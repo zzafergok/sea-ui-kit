@@ -8,6 +8,9 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
+  watch: {
+    onSuccess: "echo 'Build completed successfully!'",
+  },
   external: [
     'react',
     'react-dom',
@@ -31,5 +34,4 @@ export default defineConfig({
       js: '/**\n * Sea UI Kit - Custom Radix UI Components\n * @license MIT\n */',
     }
   },
-  onSuccess: "echo 'Build completed successfully!'",
 })
