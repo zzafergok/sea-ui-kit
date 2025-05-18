@@ -1,18 +1,6 @@
-/* Tailwind direktifleri */
-@layer base {
-    /* @tailwind base; yerine */
-    /* Temel stilleriniz burada */
-}
-
-@layer components {
-    /* @tailwind components; yerine */
-    /* Bileşen stilleri burada */
-}
-
-@layer utilities {
-    /* @tailwind utilities; yerine */
-    /* Yardımcı sınıflar burada */
-}
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
 
 :root {
     // Primary sea colors

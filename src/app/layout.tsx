@@ -1,6 +1,6 @@
 import React from 'react'
 import type { Metadata } from 'next'
-import '../styles/global.scss'
+import '@/styles/global.scss'
 
 import { Bai_Jamjuree } from 'next/font/google'
 
