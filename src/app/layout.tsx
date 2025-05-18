@@ -1,15 +1,15 @@
+import React from 'react'
+
 import type { Metadata } from 'next'
-import { Geist, Geist_Mono } from 'next/font/google'
-import './globals.css'
 
-const geistSans = Geist({
-  variable: '--font-geist-sans',
-  subsets: ['latin'],
-})
+import '..styles/globals.css'
 
-const geistMono = Geist_Mono({
-  variable: '--font-geist-mono',
+import { Bai_Jamjuree } from 'next/font/google'
+
+const baiJamjuree = Bai_Jamjuree({
   subsets: ['latin'],
+  weight: ['400', '700'], // Specify the weights you need
+  variable: '--font-bai-jamjuree', // Optional: define a CSS variable
 })
 
 export const metadata: Metadata = {
@@ -24,7 +24,7 @@ export default function RootLayout({
 }>) {
   return (
     <html lang='en'>
-      <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>{children}</body>
+      <body className={`${baiJamjuree.variable} antialiased`}>{children}</body>
     </html>
   )
 }

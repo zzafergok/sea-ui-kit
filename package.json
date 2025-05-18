@@ -15,13 +15,18 @@
   "bin": {
     "create-sea-ui-kit": "./index.js"
   },
+  "author": "Zafer Gök (zzafergok)",
   "scripts": {
-    "build": "npm run build:esm && npm run build:cjs",
+    "build": "tsup",
     "build:esm": "tsc",
-    "build:cjs": "tsc --module commonjs --outDir dist/cjs",
+    "build:cjs": "tsc --project tsconfig.cjs.json",
     "dev": "tsup src/index.ts --format esm,cjs --watch --dts --external react",
     "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
     "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\""
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/zzafergok/sea-ui-kit.git"
   },
   "peerDependencies": {
     "@radix-ui/react-alert-dialog": "^1.0.5",

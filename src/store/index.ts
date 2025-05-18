@@ -1,11 +1,22 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
-
+import themeReducer from './slices/themeSlice'
 import langReducer from './slices/langSlice'
 import userReducer from './slices/userSlice'
-import themeReducer from './slices/themeSlice'
+import { apiSlice } from '../services/api/apiSlice'
 
-import { apiSlice } from '@/services/api/apiSlice'
+// Tipler için ayrı bir dosya oluşturalım
+import type { ThemeState } from './slices/themeSlice'
+import type { LangState } from './slices/langSlice'
+import type { UserState } from './slices/userSlice'
+
+// Store tipi tanımlaması
+export interface AppStore {
+  theme: ThemeState
+  lang: LangState
+  user: UserState
+  api: ReturnType<typeof apiSlice.reducer>
+}
 
 export const store = configureStore({
   reducer: {

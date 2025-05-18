@@ -1,7 +1,7 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
 import { RootState } from '../index'
 
-interface User {
+export interface User {
   id: string
   username: string
   email: string
@@ -9,7 +9,8 @@ interface User {
   role: string
 }
 
-interface UserState {
+// UserState tipini export edin
+export interface UserState {
   user: User | null
   isAuthenticated: boolean
   isLoading: boolean

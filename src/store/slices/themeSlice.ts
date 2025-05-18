@@ -1,12 +1,11 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-
 import { RootState } from '../index'
-
 import { isDarkMode } from '../../lib/utils'
 
 export type ThemeMode = 'light' | 'dark' | 'system'
 
-interface ThemeState {
+// ThemeState tipini export edin
+export interface ThemeState {
   mode: ThemeMode
   systemPreference: 'light' | 'dark'
 }
