@@ -1,15 +1,13 @@
 import React from 'react'
-
 import type { Metadata } from 'next'
-
-import '..styles/globals.css'
+import '../styles/global.scss'
 
 import { Bai_Jamjuree } from 'next/font/google'
 
 const baiJamjuree = Bai_Jamjuree({
   subsets: ['latin'],
-  weight: ['400', '700'], // Specify the weights you need
-  variable: '--font-bai-jamjuree', // Optional: define a CSS variable
+  weight: ['400', '700'],
+  variable: '--font-bai-jamjuree',
 })
 
 export const metadata: Metadata = {
