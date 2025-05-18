@@ -92,7 +92,7 @@ program
     console.log(chalk.blue('Şablon indiriliyor...'))
 
     // Template indirme işlemi (gerçek repo ile değiştirin)
-    const emitter = degit('zzafergok/sea-ui-kit-template', {
+    const emitter = degit('zzafergok/sea-ui-kit', {
       force: true,
       verbose: true,
     })
