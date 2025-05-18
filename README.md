@@ -204,41 +204,24 @@ function LoginPage() {
   };
 
   return (
+    Login
+      <FormField
+        control={form.control}
+        name="email"
+        render={({ field }) => (
+          Email
+        )}
+      />
 
+      <FormField
+        control={form.control}
+        name="password"
+        render={({ field }) => (
+          Password
+        )}
+      />
 
-        Login
-
-
-          <FormField
-            control={form.control}
-            name="email"
-            render={({ field }) => (
-
-                Email
-
-
-
-            )}
-          />
-
-          <FormField
-            control={form.control}
-            name="password"
-            render={({ field }) => (
-
-                Password
-
-
-
-            )}
-          />
-
-
-            Login
-
-
-
-
+      Login
   );
 }
 ```
