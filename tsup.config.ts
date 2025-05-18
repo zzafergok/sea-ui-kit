@@ -8,9 +8,8 @@ export default defineConfig({
   sourcemap: true,
   clean: true,
   treeshake: true,
-  watch: {
-    onSuccess: "echo 'Build completed successfully!'",
-  },
+  watch: true, // or specify paths: ['src/**/*.ts']
+  onSuccess: "echo 'Build completed successfully!'",
   external: [
     'react',
     'react-dom',
