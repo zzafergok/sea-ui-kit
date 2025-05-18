@@ -26,7 +26,7 @@
   },
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/zzafergok/sea-ui-kit.git"
+    "url": "https://github.com/zzafergok/sea-ui-kit"
   },
   "peerDependencies": {
     "@radix-ui/react-alert-dialog": "^1.0.5",
