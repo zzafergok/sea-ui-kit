@@ -2,15 +2,14 @@
   "name": "sea-ui-kit-stark",
   "version": "0.1.1",
   "description": "Create a Next.js project with Sea UI Kit",
-  "main": "./dist/cjs/index.js",
+  "main": "index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "files": [
-    "dist",
-    "LICENSE",
-    "README.md"
+    "index.js",
+    "template"
   ],
   "bin": {
     "create-sea-ui-kit": "index.js"
