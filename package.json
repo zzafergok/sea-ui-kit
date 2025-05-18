@@ -13,7 +13,7 @@
     "template"
   ],
   "bin": {
-    "create-sea-ui-kit": "index.js"
+    "sea-ui-kit-stark": "index.js"
   },
   "author": "Zafer Gök (zzafergok)",
   "scripts": {

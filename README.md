@@ -4,6 +4,18 @@
 
 Sea UI Kit is a comprehensive component library built on Radix UI primitives with a beautiful sea blue theme. It provides a complete system of components, hooks, utilities, and styling for building modern React and Next.js applications.
 
+## Installation and Usage
+
+To create a new project with Sea UI Kit:
+
+bash
+
+```bash
+npx sea-ui-kit-stark
+```
+
+This will guide you through setting up a new project with all the Sea UI Kit components and configurations.
+
 ## Key Features
 
 - 🎨 **Sea Blue Theme**: Custom color palette with shades of sea blue
@@ -170,25 +182,17 @@ Axios is used for API integration:
 
 ## Usage Example
 
+tsx
+
 ```tsx
-import {
-  ThemeProvider,
-  Button,
-  Input,
-  Form,
-  FormField,
-  FormItem,
-  FormLabel,
-  FormMessage,
-  useForm
-} from 'sea-ui-kit';
-import { z } from 'zod';
+import { ThemeProvider, Button, Input, Form, FormField, FormItem, FormLabel, FormMessage, useForm } from 'sea-ui-kit'
+import { z } from 'zod'
 
 // Define a schema for form validation
 const loginSchema = z.object({
   email: z.string().email(),
   password: z.string().min(8),
-});
+})
 
 function LoginPage() {
   // Use the form hook with schema validation
@@ -197,34 +201,55 @@ function LoginPage() {
       email: '',
       password: '',
     },
-  });
+  })
 
   const onSubmit = (data) => {
-    console.log(data);
-  };
+    console.log(data)
+  }
 
   return (
-    Login
+    <Form form={form} onSubmit={onSubmit} className='space-y-6'>
       <FormField
         control={form.control}
-        name="email"
+        name='email'
         render={({ field }) => (
-          Email
+          <FormItem>
+            <FormLabel>Email</FormLabel>
+            <Input type='email' {...field} />
+            <FormMessage />
+          </FormItem>
         )}
       />
 
       <FormField
         control={form.control}
-        name="password"
+        name='password'
         render={({ field }) => (
-          Password
+          <FormItem>
+            <FormLabel>Password</FormLabel>
+            <Input type='password' {...field} />
+            <FormMessage />
+          </FormItem>
         )}
       />
 
-      Login
-  );
+      <Button type='submit'>Login</Button>
+    </Form>
+  )
 }
 ```
+
+## Creating a New Project
+
+You can quickly scaffold a new project with Sea UI Kit using our CLI:
+
+bash
+
+```bash
+npx sea-ui-kit-stark my-app
+```
+
+This command creates a new directory with a fully configured Next.js application using Sea UI Kit components, theming, and all essential configurations.
 
 ## Publishing to NPM
 
