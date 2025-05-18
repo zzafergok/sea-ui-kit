@@ -2,12 +2,13 @@
   "name": "sea-ui-kit-stark",
   "version": "0.1.7",
   "description": "Create a Next.js project with Sea UI Kit",
-  "main": "index.js",
+  "main": "dist/cjs/index.js",
   "module": "./dist/esm/index.js",
   "types": "./dist/esm/index.d.ts",
   "sideEffects": false,
   "license": "MIT",
   "files": [
+    "dist",
     "index.js",
     "template"
   ],
@@ -19,7 +20,7 @@
     "build": "tsup",
     "build:esm": "tsc",
     "build:cjs": "tsc --project tsconfig.cjs.json",
-    "dev": "tsup src/index.ts --format esm,cjs --watch --dts --external react",
+    "dev": "tsup --watch",
     "lint": "eslint \"{**/*,*}.{js,ts,jsx,tsx}\"",
     "prettier": "prettier --write \"{src,tests,example/src}/**/*.{js,ts,jsx,tsx}\""
   },
