@@ -5,6 +5,8 @@ import LanguageDetector from 'i18next-browser-languagedetector'
 import enTranslation from './en/translation.json'
 import trTranslation from './tr/translation.json'
 
+import { isDevelopment } from '../utils/environment'
+
 // Resources for i18next
 const resources = {
   en: {
@@ -22,7 +24,7 @@ i18n
   .init({
     resources,
     fallbackLng: 'en',
-    debug: process.env.NODE_ENV === 'development',
+    debug: isDevelopment,
     interpolation: {
       escapeValue: false, // React already escapes values
     },

@@ -1,9 +1,12 @@
 import { configureStore } from '@reduxjs/toolkit'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
+
 import themeReducer from './slices/themeSlice'
 import langReducer from './slices/langSlice'
 import userReducer from './slices/userSlice'
 import { apiSlice } from '../services/api/apiSlice'
+
+import { isDevelopment } from '../utils/environment'
 
 // Tipler için ayrı bir dosya oluşturalım
 import type { ThemeState } from './slices/themeSlice'
@@ -26,7 +29,7 @@ export const store = configureStore({
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
-  devTools: process.env.NODE_ENV !== 'production',
+  devTools: isDevelopment,
 })
 
 // Infer the RootState and AppDispatch types from the store itself
