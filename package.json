@@ -1,6 +1,6 @@
 {
   "name": "sea-ui-kit-stark",
-  "version": "0.1.6",
+  "version": "0.1.7",
   "description": "Create a Next.js project with Sea UI Kit",
   "main": "index.js",
   "module": "./dist/esm/index.js",
