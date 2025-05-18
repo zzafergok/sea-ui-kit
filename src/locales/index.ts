@@ -1,3 +1,5 @@
+'use client'
+
 import i18n from 'i18next'
 import { initReactI18next } from 'react-i18next'
 import LanguageDetector from 'i18next-browser-languagedetector'
@@ -23,6 +25,7 @@ i18n
   .use(initReactI18next)
   .init({
     resources,
+    lng: 'en', // Varsayılan dili açıkça belirtin
     fallbackLng: 'en',
     debug: isDevelopment,
     interpolation: {
@@ -31,6 +34,7 @@ i18n
     detection: {
       order: ['localStorage', 'navigator'],
       lookupLocalStorage: 'language',
+      caches: [], // Depolama önbelleğini devre dışı bırakın
     },
   })
 

@@ -1,4 +1,6 @@
-import React from 'react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
 
@@ -18,6 +20,11 @@ interface LoginFormProps {
 
 export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
   const { t } = useTranslation()
+  const [isMounted, setIsMounted] = useState(false)
+
+  useEffect(() => {
+    setIsMounted(true)
+  }, [])
 
   const form = useForm(loginSchema, {
     defaultValues: {
@@ -26,6 +33,12 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
       rememberMe: false,
     },
   })
+
+  // İstemci tarafında render edilen içerik için şablonu return et
+  if (!isMounted) {
+    // Sunucu tarafında render sırasında hafif bir iskelet gösterin
+    return <div className='space-y-6'>Loading...</div>
+  }
 
   return (
     <Form form={form} onSubmit={onSubmit} className='space-y-6'>

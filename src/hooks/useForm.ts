@@ -1,3 +1,5 @@
+'use client'
+
 import { z } from 'zod'
 import { useTranslation } from 'react-i18next'
 import { zodResolver } from '@hookform/resolvers/zod'
