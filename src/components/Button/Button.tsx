@@ -37,7 +37,6 @@ const buttonVariants = cva(
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
     VariantProps<typeof buttonVariants> {
-  asChild?: boolean
   className?: string
   disabled?: boolean
   fullWidth?: boolean
@@ -47,21 +46,14 @@ export interface ButtonProps
 }
 
 const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  (
-    {
-      children,
-      className,
-      size = 'md',
-      asChild = false,
-      disabled = false,
-      fullWidth = false,
-      variant = 'default',
-      ...props
-    },
-    ref,
-  ) => {
+  ({ children, className, size = 'md', disabled = false, fullWidth = false, variant = 'default', ...props }, ref) => {
     return (
-      <button ref={ref} className={cn(buttonVariants({ variant, size, fullWidth, className }))} {...props}>
+      <button
+        ref={ref}
+        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+        {...props}
+        disabled={disabled}
+      >
         {children}
       </button>
     )

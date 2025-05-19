@@ -69,17 +69,43 @@ const convertTsToJs = (targetDir) => {
 
     // TypeScript'e özgü syntax'ı kaldır
     content = content
-      // Type tanımlamalarını ve import'larını kaldır
+      // Sadece type importlarını kaldır, namespace importlarını koru
       .replace(/import\s+type\s+.*?from\s+.*?;?/g, '')
-      .replace(/import\s+{\s*.*?type.*?\s*}\s+from\s+.*?;?/g, '')
-      // Tip tanımlamalarını kaldır
+      .replace(
+        /import\s+{\s*((.*?type.*?)|([^}]*?))\s*}\s+from\s+['"](.+?)['"];?/g,
+        (match, importGroup, withType, withoutType, from) => {
+          // Eğer import içinde "type" kelimesi varsa veya sadece tip importları içeriyorsa
+          if (withType || (importGroup && !withoutType)) {
+            // Tip olmayan importları filtrele
+            const nonTypeImports = importGroup
+              .split(',')
+              .map((i) => i.trim())
+              .filter((i) => !i.includes('type'))
+              .join(', ')
+
+            if (nonTypeImports) {
+              return `import { ${nonTypeImports} } from '${from}';`
+            }
+            return '' // Tamamı tip importlarıysa kaldır
+          }
+          return match // Tip importu değilse olduğu gibi bırak
+        },
+      )
+      // Fonksiyon parametrelerindeki ve değişkenlerdeki tip tanımlamalarını kaldır
       .replace(/:\s*[A-Za-z0-9_<>[\](){}|&,'"\s.*]+(?=\s*[=,);]|$)/g, '')
-      .replace(/<[A-Za-z0-9_<>[\](){}|&,'"\s.*]+>/g, '')
-      // Interface ve type tanımlamalarını kaldır
+      // Generic tipleri kaldır, `import * as X`/`export * as X` koruması ekle
+      .replace(/<[A-Za-z0-9_<>[\](){}|&,'"\s.*]+>/g, function (match) {
+        // import * as X from 'y' ifadelerini koru
+        const prevText = content.substring(Math.max(0, content.indexOf(match) - 30), content.indexOf(match))
+        if (prevText.includes('import') || prevText.includes('export')) {
+          return match
+        }
+        return ''
+      })
+      // Interface tanımlamalarını kaldır
       .replace(/interface\s+[^{]+{[^}]*}/g, '')
+      // Type tanımlamalarını kaldır
       .replace(/type\s+[^=]+=\s*[^;]+;?/g, '')
-      // Generic tipleri kaldır
-      .replace(/<[^<>]*>(?=\()/g, '')
       // "as" type assertion'ları kaldır
       .replace(/\s+as\s+[A-Za-z0-9_<>[\](){}|&,'"\s.*]+/g, '')
       // export type ifadelerini kaldır
