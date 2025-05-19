@@ -64,133 +64,165 @@ const convertTsToJs = (targetDir) => {
   // Tüm .ts ve .tsx dosyalarını bul
   const tsFiles = glob.sync(path.join(targetDir, 'src/**/*.{ts,tsx}'))
 
-  // TypeScript-JavaScript dönüşüm fonksiyonu
-  const processFile = (filePath) => {
-    let content = fs.readFileSync(filePath, 'utf8')
-    let isJSX = filePath.endsWith('.tsx')
+  // Dönüşüm gerçekleştirilirken sık görülen hataları raporla
+  let conversionErrors = []
 
-    // ADIM 1: Import ifadelerini işle
-    content = content.replace(/^import\s+(.+?)\s+from\s+['"](.+?)['"];?$/gm, (match, importPart, moduleName) => {
-      // Sadece tip importları
-      if (importPart.trim().startsWith('type ')) {
-        return ''
-      }
+  tsFiles.forEach((file) => {
+    console.log(chalk.blue(`  ${path.basename(file)} işleniyor...`))
+    let content = fs.readFileSync(file, 'utf8')
+    let jsFileContent = ''
 
-      // Namespace import (import * as X from 'y')
-      if (importPart.trim().startsWith('* as ')) {
-        return match
-      }
+    // Satır satır işle - özellikle import ifadeleri için hayati
+    const lines = content.split('\n')
 
-      // Süslü parantez içindeki import
-      if (importPart.includes('{')) {
-        // Tip notasyonlarını kaldır
-        const cleanImport = importPart
-          .replace(/type\s+/g, '')
-          .replace(/{\s*/, '{ ')
-          .replace(/\s*}/, ' }')
-          // Her tür içeri aktarmada ekstra boşlukları temizle
-          .replace(/\s{2,}/g, ' ')
+    for (let i = 0; i < lines.length; i++) {
+      let line = lines[i]
 
-        return `import ${cleanImport} from '${moduleName}';`
-      }
+      // İmport ifadelerini düzgün biçimde işle
+      if (line.trim().startsWith('import ')) {
+        if (line.includes('import type ') || line.includes('import { type ')) {
+          // Tamamen tip importu ise satırı atla
+          if (line.includes('import type ')) {
+            continue
+          }
 
-      // Standart import (import React from 'react')
-      return match
-    })
+          // Karışık importlar içinde sadece tip olmayanları tut
+          if (line.includes('import { type ')) {
+            let importParts = line.match(/import\s+{([^}]*)}\s+from\s+['"]([^'"]+)['"]/i)
+            if (importParts && importParts[1]) {
+              let items = importParts[1].split(',').map((p) => p.trim())
+              let nonTypeItems = items.filter((item) => !item.startsWith('type '))
 
-    // ADIM 2: Interface ve type tanımlamalarını kaldır
-    content = content
-      .replace(/^interface\s+[^{]+{[\s\S]*?^}/gm, '')
-      .replace(/^type\s+[^=]+=[\s\S]*?(?=^[a-zA-Z]|$)/gm, '')
-      .replace(/^export\s+(interface|type)[\s\S]*?(?=^[a-zA-Z]|$)/gm, '')
-
-    // ADIM 3: Tip tanımlamalarını kaldır ama JSX yapısını koru
-    content = content
-      // Fonksiyon ve değişken tanımlamalarındaki tipleri kaldır
-      .replace(/:\s*[A-Za-z0-9_.]+(\[\])?\s*(?=[,)=;]|$)/g, '')
-      // Generic tipleri kaldır ama açılı ayraçları (JSX) koru
-      .replace(/<([A-Za-z0-9_$]+)(?:<.+?>)?(?:\s*,\s*[A-Za-z0-9_$]+)*>/g, (match, typeName) => {
-        // Bu muhtemelen bir JSX ise koru (örn. <div>)
-        if (/^[a-z]/.test(typeName)) return match
-        // Bir React komponenti ise koru (örn. <Button>)
-        if (/^[A-Z]/.test(typeName) && isJSX) return match
-        // Generic tip ise kaldır (örn. Promise<string>)
-        return ''
-      })
-      // React.FC<Props> gibi komponenet tiplerini kaldır
-      .replace(/React\.FC<[^>]*>/g, '')
-
-    // ADIM 4: React.forwardRef yapısındaki tip tanımlamalarını kaldır
-    content = content.replace(
-      /React\.forwardRef<[^>]*>\((?:\(\s*{\s*([^}]*)\s*},\s*ref\s*\)|function\s*\(\s*{\s*([^}]*)\s*},\s*ref\s*\))/g,
-      (match, props1, props2) => {
-        const props = props1 || props2 || ''
-        return `React.forwardRef((${props ? `{ ${props} }` : '{}'}, ref)`
-      },
-    )
-
-    // ADIM 5: as tiplemelerini kaldır
-    content = content.replace(/\s+as\s+[A-Za-z0-9_.]+(\[\])?/g, '')
-
-    // ADIM 6: Fonksiyon parametrelerindeki karmaşık tip tanımlamalarını kaldır
-    content = content.replace(
-      /\(\s*{\s*([^}]*)\s*}(?:\s*:\s*[^)]*?)?\s*\)\s*=>/g,
-      (match, params) => `({ ${params} }) =>`,
-    )
-
-    // ADIM 7: Component tanımlamalarındaki sorunları gider
-    content = content.replace(
-      /const\s+([A-Z][A-Za-z0-9]*)\s*=\s*(?:React\.)?(?:forwardRef|memo)?\(?(?:\(\s*{\s*([^}]*)\s*}(?:\s*:\s*[^)]*?)?,?\s*([a-zA-Z0-9_]*)\s*\)|function\s*\(\s*{\s*([^}]*)\s*}(?:\s*:\s*[^)]*?)?,?\s*([a-zA-Z0-9_]*)\s*\))/g,
-      (match, compName, props1, ref1, props2, ref2) => {
-        const props = props1 || props2 || ''
-        const ref = ref1 || ref2 || ''
-        if (ref) {
-          return `const ${compName} = React.forwardRef(({ ${props} }, ${ref})`
+              if (nonTypeItems.length === 0) {
+                // Sadece tip importları içeriyorsa satırı atla
+                continue
+              } else {
+                // Tip importlarını çıkar, normal importları koru
+                line = `import { ${nonTypeItems.join(', ')} } from '${importParts[2]}'`
+              }
+            }
+          }
         }
-        return `const ${compName} = ({ ${props} })`
-      },
-    )
+        // "* as NAME" pattern'i koru
+        else if (line.includes('import * as ')) {
+          // Bu satırı olduğu gibi koru
+        }
+        // "import *" düzgünce ele al
+        else if (line.match(/import\s+\*\s+from/)) {
+          // "import * from" düzelt -> "import * as MODÜL_ADI from"
+          const modulePath = line.match(/from\s+['"]([^'"]+)['"]/)[1]
+          // Modül adını yol üzerinden çıkar
+          const moduleName = modulePath.split('/').pop().replace(/-/g, '_')
+          line = `import * as ${moduleName} from '${modulePath}'`
+        }
+      }
+      // Generic tipleri temizle ama JSX yapılarını koru
+      else if (line.includes('<') && line.includes('>')) {
+        // React.forwardRef<...> yapılarını temizle
+        if (line.includes('React.forwardRef<')) {
+          // Tüm generic kısmını çıkar
+          line = line.replace(/React\.forwardRef<[^>]*>/g, 'React.forwardRef')
+        }
+        // Fonksiyon tanımlamalarındaki tipleri temizle
+        else if (line.match(/\w+\s*=\s*.*=>/)) {
+          // Arrow fonksiyonlardaki tip bildirimlerini temizle
+          line = line.replace(/<[^>]*>/g, '')
+        }
+        // JSX yapılarında üç durumu kontrol et:
+        // 1. Başlarken küçük harf = HTML elementi (<div>)
+        // 2. Başlarken büyük harf = React komponenti (<Button>)
+        // 3. TypeScript Generic (<T, K>)
+        else if (line.match(/<[A-Z][^<>]*>/)) {
+          // Componente benziyor, koru
+        } else if (line.match(/<[a-z][^<>]*>/)) {
+          // HTML etiketine benziyor, koru
+        } else {
+          // TypeScript generic tipine benziyor, çıkar
+          line = line.replace(/<[^>]*>/g, '')
+        }
+      }
 
-    // ADIM 8: displayName atamalarını koru
+      // Tip tanımlamalarını çıkar `: Type` şeklindeki ifadeleri sil
+      // Ama JSX kapatma etiketlerini ve JSX prop atamalarını koru (a="b")
+      if (!line.trim().startsWith('<') && !line.trim().startsWith('//')) {
+        // Değişken veya parametre tipi tanımlamalarını çıkar
+        line = line.replace(/:\s*[A-Za-z0-9_.<>[\]|&{}()'"`+\-*/]+(?=[,)=;]|$)/g, '')
+      }
 
-    // ADIM 9: Boş satırları temizle
-    content = content.replace(/\n\s*\n\s*\n/g, '\n\n')
+      // Interface tanımlarını atla
+      if (line.trim().startsWith('interface ') || line.trim().startsWith('type ')) {
+        // İlgili blok bitene kadar satırları atla
+        let bracketCount = 0
+        let foundOpeningBracket = false
+
+        do {
+          if (line.includes('{')) {
+            foundOpeningBracket = true
+            bracketCount += (line.match(/{/g) || []).length
+          }
+
+          if (line.includes('}')) {
+            bracketCount -= (line.match(/}/g) || []).length
+          }
+
+          // Bitişe ulaştık mı kontrol et
+          if (foundOpeningBracket && bracketCount <= 0) {
+            break
+          }
+
+          i++ // Sonraki satıra geç
+          if (i >= lines.length) break
+          line = lines[i]
+        } while (true)
+        continue // Bu satırı jsFileContent'e ekleme
+      }
+
+      // Export type tanımlamalarını atla
+      if (line.trim().startsWith('export type ')) {
+        continue
+      }
+
+      // as Type dönüşümlerini çıkar
+      line = line.replace(/\s+as\s+[A-Za-z0-9_.<>[\]|&{}]+/g, '')
+
+      jsFileContent += line + '\n'
+    }
+
+    // Temel kontroller
+    if (jsFileContent.includes('import * from')) {
+      conversionErrors.push({
+        file: path.basename(file),
+        error: 'Namespace import hatası: "import * from" ifadesi geçersiz',
+      })
+    }
+
+    if (jsFileContent.includes(':') && jsFileContent.match(/:[A-Za-z0-9_]+[,);]/)) {
+      conversionErrors.push({
+        file: path.basename(file),
+        error: 'Kalan tip tanımlaması tespit edildi',
+      })
+    }
 
     // Dosya uzantısını değiştir
-    const jsFile = filePath.replace(/\.tsx?$/, filePath.endsWith('.tsx') ? '.jsx' : '.js')
+    const jsFile = file.replace(/\.tsx?$/, file.endsWith('.tsx') ? '.jsx' : '.js')
 
     // Yeni içeriği yaz
-    fs.writeFileSync(jsFile, content)
+    fs.writeFileSync(jsFile, jsFileContent)
 
     // Orijinal TS dosyasını sil
-    fs.unlinkSync(filePath)
+    fs.unlinkSync(file)
 
-    console.log(chalk.green(`  ${path.basename(filePath)} -> ${path.basename(jsFile)}`))
+    console.log(chalk.green(`  ${path.basename(file)} -> ${path.basename(jsFile)}`))
+  })
 
-    // Dönüşüm hataları için basit bir kontrol yap
-    const errorChecks = [
-      { pattern: /import \*@/g, message: 'Hatalı namespace import' },
-      { pattern: /:\s*[A-Za-z0-9_]+/g, message: 'Kalan tip tanımlamaları' },
-      { pattern: /=>/g, count: /{\s*.*\s*}/g, message: 'Fat arrow fonksiyon parantez hatası' },
-    ]
-
-    for (const check of errorChecks) {
-      const matches = content.match(check.pattern)
-      if (matches && (!check.count || matches.length !== content.match(check.count).length)) {
-        console.warn(chalk.yellow(`⚠️ Olası hata (${check.message}): ${path.basename(jsFile)}`))
-        // Hatanın geçtiği satırı bul ve göster
-        matches.forEach((match) => {
-          const index = content.indexOf(match)
-          const line = content.substring(0, index).split('\n').length
-          const excerpt = content.split('\n')[line - 1]
-          console.warn(chalk.yellow(`   Satır ${line}: ${excerpt}`))
-        })
-      }
-    }
+  // Hataları raporla
+  if (conversionErrors.length > 0) {
+    console.log(chalk.yellow(`\n⚠️ Dönüşüm sırasında ${conversionErrors.length} potansiyel sorun tespit edildi:`))
+    conversionErrors.forEach((err) => {
+      console.log(chalk.yellow(`  - ${err.file}: ${err.error}`))
+    })
+    console.log(chalk.yellow('\nBu dosyaları manuel olarak kontrol etmeniz önerilir.'))
   }
-
-  // Tüm dosyaları işle
-  tsFiles.forEach(processFile)
 
   // tsconfig dosyalarını sil
   const tsconfigFiles = glob.sync(path.join(targetDir, 'tsconfig*.json'))
@@ -214,66 +246,7 @@ const convertTsToJs = (targetDir) => {
   fs.writeFileSync(jsConfigPath, jsConfigContent)
   console.log(chalk.green('✅ jsconfig.json oluşturuldu'))
 
-  // Örnek dosya kontrol edici oluştur
-  const exampleJsPath = path.join(targetDir, 'ts-to-js-check.js')
-  fs.writeFileSync(
-    exampleJsPath,
-    `
-// Bu dosya dönüşüm sonrası hataları kontrol etmeye yardımcı olur
-const fs = require('fs');
-const path = require('path');
-const glob = require('glob');
-
-// Tüm .js ve .jsx dosyalarını bul
-const jsFiles = glob.sync(path.join(process.cwd(), 'src/**/*.{js,jsx}'));
-
-let errorFound = false;
-
-jsFiles.forEach(file => {
-  const content = fs.readFileSync(file, 'utf8');
-  
-  // Olası hataları kontrol et
-  const problems = [
-    { regex: /import \\*@/g, message: "Hatalı namespace import" },
-    { regex: /:[\\s]*[A-Za-z0-9_]+/g, message: "Kalan tip tanımlaması" },
-    { regex: /=>/g, message: "Arrow fonksiyon yapısı kontrol et" },
-    { regex: /\\(\\s*{\\s*([^}]*)\\s*}\\s*=>\\s*\\(/g, message: "Arrow fonksiyon parantez hatası" }
-  ];
-  
-  let fileHasError = false;
-  
-  problems.forEach(problem => {
-    if (problem.regex.test(content)) {
-      if (!fileHasError) {
-        console.error('\\n\\x1b[31mHATA BULUNDU:\\x1b[0m', file);
-        fileHasError = true;
-        errorFound = true;
-      }
-      
-      console.error('  \\x1b[33m- ' + problem.message + '\\x1b[0m');
-      
-      // Hatanın geçtiği satırı bul
-      const lines = content.split('\\n');
-      lines.forEach((line, index) => {
-        if (problem.regex.test(line)) {
-          console.error('    Satır ' + (index + 1) + ': ' + line.trim());
-        }
-      });
-    }
-  });
-});
-
-if (!errorFound) {
-  console.log('\\x1b[32m✅ Tüm dosyalar kontrol edildi, hata bulunamadı!\\x1b[0m');
-} else {
-  console.error('\\n\\x1b[31m❌ Dönüşüm hatalarını düzeltmeniz gerekiyor.\\x1b[0m');
-}
-  `,
-  )
-
   console.log(chalk.green('✅ TypeScript -> JavaScript dönüşümü tamamlandı!'))
-  console.log(chalk.blue('ℹ️ Dönüşüm sonrası hataları kontrol etmek için şu komutu çalıştırabilirsiniz:'))
-  console.log(chalk.cyan('   node ts-to-js-check.js'))
 }
 
 // Dark mode desteğini kaldır
