@@ -56,8 +56,19 @@ const cleanupInstallationFiles = (projectDir) => {
     // Next.js projesi olarak işaretle
     packageJson.private = true
 
-    // Yeni bağımlılık listelerini oluştur
+    // peerDependencies'deki tüm paketleri dependencies'e taşı
+    let allDependencies = { ...packageJson.dependencies }
+
+    // Eğer peerDependencies varsa, içeriğini dependencies'e ekle
+    if (packageJson.peerDependencies) {
+      allDependencies = { ...allDependencies, ...packageJson.peerDependencies }
+      delete packageJson.peerDependencies // peerDependencies alanını tamamen sil
+    }
+
+    // Standart Next.js uygulaması için gerekli olan bağımlılıkları ekle
+    // Mevcut bağımlılıkları koruyarak üzerine yaz
     packageJson.dependencies = {
+      ...allDependencies, // Önce mevcut ve peerDependencies'den gelenleri ekle
       next: '^16.0.0',
       react: '^18.2.0',
       'react-dom': '^18.2.0',
@@ -81,6 +92,12 @@ const cleanupInstallationFiles = (projectDir) => {
       '@radix-ui/react-tabs': '^1.0.4',
       '@radix-ui/react-toast': '^1.1.5',
     }
+
+    // CLI'a özgü bağımlılıkları kaldır
+    delete packageJson.dependencies?.chalk
+    delete packageJson.dependencies?.commander
+    delete packageJson.dependencies?.degit
+    delete packageJson.dependencies?.prompts
 
     packageJson.devDependencies = {
       '@types/node': '^20.8.9',
@@ -111,12 +128,6 @@ const cleanupInstallationFiles = (projectDir) => {
       lint: 'eslint "{**/*,*}.{js,ts,jsx,tsx}"',
       prettier: 'prettier --write "{src,tests}/**/*.{js,ts,jsx,tsx}"',
     }
-
-    // CLI'a özgü bağımlılıkları kaldır
-    delete packageJson.dependencies?.chalk
-    delete packageJson.dependencies?.commander
-    delete packageJson.dependencies?.degit
-    delete packageJson.dependencies?.prompts
 
     // Proje adını güzelleştir
     packageJson.name = projectDir.toLowerCase().replace(/\s+/g, '-')
