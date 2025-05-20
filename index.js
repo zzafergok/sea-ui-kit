@@ -25,9 +25,6 @@ const createNextConfig = (targetDir) => {
   const configContent = `/** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  sassOptions: {
-    includePaths: ['./src/styles'],
-  },
 }
 
 module.exports = nextConfig;
@@ -127,10 +124,6 @@ const cleanupInstallationFiles = (projectDir) => {
       postcss: '^8.5.3',
       'postcss-nesting': '^13.0.1',
       prettier: '^3.5.3',
-      sass: '^1.89.0', // SCSS için gerekli
-      'style-loader': '^3.3.4', // SCSS işleme için ekledik
-      'css-loader': '^6.10.0', // SCSS işleme için ekledik
-      'sass-loader': '^14.1.1', // SCSS işleme için ekledik
       tailwindcss: '^3.4.15',
       typescript: '^5.2.2',
       '@typescript-eslint/eslint-plugin': '^8.32.1',

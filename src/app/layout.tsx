@@ -4,7 +4,7 @@ import React from 'react'
 
 import { Providers } from '@/providers/Providers'
 
-import '@/styles/global.scss'
+import './globals.css' // veya global.css dosyasını src/app klasörüne taşıyın
 
 export const metadata: Metadata = {
   title: 'Sea UI Kit Demo',
@@ -14,7 +14,7 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: React.ReactNode }) {
   return (
     <html lang='tr'>
-      <body className='antialiased'>
+      <body>
         <Providers>{children}</Providers>
       </body>
     </html>
