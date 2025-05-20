@@ -5,7 +5,7 @@ import React from 'react'
 
 import { Providers } from '@/providers/Providers'
 
-import '../styles/globals.scss'
+import '../styles/global.scss'
 
 const baiJamjuree = Bai_Jamjuree({
   subsets: ['latin'],
