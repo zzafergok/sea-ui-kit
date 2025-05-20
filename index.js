@@ -1,11 +1,10 @@
 #!/usr/bin/env node
 
-const { program } = require('commander')
+const fs = require('fs')
+const path = require('path')
 const chalk = require('chalk')
 const degit = require('degit')
-const path = require('path')
-const fs = require('fs')
-const { execSync } = require('child_process')
+const { program } = require('commander')
 
 // Minimum Node.js sürüm kontrolü
 const nodeVersion = process.versions.node
@@ -57,30 +56,24 @@ const cleanupInstallationFiles = (projectDir) => {
     // Next.js projesi olarak işaretle
     packageJson.private = true
 
-    // peerDependencies'deki tüm paketleri dependencies'e taşı
-    if (packageJson.peerDependencies) {
-      // peerDependencies alanını tamamen sil
-      delete packageJson.peerDependencies
-    }
-
-    // Birbiriyle uyumlu sürümleri içeren bağımlılıklar oluştur
+    // Yeni bağımlılık listelerini oluştur
     packageJson.dependencies = {
-      next: '^14.1.0', // Next.js'in mevcut kararlı sürümü
-      react: '^18.2.0', // React - sabit 18 sürümü
-      'react-dom': '^18.2.0', // React DOM - aynı sürümde
+      next: '^16.0.0',
+      react: '^18.2.0',
+      'react-dom': '^18.2.0',
       '@reduxjs/toolkit': '^2.0.0',
       axios: '^1.6.0',
       'class-variance-authority': '^0.7.1',
       clsx: '^2.1.1',
-      i18next: '^23.7.11', // Biraz daha eski, ama kararlı sürüm
-      'i18next-browser-languagedetector': '^7.1.0',
-      'lucide-react': '^0.294.0',
-      'react-hook-form': '^7.48.0',
-      'react-i18next': '^13.5.0',
+      i18next: '^25.1.3',
+      'i18next-browser-languagedetector': '^8.1.0',
+      'lucide-react': '^0.483.0',
+      'react-hook-form': '^7.53.0',
+      'react-i18next': '^15.5.1',
       'react-redux': '^9.0.0',
       'tailwind-merge': '^2.0.0',
-      zod: '^3.22.4',
-      '@hookform/resolvers': '^3.3.2',
+      zod: '^3.23.8',
+      '@hookform/resolvers': '^5.0.1',
       '@radix-ui/react-checkbox': '^1.0.4',
       '@radix-ui/react-dialog': '^1.0.5',
       '@radix-ui/react-select': '^2.0.0',
@@ -89,31 +82,25 @@ const cleanupInstallationFiles = (projectDir) => {
       '@radix-ui/react-toast': '^1.1.5',
     }
 
-    // CLI'a özgü bağımlılıkları kaldır
-    delete packageJson.dependencies?.chalk
-    delete packageJson.dependencies?.commander
-    delete packageJson.dependencies?.degit
-    delete packageJson.dependencies?.prompts
-
     packageJson.devDependencies = {
       '@types/node': '^20.8.9',
       '@types/react': '^18.2.33',
       '@types/react-dom': '^18.2.14',
-      autoprefixer: '^10.4.16',
-      eslint: '^8.52.0',
+      autoprefixer: '^10.4.21',
+      eslint: '^8.57.1',
       'eslint-config-next': '^14.0.0',
-      'eslint-config-prettier': '^9.0.0',
-      'eslint-plugin-prettier': '^5.0.1',
-      postcss: '^8.4.31',
-      'postcss-nesting': '^12.0.1',
-      prettier: '^3.0.3',
-      sass: '^1.69.5',
+      'eslint-config-prettier': '^10.1.5',
+      'eslint-plugin-prettier': '^5.4.0',
+      postcss: '^8.5.3',
+      'postcss-nesting': '^13.0.1',
+      prettier: '^3.5.3',
+      sass: '^1.89.0',
       tailwindcss: '^3.3.5',
       typescript: '^5.2.2',
-      '@typescript-eslint/eslint-plugin': '^6.9.1',
-      '@typescript-eslint/parser': '^6.9.1',
-      'eslint-plugin-react': '^7.33.2',
-      'eslint-plugin-react-hooks': '^4.6.0',
+      '@typescript-eslint/eslint-plugin': '^8.32.1',
+      '@typescript-eslint/parser': '^8.32.1',
+      'eslint-plugin-react': '^7.37.5',
+      'eslint-plugin-react-hooks': '^5.2.0',
     }
 
     // Scripts güncelleme - sadece Next.js projeleri için gerekli olanları bırak
@@ -124,6 +111,12 @@ const cleanupInstallationFiles = (projectDir) => {
       lint: 'eslint "{**/*,*}.{js,ts,jsx,tsx}"',
       prettier: 'prettier --write "{src,tests}/**/*.{js,ts,jsx,tsx}"',
     }
+
+    // CLI'a özgü bağımlılıkları kaldır
+    delete packageJson.dependencies?.chalk
+    delete packageJson.dependencies?.commander
+    delete packageJson.dependencies?.degit
+    delete packageJson.dependencies?.prompts
 
     // Proje adını güzelleştir
     packageJson.name = projectDir.toLowerCase().replace(/\s+/g, '-')
@@ -154,7 +147,7 @@ const cleanupInstallationFiles = (projectDir) => {
           fs.unlinkSync(filePath)
         }
       } catch (error) {
-        console.warn(chalk.yellow(`'${file}' silinemedi. Manuel olarak silmeniz gerekebilir.`))
+        console.warn(chalk.yellow(`'${file}' silinemedi. Manuel olarak silmeniz gerekebilir.`), error)
       }
     }
   })
