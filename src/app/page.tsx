@@ -1,22 +1,29 @@
 'use client'
 
-import React, { Suspense } from 'react'
+import React, { useEffect, useState } from 'react'
 import dynamic from 'next/dynamic'
 import { type LoginFormValues } from '@/lib/validations/auth'
 
-// LoginForm'u dinamik olarak yükle ve SSR'ı devre dışı bırak
+// SSR devre dışı bırakılmış dinamik import
 const LoginForm = dynamic(() => import('@/components/auth/LoginForm').then((mod) => ({ default: mod.LoginForm })), {
   ssr: false,
 })
 
 export default function Home() {
+  const [isLoading, setIsLoading] = useState(true)
+
+  useEffect(() => {
+    // İstemci tarafında olduğumuzu doğrula
+    setIsLoading(false)
+  }, [])
+
   const handleSubmit = (data: LoginFormValues) => {
     console.log(data)
   }
 
-  return (
-    <Suspense fallback={<div className='flex min-h-screen items-center justify-center'>Yükleniyor...</div>}>
-      <LoginForm onSubmit={handleSubmit} />
-    </Suspense>
-  )
+  if (isLoading) {
+    return <div className='min-h-screen flex items-center justify-center'>Yükleniyor...</div>
+  }
+
+  return <LoginForm onSubmit={handleSubmit} />
 }
