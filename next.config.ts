@@ -1,8 +1,10 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: true,
+  reactStrictMode: false,
   sassOptions: {
     includePaths: ['./src/styles'],
+    quietDeps: true,
+    outputStyle: 'compressed',
   },
 }
 
