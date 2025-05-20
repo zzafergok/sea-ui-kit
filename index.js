@@ -20,6 +20,36 @@ process.on('unhandledRejection', (reason) => {
   process.exit(1)
 })
 
+// Next.js yapılandırma dosyası oluştur
+const createNextConfig = (targetDir) => {
+  const configContent = `/** @type {import('next').NextConfig} */
+const nextConfig = {
+  reactStrictMode: false,
+  sassOptions: {
+    includePaths: ['./src/styles'],
+  },
+}
+
+module.exports = nextConfig;
+`
+  fs.writeFileSync(path.join(targetDir, 'next.config.js'), configContent)
+  console.log(chalk.green('✅ next.config.js oluşturuldu'))
+}
+
+// PostCSS yapılandırma dosyası oluştur
+const createPostcssConfig = (targetDir) => {
+  const configContent = `module.exports = {
+  plugins: {
+    'tailwindcss': {},
+    'autoprefixer': {},
+    'postcss-nesting': {},
+  },
+}
+`
+  fs.writeFileSync(path.join(targetDir, 'postcss.config.js'), configContent)
+  console.log(chalk.green('✅ postcss.config.js oluşturuldu'))
+}
+
 // Kurulum sonrası temizleme işlevi
 const cleanupInstallationFiles = (projectDir) => {
   console.log(chalk.blue('Kurulum dosyaları temizleniyor...'))
@@ -34,6 +64,9 @@ const cleanupInstallationFiles = (projectDir) => {
     'LICENSE-cli', // CLI lisansı (eğer varsa)
     'tsconfig.cjs.json', // CommonJS derleme yapılandırması
     'tsup.config.ts', // Paket derleyici yapılandırması
+    '.babelrc', // Babel yapılandırması (Next.js kendi yapılandırmasını kullanacak)
+    'next.config.ts', // TypeScript'te yazılmış next config (JavaScript olanla değiştireceğiz)
+    'postcss.config.mjs', // ESM formatındaki postcss config (CommonJS olanla değiştireceğiz)
   ]
 
   // package.json düzenlemeleri
@@ -58,7 +91,7 @@ const cleanupInstallationFiles = (projectDir) => {
 
     // Yeni bağımlılık listelerini oluştur
     packageJson.dependencies = {
-      next: '^15.0.3',
+      next: '^14.0.4', // 15 yerine 14 sürümünü kullan (daha stabil)
       react: '^18.2.0',
       'react-dom': '^18.2.0',
       '@reduxjs/toolkit': '^2.0.0',
@@ -84,17 +117,20 @@ const cleanupInstallationFiles = (projectDir) => {
 
     packageJson.devDependencies = {
       '@types/node': '^20.8.9',
-      '@types/react': '^19',
-      '@types/react-dom': '^19',
+      '@types/react': '^18.2.33', // React 19 için değil 18 için tip tanımları
+      '@types/react-dom': '^18.2.14', // React 19 için değil 18 için tip tanımları
       autoprefixer: '^10.4.21',
       eslint: '^8.57.1',
-      'eslint-config-next': '^14.0.0',
+      'eslint-config-next': '^14.0.0', // Next.js 14 uyumlu ESLint
       'eslint-config-prettier': '^10.1.5',
       'eslint-plugin-prettier': '^5.4.0',
       postcss: '^8.5.3',
       'postcss-nesting': '^13.0.1',
       prettier: '^3.5.3',
-      sass: '^1.89.0',
+      sass: '^1.89.0', // SCSS için gerekli
+      'style-loader': '^3.3.4', // SCSS işleme için ekledik
+      'css-loader': '^6.10.0', // SCSS işleme için ekledik
+      'sass-loader': '^14.1.1', // SCSS işleme için ekledik
       tailwindcss: '^3.4.15',
       typescript: '^5.2.2',
       '@typescript-eslint/eslint-plugin': '^8.32.1',
@@ -125,9 +161,27 @@ const cleanupInstallationFiles = (projectDir) => {
 
     // Güncellenmiş package.json'ı kaydet
     fs.writeFileSync(packageJsonPath, JSON.stringify(packageJson, null, 2))
+    console.log(chalk.green('✅ package.json güncellendi'))
   } catch (error) {
     console.warn(chalk.yellow('package.json düzenlenemedi. Manuel olarak düzenlemeniz gerekebilir.'))
     console.error(error)
+  }
+
+  // Providers.tsx düzenle - sayfa yenileme mantığını kaldır
+  try {
+    const providersPath = path.join(targetDir, 'src/providers/Providers.tsx')
+    if (fs.existsSync(providersPath)) {
+      let providersContent = fs.readFileSync(providersPath, 'utf8')
+      // useEffect bloğunu yorum satırına al veya kaldır
+      providersContent = providersContent.replace(
+        /useEffect\(\s*\(\)\s*=>\s*{[\s\S]*?}\s*,\s*\[\]\s*\)/,
+        '// Sayfa yenileme mantığı kaldırıldı',
+      )
+      fs.writeFileSync(providersPath, providersContent)
+      console.log(chalk.green('✅ Providers.tsx düzenlendi'))
+    }
+  } catch (error) {
+    console.warn(chalk.yellow('Providers.tsx düzenlenemedi. Manuel olarak düzenlemeniz gerekebilir.'), error)
   }
 
   // Dosyaları temizleyelim
@@ -151,6 +205,10 @@ const cleanupInstallationFiles = (projectDir) => {
       }
     }
   })
+
+  // Yeni yapılandırma dosyalarını oluştur
+  createNextConfig(targetDir)
+  createPostcssConfig(targetDir)
 
   console.log(chalk.green('✅ Kurulum dosyaları başarıyla temizlendi!'))
 }
