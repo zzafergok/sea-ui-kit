@@ -1,12 +1,15 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
 import { useTranslation } from 'react-i18next'
-import { useForm } from '@/hooks/useForm'
-import { Form, FormItem, FormField, FormLabel, FormMessage } from '../Form/Form'
+
 import { Input } from '../Input/Input'
 import { Button } from '../Button/Button'
+import { useForm } from '@/hooks/useForm'
 import { Checkbox } from '../Checkbox/Checkbox'
+import { Form, FormItem, FormField, FormLabel, FormMessage } from '../Form/Form'
+
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth'
 
 interface LoginFormProps {
@@ -16,10 +19,12 @@ interface LoginFormProps {
 
 export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
   const { t } = useTranslation()
-  const [isMounted, setIsMounted] = useState(false)
+
+  const [mounted, setMounted] = useState(false)
 
   useEffect(() => {
-    setIsMounted(true)
+    const animationFrame = requestAnimationFrame(() => setMounted(true))
+    return () => cancelAnimationFrame(animationFrame)
   }, [])
 
   const form = useForm(loginSchema, {
@@ -30,7 +35,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
     },
   })
 
-  if (!isMounted) {
+  if (!mounted) {
     return <div className='space-y-6'>Loading...</div>
   }
 
