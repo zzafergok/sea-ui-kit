@@ -40,14 +40,7 @@ const cleanupInstallationFiles = (projectDir) => {
   const targetDir = path.resolve(process.cwd(), projectDir)
 
   // Temizlenecek dosyalar ve klasörler
-  const filesToRemove = [
-    'index.js', // CLI giriş dosyası
-    '.git', // Git klasörü (kullanıcı kendi git repo'sunu başlatabilsin)
-    'template', // Varsa template klasörü
-    'LICENSE-cli', // CLI lisansı (eğer varsa)
-    'tsconfig.cjs.json', // CommonJS derleme yapılandırması
-    'tsup.config.ts', // Paket derleyici yapılandırması
-  ]
+  const filesToRemove = ['index.js', '.git', 'template', 'LICENSE-cli', 'tsconfig.cjs.json', 'tsup.config.ts']
 
   // package.json düzenlemeleri
   const packageJsonPath = path.join(targetDir, 'package.json')
@@ -69,7 +62,7 @@ const cleanupInstallationFiles = (projectDir) => {
     // Next.js projesi olarak işaretle
     packageJson.private = true
 
-    // Scripts güncelleme - sadece Next.js projeleri için gerekli olanları bırak
+    // Scripts güncelleme
     packageJson.scripts = {
       dev: 'next dev',
       build: 'next build',
@@ -78,11 +71,26 @@ const cleanupInstallationFiles = (projectDir) => {
       prettier: 'prettier --write "{src,tests}/**/*.{js,ts,jsx,tsx}"',
     }
 
+    // PeerDependencies'leri dependencies'e taşı
+    if (packageJson.peerDependencies) {
+      if (!packageJson.dependencies) {
+        packageJson.dependencies = {}
+      }
+
+      // Tüm peerDependencies'leri dependencies'e kopyala
+      Object.assign(packageJson.dependencies, packageJson.peerDependencies)
+
+      // peerDependencies'i sil
+      delete packageJson.peerDependencies
+    }
+
     // CLI'a özgü bağımlılıkları kaldır
-    delete packageJson.dependencies?.chalk
-    delete packageJson.dependencies?.commander
-    delete packageJson.dependencies?.degit
-    delete packageJson.dependencies?.prompts
+    if (packageJson.dependencies) {
+      delete packageJson.dependencies.chalk
+      delete packageJson.dependencies.commander
+      delete packageJson.dependencies.degit
+      delete packageJson.dependencies.prompts
+    }
 
     // Proje adını güzelleştir
     packageJson.name = projectDir.toLowerCase().replace(/\s+/g, '-')
@@ -97,12 +105,11 @@ const cleanupInstallationFiles = (projectDir) => {
     console.error(error)
   }
 
-  // Providers.tsx düzenle - sayfa yenileme mantığını kaldır
+  // Providers.tsx düzenle
   try {
     const providersPath = path.join(targetDir, 'src/providers/Providers.tsx')
     if (fs.existsSync(providersPath)) {
       let providersContent = fs.readFileSync(providersPath, 'utf8')
-      // useEffect bloğunu yorum satırına al veya kaldır
       providersContent = providersContent.replace(
         /useEffect\(\s*\(\)\s*=>\s*{[\s\S]*?}\s*,\s*\[\]\s*\)/,
         '// Sayfa yenileme mantığı kaldırıldı',
@@ -114,20 +121,17 @@ const cleanupInstallationFiles = (projectDir) => {
     console.warn(chalk.yellow('Providers.tsx düzenlenemedi. Manuel olarak düzenlemeniz gerekebilir.'), error)
   }
 
-  // Dosyaları temizleyelim
+  // Dosyaları temizle
   filesToRemove.forEach((file) => {
     const filePath = path.join(targetDir, file)
 
     if (fs.existsSync(filePath)) {
       try {
-        // Klasör mü, dosya mı kontrol edelim
         const stats = fs.statSync(filePath)
 
         if (stats.isDirectory()) {
-          // Klasörü rekürsif olarak silelim
           fs.rmSync(filePath, { recursive: true, force: true })
         } else {
-          // Dosyayı silelim
           fs.unlinkSync(filePath)
         }
       } catch (error) {
@@ -149,7 +153,6 @@ program
   .action(async (projectDir) => {
     console.log(chalk.bold.blue('🌊 Sea UI Kit projesi oluşturuluyor...'))
 
-    // Proje dizini belirtilmemişse varsayılan olarak 'my-sea-ui-app' kullan
     if (!projectDir) {
       projectDir = 'my-sea-ui-app'
       console.log(chalk.blue(`Proje dizini belirtilmedi. Varsayılan olarak "${projectDir}" kullanılıyor.`))
@@ -157,24 +160,19 @@ program
 
     const targetDir = path.resolve(process.cwd(), projectDir)
 
-    // Dizin varsa ve boş değilse uyar, ancak devam et
     if (fs.existsSync(targetDir) && fs.readdirSync(targetDir).length > 0) {
       console.log(chalk.yellow(`Uyarı: "${projectDir}" dizini zaten var ve boş değil. Dosyalar üzerine yazılabilir.`))
     }
 
     console.log(chalk.blue('Template indiriliyor...'))
 
-    // Template indirme işlemi
     const emitter = degit('zzafergok/sea-ui-kit', {
       force: true,
       verbose: true,
     })
 
     try {
-      // Şablonu hedef dizine klonla
       await emitter.clone(targetDir)
-
-      // Kurulum dosyalarını temizle
       cleanupInstallationFiles(projectDir)
 
       console.log(chalk.green.bold('✅ Başarılı!'))
