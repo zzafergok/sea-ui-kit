@@ -10,15 +10,18 @@ import { Checkbox } from '../Checkbox/Checkbox'
 import { Form, FormItem, FormField, FormLabel, FormMessage } from '../Form/Form'
 
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth'
+import { useAuth } from '@/hooks/useAuth'
 
 interface LoginFormProps {
-  onSubmit: (data: LoginFormValues) => void
+  onSubmit?: (data: LoginFormValues) => void
   isLoading?: boolean
+  redirectOnSuccess?: string
 }
 
-export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
+export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/dashboard' }: LoginFormProps) {
   const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
+  const { login, isLoginLoading } = useAuth()
 
   // Hydration mismatch'i önlemek için
   useEffect(() => {
@@ -57,13 +60,27 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
     )
   }
 
-  const handleFormSubmit = (data: LoginFormValues) => {
+  const handleFormSubmit = async (data: LoginFormValues) => {
     try {
-      onSubmit(data)
+      // useAuth hook'unu kullan
+      await login(data)
+      
+      // Custom onSubmit varsa çağır
+      if (onSubmit) {
+        onSubmit(data)
+      }
+
+      // Başarılı login sonrası yönlendirme
+      if (typeof window !== 'undefined' && redirectOnSuccess) {
+        window.location.href = redirectOnSuccess
+      }
     } catch (error) {
-      console.error('Form submission error:', error)
+      console.error('Login failed:', error)
+      // Hata zaten interceptor tarafından handle edildi
     }
   }
+
+  const isFormLoading = isLoading || isLoginLoading
 
   return (
     <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
@@ -82,7 +99,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
                 <Input
                   type='email'
                   placeholder='email@example.com'
-                  disabled={isLoading}
+                  disabled={isFormLoading}
                   autoComplete='email'
                   {...field}
                 />
@@ -97,7 +114,12 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>{t('auth.password')}</FormLabel>
-                <Input type='password' disabled={isLoading} autoComplete='current-password' {...field} />
+                <Input 
+                  type='password' 
+                  disabled={isFormLoading} 
+                  autoComplete='current-password' 
+                  {...field} 
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -113,7 +135,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
                     id='rememberMe'
                     checked={field.value}
                     onCheckedChange={field.onChange}
-                    disabled={isLoading}
+                    disabled={isFormLoading}
                   />
                   <label
                     htmlFor='rememberMe'
@@ -125,15 +147,29 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
               )}
             />
 
-            <Button variant='ghost' className='px-0 text-sm' disabled={isLoading} type='button'>
+            <Button variant='ghost' className='px-0 text-sm' disabled={isFormLoading} type='button'>
               {t('auth.forgotPassword')}
             </Button>
           </div>
 
-          <Button type='submit' fullWidth disabled={isLoading || !form.formState.isValid} className='mt-6'>
-            {isLoading ? t('components.button.loadingText') : t('auth.login')}
+          <Button 
+            type='submit' 
+            fullWidth 
+            disabled={isFormLoading || !form.formState.isValid} 
+            className='mt-6'
+          >
+            {isFormLoading ? t('components.button.loadingText') : t('auth.login')}
           </Button>
         </Form>
+
+        <div className='mt-6 text-center'>
+          <p className='text-sm text-neutral-600 dark:text-neutral-400'>
+            Hesabınız yok mu?{' '}
+            <Button variant='link' className='p-0 h-auto font-normal text-sm'>
+              Kayıt olun
+            </Button>
+          </p>
+        </div>
       </div>
     </div>
   )
