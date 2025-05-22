@@ -1,4 +1,4 @@
-import React, { forwardRef } from 'react'
+import React, { forwardRef, memo } from 'react'
 
 import { cva, type VariantProps } from 'class-variance-authority'
 
@@ -45,19 +45,21 @@ export interface ButtonProps
   variant?: 'default' | 'secondary' | 'outline' | 'ghost'
 }
 
-const Button = forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ children, className, size = 'md', disabled = false, fullWidth = false, variant = 'default', ...props }, ref) => {
-    return (
-      <button
-        ref={ref}
-        className={cn(buttonVariants({ variant, size, fullWidth, className }))}
-        {...props}
-        disabled={disabled}
-      >
-        {children}
-      </button>
-    )
-  },
+const Button = memo(
+  forwardRef<HTMLButtonElement, ButtonProps>(
+    ({ children, className, size = 'md', disabled = false, fullWidth = false, variant = 'default', ...props }, ref) => {
+      return (
+        <button
+          ref={ref}
+          className={cn(buttonVariants({ variant, size, fullWidth, className }))}
+          {...props}
+          disabled={disabled}
+        >
+          {children}
+        </button>
+      )
+    },
+  ),
 )
 
 Button.displayName = 'Button'

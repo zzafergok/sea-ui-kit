@@ -17,12 +17,7 @@ export function ApiExampleComponent() {
   const [newPostContent, setNewPostContent] = useState('')
 
   // RTK Query kullanımı
-  const { 
-    data: posts, 
-    isLoading, 
-    error, 
-    refetch 
-  } = useGetPostsQuery({ page: 1, limit: 10 })
+  const { data: posts, isLoading, error, refetch } = useGetPostsQuery({ page: 1, limit: 10 })
 
   const [createPost, { isLoading: isCreating }] = useCreatePostMutation()
   const [deletePost, { isLoading: isDeleting }] = useDeletePostMutation()
@@ -47,7 +42,7 @@ export function ApiExampleComponent() {
     try {
       await createPost({
         title: newPostTitle,
-        content: newPostContent
+        content: newPostContent,
       }).unwrap()
 
       setNewPostTitle('')
@@ -69,57 +64,41 @@ export function ApiExampleComponent() {
   }
 
   return (
-    <div className="max-w-4xl mx-auto p-6 space-y-8">
-      <h1 className="text-3xl font-bold text-center mb-8">API Integration Examples</h1>
+    <div className='max-w-4xl mx-auto p-6 space-y-8'>
+      <h1 className='text-3xl font-bold text-center mb-8'>API Integration Examples</h1>
 
       {/* RTK Query Example */}
-      <section className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-xl font-semibold mb-4">RTK Query Kullanımı</h2>
-        
+      <section className='bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md'>
+        <h2 className='text-xl font-semibold mb-4'>RTK Query Kullanımı</h2>
+
         {/* Post Creation Form */}
-        <div className="mb-6 space-y-4">
-          <Input
-            placeholder="Post başlığı"
-            value={newPostTitle}
-            onChange={(e) => setNewPostTitle(e.target.value)}
-          />
+        <div className='mb-6 space-y-4'>
+          <Input placeholder='Post başlığı' value={newPostTitle} onChange={(e) => setNewPostTitle(e.target.value)} />
           <Textarea
-            placeholder="Post içeriği"
+            placeholder='Post içeriği'
             value={newPostContent}
             onChange={(e) => setNewPostContent(e.target.value)}
           />
-          <Button 
-            onClick={handleCreatePost}
-            disabled={isCreating || !newPostTitle.trim() || !newPostContent.trim()}
-          >
+          <Button onClick={handleCreatePost} disabled={isCreating || !newPostTitle.trim() || !newPostContent.trim()}>
             {isCreating ? 'Oluşturuluyor...' : 'Post Oluştur'}
           </Button>
         </div>
 
         {/* Posts List */}
-        {isLoading && <div className="text-center py-4">Yükleniyor...</div>}
-        
-        {error && (
-          <div className="text-red-500 text-center py-4">
-            Hata: {error.toString()}
-          </div>
-        )}
+        {isLoading && <div className='text-center py-4'>Yükleniyor...</div>}
+
+        {error && <div className='text-red-500 text-center py-4'>Hata: {error.toString()}</div>}
 
         {posts && (
-          <div className="space-y-4">
-            <h3 className="font-medium">Posts ({posts.length})</h3>
+          <div className='space-y-4'>
+            <h3 className='font-medium'>Posts ({posts.length})</h3>
             {posts.map((post: any) => (
-              <div key={post.id} className="border rounded p-4 flex justify-between items-start">
+              <div key={post.id} className='border rounded p-4 flex justify-between items-start'>
                 <div>
-                  <h4 className="font-medium">{post.title}</h4>
-                  <p className="text-neutral-600 dark:text-neutral-400">{post.content}</p>
+                  <h4 className='font-medium'>{post.title}</h4>
+                  <p className='text-neutral-600 dark:text-neutral-400'>{post.content}</p>
                 </div>
-                <Button
-                  variant="destructive"
-                  size="sm"
-                  onClick={() => deletePost(post.id)}
-                  disabled={isDeleting}
-                >
+                <Button variant='destructive' size='sm' onClick={() => deletePost(post.id)} disabled={isDeleting}>
                   Sil
                 </Button>
               </div>
@@ -129,52 +108,39 @@ export function ApiExampleComponent() {
       </section>
 
       {/* Direct API Service Example */}
-      <section className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Direct API Service Kullanımı</h2>
-        <div className="space-y-4">
-          <p className="text-neutral-600 dark:text-neutral-400">
-            Direct API service kullanarak veri çekme örneği
-          </p>
-          <Button onClick={handleDirectApiCall}>
-            Direct API Çağrısı Yap
-          </Button>
+      <section className='bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md'>
+        <h2 className='text-xl font-semibold mb-4'>Direct API Service Kullanımı</h2>
+        <div className='space-y-4'>
+          <p className='text-neutral-600 dark:text-neutral-400'>Direct API service kullanarak veri çekme örneği</p>
+          <Button onClick={handleDirectApiCall}>Direct API Çağrısı Yap</Button>
         </div>
       </section>
 
       {/* Custom Hook Example */}
-      <section className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-xl font-semibold mb-4">Custom Hook Kullanımı</h2>
-        <div className="space-y-4">
-          <p className="text-neutral-600 dark:text-neutral-400">
+      <section className='bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md'>
+        <h2 className='text-xl font-semibold mb-4'>Custom Hook Kullanımı</h2>
+        <div className='space-y-4'>
+          <p className='text-neutral-600 dark:text-neutral-400'>
             useApi hook'u kullanarak state management ile API çağrısı
           </p>
-          
-          <Button 
-            onClick={handleCustomHookCall}
-            disabled={userApi.loading}
-          >
+
+          <Button onClick={handleCustomHookCall} disabled={userApi.loading}>
             {userApi.loading ? 'Yükleniyor...' : 'User Profile Getir'}
           </Button>
 
-          {userApi.error && (
-            <div className="text-red-500">
-              Hata: {userApi.error.message}
-            </div>
-          )}
+          {userApi.error && <div className='text-red-500'>Hata: {userApi.error.message}</div>}
 
           {userApi.data && (
-            <div className="bg-neutral-100 dark:bg-neutral-700 rounded p-4">
-              <pre className="text-sm overflow-auto">
-                {JSON.stringify(userApi.data, null, 2)}
-              </pre>
+            <div className='bg-neutral-100 dark:bg-neutral-700 rounded p-4'>
+              <pre className='text-sm overflow-auto'>{JSON.stringify(userApi.data, null, 2)}</pre>
             </div>
           )}
         </div>
       </section>
 
       {/* File Upload Example */}
-      <section className="bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md">
-        <h2 className="text-xl font-semibold mb-4">File Upload Örneği</h2>
+      <section className='bg-white dark:bg-neutral-800 rounded-lg p-6 shadow-md'>
+        <h2 className='text-xl font-semibold mb-4'>File Upload Örneği</h2>
         <FileUploadExample />
       </section>
     </div>
@@ -196,14 +162,10 @@ function FileUploadExample() {
     setUploadProgress(0)
 
     try {
-      const result = await apiService.uploadFile(
-        '/files/upload',
-        file,
-        (progressEvent) => {
-          const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-          setUploadProgress(progress)
-        }
-      )
+      const result = await apiService.uploadFile('/files/upload', file, (progressEvent) => {
+        const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
+        setUploadProgress(progress)
+      })
 
       console.log('Upload successful:', result)
       setFile(null)
@@ -216,36 +178,32 @@ function FileUploadExample() {
   }
 
   return (
-    <div className="space-y-4">
+    <div className='space-y-4'>
       <input
-        type="file"
+        type='file'
         onChange={(e) => setFile(e.target.files?.[0] || null)}
-        className="block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100"
+        className='block w-full text-sm text-neutral-500 file:mr-4 file:py-2 file:px-4 file:rounded file:border-0 file:text-sm file:font-semibold file:bg-primary-50 file:text-primary-700 hover:file:bg-primary-100'
       />
-      
+
       {file && (
-        <div className="text-sm text-neutral-600 dark:text-neutral-400">
+        <div className='text-sm text-neutral-600 dark:text-neutral-400'>
           Seçilen dosya: {file.name} ({Math.round(file.size / 1024)} KB)
         </div>
       )}
 
       {isUploading && (
-        <div className="space-y-2">
-          <div className="w-full bg-neutral-200 rounded-full h-2 dark:bg-neutral-700">
-            <div 
-              className="bg-primary-600 h-2 rounded-full transition-all duration-300"
+        <div className='space-y-2'>
+          <div className='w-full bg-neutral-200 rounded-full h-2 dark:bg-neutral-700'>
+            <div
+              className='bg-primary-600 h-2 rounded-full transition-all duration-300'
               style={{ width: `${uploadProgress}%` }}
             ></div>
           </div>
-          <div className="text-sm text-center">{uploadProgress}%</div>
+          <div className='text-sm text-center'>{uploadProgress}%</div>
         </div>
       )}
 
-      <Button 
-        onClick={handleFileUpload}
-        disabled={!file || isUploading}
-        className="w-full"
-      >
+      <Button onClick={handleFileUpload} disabled={!file || isUploading} className='w-full'>
         {isUploading ? 'Yükleniyor...' : 'Dosyayı Yükle'}
       </Button>
     </div>
