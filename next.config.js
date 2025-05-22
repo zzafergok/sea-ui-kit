@@ -1,25 +1,55 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  // Webpack yapılandırması
-  webpack: (config, { dev }) => {
-    if (dev) {
-      config.cache = false
+  swcMinify: true,
+  experimental: {
+    optimizePackageImports: ['@radix-ui/react-icons'],
+  },
+  webpack: (config, { dev, isServer }) => {
+    // Chunk loading sorunlarını önlemek için
+    if (dev && !isServer) {
+      config.optimization = {
+        ...config.optimization,
+        splitChunks: {
+          chunks: 'all',
+          cacheGroups: {
+            default: {
+              minChunks: 2,
+              priority: -20,
+              reuseExistingChunk: true,
+            },
+            vendor: {
+              test: /[\\/]node_modules[\\/]/,
+              name: 'vendors',
+              priority: -10,
+              chunks: 'all',
+            },
+          },
+        },
+      }
     }
+
+    // ES modules desteği
+    config.resolve.extensionAlias = {
+      '.js': ['.ts', '.tsx', '.js', '.jsx'],
+      '.jsx': ['.tsx', '.jsx'],
+    }
+
     return config
   },
-  // Görüntü optimizasyonu ayarları
-  images: {
-    disableStaticImages: true,
+  // Hydration sorunlarını önlemek için
+  onDemandEntries: {
+    maxInactiveAge: 25 * 1000,
+    pagesBufferLength: 2,
   },
-  // SWC minification'ı devre dışı bırak
-  swcMinify: false,
-  // Derleme sırasında daha detaylı log
-  logging: {
-    fetches: {
-      fullUrl: true,
-    },
-  },
+  // CSS optimizasyonu
+  optimizeFonts: true,
+  // Kaynak harita desteği
+  productionBrowserSourceMaps: false,
+  // Statik optimizasyon
+  generateEtags: false,
+  // Hızlı yenileme ayarları
+  fastRefresh: true,
 }
 
 module.exports = nextConfig

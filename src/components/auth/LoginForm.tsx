@@ -1,7 +1,6 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 
 import { Input } from '../Input/Input'
@@ -19,12 +18,15 @@ interface LoginFormProps {
 
 export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
   const { t } = useTranslation()
-
   const [mounted, setMounted] = useState(false)
 
+  // Hydration mismatch'i önlemek için
   useEffect(() => {
-    const animationFrame = requestAnimationFrame(() => setMounted(true))
-    return () => cancelAnimationFrame(animationFrame)
+    const timer = setTimeout(() => {
+      setMounted(true)
+    }, 100)
+
+    return () => clearTimeout(timer)
   }, [])
 
   const form = useForm(loginSchema, {
@@ -35,28 +37,55 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
     },
   })
 
+  // Form mount olana kadar loading göster
   if (!mounted) {
-    return <div className='space-y-6'>Loading...</div>
+    return (
+      <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
+        <div className='w-full max-w-md p-6 bg-white dark:bg-neutral-800 rounded-lg shadow-md'>
+          <div className='animate-pulse'>
+            <div className='h-8 bg-neutral-200 dark:bg-neutral-700 rounded mb-6'></div>
+            <div className='space-y-4'>
+              <div className='h-4 bg-neutral-200 dark:bg-neutral-700 rounded'></div>
+              <div className='h-10 bg-neutral-200 dark:bg-neutral-700 rounded'></div>
+              <div className='h-4 bg-neutral-200 dark:bg-neutral-700 rounded'></div>
+              <div className='h-10 bg-neutral-200 dark:bg-neutral-700 rounded'></div>
+              <div className='h-10 bg-neutral-200 dark:bg-neutral-700 rounded'></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
+  const handleFormSubmit = (data: LoginFormValues) => {
+    try {
+      onSubmit(data)
+    } catch (error) {
+      console.error('Form submission error:', error)
+    }
   }
 
   return (
-    // Dış kapsayıcı - yükseklik ve genişlik tam sayfa, merkezde hizalama
     <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
-      {/* Form kapsayıcısı - responsive genişlik ve kart görünümü */}
       <div className='w-full max-w-md p-6 bg-white dark:bg-neutral-800 rounded-lg shadow-md'>
-        {/* İsteğe bağlı: Form başlığı */}
         <h2 className='text-2xl font-semibold text-center mb-6 text-primary-700 dark:text-primary-500'>
           {t('auth.login')}
         </h2>
 
-        <Form form={form} onSubmit={onSubmit} className='space-y-6'>
+        <Form form={form} onSubmit={handleFormSubmit} className='space-y-6'>
           <FormField
             control={form.control}
             name='email'
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>{t('auth.email')}</FormLabel>
-                <Input type='email' placeholder='email@example.com' disabled={isLoading} {...field} />
+                <Input
+                  type='email'
+                  placeholder='email@example.com'
+                  disabled={isLoading}
+                  autoComplete='email'
+                  {...field}
+                />
                 <FormMessage />
               </FormItem>
             )}
@@ -68,7 +97,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>{t('auth.password')}</FormLabel>
-                <Input type='password' disabled={isLoading} {...field} />
+                <Input type='password' disabled={isLoading} autoComplete='current-password' {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -101,7 +130,7 @@ export function LoginForm({ onSubmit, isLoading = false }: LoginFormProps) {
             </Button>
           </div>
 
-          <Button type='submit' fullWidth disabled={isLoading} className='mt-6'>
+          <Button type='submit' fullWidth disabled={isLoading || !form.formState.isValid} className='mt-6'>
             {isLoading ? t('components.button.loadingText') : t('auth.login')}
           </Button>
         </Form>
