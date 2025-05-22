@@ -1,6 +1,6 @@
 {
   "name": "sea-ui-kit-stark",
-  "version": "0.1.35",
+  "version": "0.1.36",
   "description": "Create a Next.js project with Sea UI Kit",
   "main": "dist/cjs/index.js",
   "module": "./dist/esm/index.js",
@@ -82,7 +82,7 @@
     "@typescript-eslint/eslint-plugin": "^8.32.1",
     "@typescript-eslint/parser": "^8.32.1",
     "axios": "^1.9.0",
-    "chalk": "^5.4.1",
+    "chalk": "^4.1.2",
     "class-variance-authority": "^0.7.1",
     "clsx": "^2.1.1",
     "commander": "^14.0.0",
