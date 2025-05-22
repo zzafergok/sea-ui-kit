@@ -33,20 +33,6 @@ module.exports = nextConfig;
   console.log(chalk.green('✅ next.config.js oluşturuldu'))
 }
 
-// PostCSS yapılandırma dosyası oluştur
-const createPostcssConfig = (targetDir) => {
-  const configContent = `module.exports = {
-  plugins: {
-    'tailwindcss': {},
-    'autoprefixer': {},
-    'postcss-nesting': {},
-  },
-}
-`
-  fs.writeFileSync(path.join(targetDir, 'postcss.config.js'), configContent)
-  console.log(chalk.green('✅ postcss.config.js oluşturuldu'))
-}
-
 // Kurulum sonrası temizleme işlevi
 const cleanupInstallationFiles = (projectDir) => {
   console.log(chalk.blue('Kurulum dosyaları temizleniyor...'))
@@ -61,9 +47,6 @@ const cleanupInstallationFiles = (projectDir) => {
     'LICENSE-cli', // CLI lisansı (eğer varsa)
     'tsconfig.cjs.json', // CommonJS derleme yapılandırması
     'tsup.config.ts', // Paket derleyici yapılandırması
-    '.babelrc', // Babel yapılandırması (Next.js kendi yapılandırmasını kullanacak)
-    'next.config.ts', // TypeScript'te yazılmış next config (JavaScript olanla değiştireceğiz)
-    'postcss.config.mjs', // ESM formatındaki postcss config (CommonJS olanla değiştireceğiz)
   ]
 
   // package.json düzenlemeleri
@@ -85,52 +68,6 @@ const cleanupInstallationFiles = (projectDir) => {
 
     // Next.js projesi olarak işaretle
     packageJson.private = true
-
-    // Yeni bağımlılık listelerini oluştur
-    packageJson.dependencies = {
-      next: '^14.0.4', // 15 yerine 14 sürümünü kullan (daha stabil)
-      react: '^18.2.0',
-      'react-dom': '^18.2.0',
-      '@reduxjs/toolkit': '^2.0.0',
-      axios: '^1.8.4',
-      'class-variance-authority': '^0.7.1',
-      clsx: '^2.1.1',
-      i18next: '^25.1.3',
-      'i18next-browser-languagedetector': '^8.1.0',
-      'lucide-react': '^0.483.0',
-      'react-hook-form': '^7.55.0',
-      'react-i18next': '^15.5.1',
-      'react-redux': '^9.2.0',
-      'tailwind-merge': '^2.0.0',
-      zod: '^3.24.2',
-      '@hookform/resolvers': '^5.0.1',
-      '@radix-ui/react-checkbox': '^1.0.4',
-      '@radix-ui/react-dialog': '^1.0.5',
-      '@radix-ui/react-select': '^2.0.0',
-      '@radix-ui/react-switch': '^1.0.3',
-      '@radix-ui/react-tabs': '^1.0.4',
-      '@radix-ui/react-toast': '^1.1.5',
-    }
-
-    packageJson.devDependencies = {
-      '@types/node': '^20.8.9',
-      '@types/react': '^18.2.33', // React 19 için değil 18 için tip tanımları
-      '@types/react-dom': '^18.2.14', // React 19 için değil 18 için tip tanımları
-      autoprefixer: '^10.4.21',
-      eslint: '^8.57.1',
-      'eslint-config-next': '^14.0.0', // Next.js 14 uyumlu ESLint
-      'eslint-config-prettier': '^10.1.5',
-      'eslint-plugin-prettier': '^5.4.0',
-      postcss: '^8.5.3',
-      'postcss-nesting': '^13.0.1',
-      prettier: '^3.5.3',
-      tailwindcss: '^3.4.15',
-      typescript: '^5.2.2',
-      '@typescript-eslint/eslint-plugin': '^8.32.1',
-      '@typescript-eslint/parser': '^8.32.1',
-      'eslint-plugin-react': '^7.37.5',
-      'eslint-plugin-react-hooks': '^5.2.0',
-    }
 
     // Scripts güncelleme - sadece Next.js projeleri için gerekli olanları bırak
     packageJson.scripts = {
@@ -201,7 +138,6 @@ const cleanupInstallationFiles = (projectDir) => {
 
   // Yeni yapılandırma dosyalarını oluştur
   createNextConfig(targetDir)
-  createPostcssConfig(targetDir)
 
   console.log(chalk.green('✅ Kurulum dosyaları başarıyla temizlendi!'))
 }
