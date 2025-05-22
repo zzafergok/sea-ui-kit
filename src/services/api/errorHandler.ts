@@ -1,9 +1,12 @@
 import { AxiosError } from 'axios'
+
 import { ApiError } from './types'
 import { HTTP_STATUS, ERROR_CODES } from './constants'
+
 import { store } from '@/store'
 import { logoutUser } from '@/store/slices/userSlice'
 import { showToast } from '@/store/slices/toastSlice'
+
 import { TokenManager } from './tokenManager'
 
 /**
