@@ -23,7 +23,7 @@ const developmentConfig: ApiConfig = {
   tokenRefreshBuffer: 300000, // 5 dakika
   maxConcurrentRequests: 10,
   enableCache: true,
-  defaultCacheTime: 300000 // 5 dakika
+  defaultCacheTime: 300000, // 5 dakika
 }
 
 const productionConfig: ApiConfig = {
@@ -37,7 +37,7 @@ const productionConfig: ApiConfig = {
   tokenRefreshBuffer: 300000, // 5 dakika
   maxConcurrentRequests: 20,
   enableCache: true,
-  defaultCacheTime: 600000 // 10 dakika
+  defaultCacheTime: 600000, // 10 dakika
 }
 
 const testConfig: ApiConfig = {
@@ -51,14 +51,14 @@ const testConfig: ApiConfig = {
   tokenRefreshBuffer: 60000, // 1 dakika
   maxConcurrentRequests: 5,
   enableCache: false,
-  defaultCacheTime: 0
+  defaultCacheTime: 0,
 }
 
-export const apiConfig: ApiConfig = 
-  process.env.NODE_ENV === 'production' 
-    ? productionConfig 
+export const apiConfig: ApiConfig =
+  process.env.NODE_ENV === 'production'
+    ? productionConfig
     : process.env.NODE_ENV === 'test'
-    ? testConfig
-    : developmentConfig
+      ? testConfig
+      : developmentConfig
 
 export default apiConfig

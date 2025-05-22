@@ -32,7 +32,7 @@ export const store = configureStore({
     toast: toastReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
-  middleware: (getDefaultMiddleware) => 
+  middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
         // Toast slice'ında function'lar olabilir (action.onClick)

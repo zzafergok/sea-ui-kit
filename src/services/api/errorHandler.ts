@@ -19,7 +19,8 @@ class ErrorHandler {
     const responseData = error.response?.data as any
 
     let message = 'Beklenmeyen bir hata oluştu'
-    let code = ERROR_CODES.SERVER_ERROR
+
+    let code: (typeof ERROR_CODES)[keyof typeof ERROR_CODES] = ERROR_CODES.SERVER_ERROR
 
     // HTTP status kodlarına göre hata mesajları
     switch (status) {
@@ -98,7 +99,7 @@ class ErrorHandler {
         url: error.config?.url,
         method: error.config?.method,
         responseData,
-        requestData: error.config?.data
+        requestData: error.config?.data,
       })
     }
 
@@ -106,7 +107,7 @@ class ErrorHandler {
       message,
       status,
       code,
-      details: responseData
+      details: responseData,
     }
   }
 
@@ -115,15 +116,17 @@ class ErrorHandler {
    */
   static showErrorToast(error: ApiError): void {
     try {
-      store.dispatch(showToast({
-        type: 'error',
-        title: 'Hata',
-        message: error.message,
-        duration: 5000
-      }))
+      store.dispatch(
+        showToast({
+          type: 'error',
+          title: 'Hata',
+          message: error.message,
+          duration: 5000,
+        }),
+      )
     } catch (toastError) {
       // Toast slice mevcut değilse console'a logla
-      console.error('Toast error:', error.message)
+      console.error('error.message: ', error.message, 'Toast error:', toastError)
     }
   }
 
@@ -132,14 +135,16 @@ class ErrorHandler {
    */
   static showSuccessToast(message: string, title: string = 'Başarılı'): void {
     try {
-      store.dispatch(showToast({
-        type: 'success',
-        title,
-        message,
-        duration: 3000
-      }))
+      store.dispatch(
+        showToast({
+          type: 'success',
+          title,
+          message,
+          duration: 3000,
+        }),
+      )
     } catch (toastError) {
-      console.log('Success:', message)
+      console.log('error:', toastError)
     }
   }
 
@@ -150,15 +155,15 @@ class ErrorHandler {
   static handleAuthError(): void {
     const tokenManager = TokenManager.getInstance()
     tokenManager.removeTokens()
-    
+
     // Store'dan user bilgilerini temizle
     store.dispatch(logoutUser())
-    
+
     // Toast mesajı göster
     this.showErrorToast({
       message: 'Oturumunuz sonlandırıldı, lütfen tekrar giriş yapın',
       status: 401,
-      code: ERROR_CODES.TOKEN_EXPIRED
+      code: ERROR_CODES.TOKEN_EXPIRED,
     })
 
     // Kullanıcıyı login sayfasına yönlendir
@@ -178,7 +183,7 @@ class ErrorHandler {
     this.showErrorToast({
       message: 'Çok fazla istek gönderildi. Lütfen birkaç dakika bekleyip tekrar deneyiniz.',
       status: 429,
-      code: ERROR_CODES.RATE_LIMIT_EXCEEDED
+      code: ERROR_CODES.RATE_LIMIT_EXCEEDED,
     })
   }
 
@@ -189,7 +194,7 @@ class ErrorHandler {
     this.showErrorToast({
       message: 'İnternet bağlantınızı kontrol ediniz ve tekrar deneyiniz.',
       status: 0,
-      code: ERROR_CODES.NETWORK_ERROR
+      code: ERROR_CODES.NETWORK_ERROR,
     })
   }
 
@@ -198,7 +203,7 @@ class ErrorHandler {
    */
   static handleValidationError(details: any): void {
     let message = 'Girilen bilgilerde hata bulunmaktadır'
-    
+
     // Detaylı validation mesajları varsa kullan
     if (details?.errors && Array.isArray(details.errors)) {
       message = details.errors.join(', ')
@@ -210,7 +215,7 @@ class ErrorHandler {
       message,
       status: 400,
       code: ERROR_CODES.VALIDATION_ERROR,
-      details
+      details,
     })
   }
 
@@ -223,19 +228,19 @@ class ErrorHandler {
       case ERROR_CODES.INVALID_TOKEN:
         this.handleAuthError()
         break
-      
+
       case ERROR_CODES.RATE_LIMIT_EXCEEDED:
         this.handleRateLimitError()
         break
-      
+
       case ERROR_CODES.NETWORK_ERROR:
         this.handleNetworkError()
         break
-      
+
       case ERROR_CODES.VALIDATION_ERROR:
         this.handleValidationError(error.details)
         break
-      
+
       default:
         this.showErrorToast(error)
     }
@@ -248,11 +253,11 @@ class ErrorHandler {
     if (process.env.NODE_ENV === 'production') {
       // Sentry, LogRocket, Bugsnag gibi servislere hata raporu gönder
       if (typeof window !== 'undefined' && (window as any).gtag) {
-        (window as any).gtag('event', 'api_error', {
+        return (window as any).gtag('event', 'api_error', {
           error_code: error.code,
           error_message: error.message,
           error_status: error.status,
-          context: JSON.stringify(context)
+          context: JSON.stringify(context),
         })
       }
 
@@ -266,9 +271,11 @@ class ErrorHandler {
    */
   static isRetryableError(error: ApiError): boolean {
     // Network hataları ve 5xx server hataları retry edilebilir
-    return error.code === ERROR_CODES.NETWORK_ERROR || 
-           (error.status >= 500 && error.status < 600) ||
-           error.status === HTTP_STATUS.TOO_MANY_REQUESTS
+    return (
+      error.code === ERROR_CODES.NETWORK_ERROR ||
+      (error.status >= 500 && error.status < 600) ||
+      error.status === HTTP_STATUS.TOO_MANY_REQUESTS
+    )
   }
 
   /**
@@ -279,7 +286,7 @@ class ErrorHandler {
     return {
       timestamp: new Date().toISOString(),
       userAgent: typeof window !== 'undefined' ? window.navigator.userAgent : 'unknown',
-      url: typeof window !== 'undefined' ? window.location.href : 'unknown'
+      url: typeof window !== 'undefined' ? window.location.href : 'unknown',
     }
   }
 }

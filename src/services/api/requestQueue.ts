@@ -96,7 +96,7 @@ class RequestQueue {
     return {
       isRefreshing: this.isRefreshing,
       queueSize: this.failedQueue.length,
-      timestamp: new Date().toISOString()
+      timestamp: new Date().toISOString(),
     }
   }
 }

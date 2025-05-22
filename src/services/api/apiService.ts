@@ -61,7 +61,7 @@ class ApiService {
     url: string,
     file: File,
     onUploadProgress?: (progressEvent: any) => void,
-    config?: RequestConfig
+    config?: RequestConfig,
   ): Promise<ApiResponse<T>> {
     const formData = new FormData()
     formData.append('file', file)
@@ -70,10 +70,10 @@ class ApiService {
       ...config,
       headers: {
         'Content-Type': 'multipart/form-data',
-        ...config?.headers
+        ...config?.headers,
       },
       timeout: REQUEST_TIMEOUT.UPLOAD,
-      onUploadProgress
+      onUploadProgress,
     })
 
     return response.data
@@ -86,10 +86,10 @@ class ApiService {
     url: string,
     files: File[],
     onUploadProgress?: (progressEvent: any) => void,
-    config?: RequestConfig
+    config?: RequestConfig,
   ): Promise<ApiResponse<T>> {
     const formData = new FormData()
-    
+
     files.forEach((file, index) => {
       formData.append(`files[${index}]`, file)
     })
@@ -98,10 +98,10 @@ class ApiService {
       ...config,
       headers: {
         'Content-Type': 'multipart/form-data',
-        ...config?.headers
+        ...config?.headers,
       },
       timeout: REQUEST_TIMEOUT.UPLOAD,
-      onUploadProgress
+      onUploadProgress,
     })
 
     return response.data
@@ -110,15 +110,11 @@ class ApiService {
   /**
    * Dosya download işlemi
    */
-  async downloadFile(
-    url: string,
-    filename?: string,
-    config?: RequestConfig
-  ): Promise<Blob> {
+  async downloadFile(url: string, filename?: string, config?: RequestConfig): Promise<Blob> {
     const response = await this.axiosInstance.get(url, {
       ...config,
       responseType: 'blob',
-      timeout: REQUEST_TIMEOUT.DOWNLOAD
+      timeout: REQUEST_TIMEOUT.DOWNLOAD,
     })
 
     // Otomatik download
@@ -139,15 +135,11 @@ class ApiService {
   /**
    * Streaming data işlemi
    */
-  async streamData<T>(
-    url: string,
-    onChunk: (chunk: T) => void,
-    config?: RequestConfig
-  ): Promise<void> {
+  async streamData<T>(url: string, onChunk: (chunk: T) => void, config?: RequestConfig): Promise<void> {
     const response = await this.axiosInstance.get(url, {
       ...config,
       responseType: 'stream',
-      timeout: REQUEST_TIMEOUT.LONG_RUNNING
+      timeout: REQUEST_TIMEOUT.LONG_RUNNING,
     })
 
     // Stream handling (Node.js environment)
@@ -167,9 +159,9 @@ class ApiService {
    * Batch request işlemi
    */
   async batch<T>(requests: Array<() => Promise<ApiResponse<T>>>): Promise<Array<ApiResponse<T> | Error>> {
-    const results = await Promise.allSettled(requests.map(req => req()))
-    
-    return results.map(result => {
+    const results = await Promise.allSettled(requests.map((req) => req()))
+
+    return results.map((result) => {
       if (result.status === 'fulfilled') {
         return result.value
       } else {
@@ -186,11 +178,11 @@ class ApiService {
       const response = await this.get('/health', {
         timeout: 5000,
         skipAuth: true,
-        skipErrorHandling: true
+        skipErrorHandling: true,
       })
       return response.success
     } catch (error) {
-      return false
+      return error instanceof Error ? false : true
     }
   }
 
@@ -200,7 +192,8 @@ class ApiService {
   async getApiInfo(): Promise<ApiResponse<any>> {
     return this.get('/info', {
       skipAuth: true,
-      timeout: 5000
+
+      timeout: 5000,
     })
   }
 

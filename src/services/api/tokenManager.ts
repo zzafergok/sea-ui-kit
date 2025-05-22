@@ -1,6 +1,15 @@
 import { AxiosInstance } from 'axios'
-import { RefreshTokenResponse } from './types'
+
 import { API_ENDPOINTS } from './constants'
+import { RefreshTokenResponse } from './types'
+
+// AxiosRequestConfig'i genişlet
+declare module 'axios' {
+  export interface AxiosRequestConfig {
+    skipAuth?: boolean
+    skipErrorHandling?: boolean
+  }
+}
 import apiConfig from '@/config/api'
 
 /**
@@ -39,14 +48,14 @@ class TokenManager {
    */
   setTokens(accessToken: string, refreshToken: string, expiresIn?: number): void {
     if (typeof window === 'undefined') return
-    
+
     localStorage.setItem('accessToken', accessToken)
     localStorage.setItem('refreshToken', refreshToken)
-    
+
     // Token süresini hesapla ve kaydet
     const expiryTime = Date.now() + (expiresIn ? expiresIn * 1000 : apiConfig.tokenRefreshBuffer)
     localStorage.setItem('tokenExpiry', expiryTime.toString())
-    
+
     // User session bilgisini güncelle
     localStorage.setItem('lastActivity', Date.now().toString())
   }
@@ -56,7 +65,6 @@ class TokenManager {
    */
   removeTokens(): void {
     if (typeof window === 'undefined') return
-    
     localStorage.removeItem('accessToken')
     localStorage.removeItem('refreshToken')
     localStorage.removeItem('tokenExpiry')
@@ -68,13 +76,13 @@ class TokenManager {
    */
   isTokenExpired(): boolean {
     if (typeof window === 'undefined') return true
-    
+
     const expiry = localStorage.getItem('tokenExpiry')
     if (!expiry) return true
-    
+
     // Buffer süresi ekleyerek erken yenileme yapar
     const bufferTime = 60000 // 1 dakika buffer
-    return Date.now() > (parseInt(expiry) - bufferTime)
+    return Date.now() > parseInt(expiry) - bufferTime
   }
 
   /**
@@ -119,10 +127,10 @@ class TokenManager {
    */
   isSessionExpired(timeoutMinutes: number = 30): boolean {
     if (typeof window === 'undefined') return true
-    
+
     const lastActivity = localStorage.getItem('lastActivity')
     if (!lastActivity) return true
-    
+
     const sessionTimeout = timeoutMinutes * 60 * 1000 // milliseconds
     return Date.now() - parseInt(lastActivity) > sessionTimeout
   }
@@ -130,19 +138,17 @@ class TokenManager {
   /**
    * Token refresh işlemini gerçekleştirir
    */
-  private async performTokenRefresh(
-    axiosInstance: AxiosInstance, 
-    refreshToken: string
-  ): Promise<RefreshTokenResponse> {
+
+  private async performTokenRefresh(axiosInstance: AxiosInstance, refreshToken: string): Promise<RefreshTokenResponse> {
     try {
       const response = await axiosInstance.post(
         API_ENDPOINTS.AUTH.REFRESH,
         { refreshToken },
-        { 
-          skipAuth: true, 
+        {
+          skipAuth: true,
           skipErrorHandling: true,
-          timeout: 10000
-        }
+          timeout: 10000,
+        },
       )
 
       if (response.data?.success && response.data?.data) {
@@ -168,7 +174,7 @@ class TokenManager {
       isExpired: this.isTokenExpired(),
       isSessionExpired: this.isSessionExpired(),
       lastActivity: localStorage.getItem('lastActivity'),
-      tokenExpiry: localStorage.getItem('tokenExpiry')
+      tokenExpiry: localStorage.getItem('tokenExpiry'),
     }
   }
 }

@@ -1,8 +1,13 @@
+/* eslint-disable @typescript-eslint/no-unused-vars */
+
 import { useCallback } from 'react'
+
 import { useAppDispatch, useAppSelector } from '@/store'
 import { setUser, logoutUser, selectUser, selectIsAuthenticated, selectIsLoading } from '@/store/slices/userSlice'
-import { useLoginMutation, useLogoutMutation, useGetCurrentUserQuery } from '@/services/api/apiSlice'
+
 import { TokenManager } from '@/services/api/tokenManager'
+import { useLoginMutation, useLogoutMutation, useGetCurrentUserQuery } from '@/services/api/apiSlice'
+
 import { LoginFormValues } from '@/lib/validations/auth'
 
 /**
@@ -14,34 +19,28 @@ export function useAuth() {
   const user = useAppSelector(selectUser)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isLoading = useAppSelector(selectIsLoading)
-  
   const [loginMutation, { isLoading: isLoginLoading }] = useLoginMutation()
   const [logoutMutation, { isLoading: isLogoutLoading }] = useLogoutMutation()
-  
   // Current user query - sadece authenticated ise çalışır
   const { data: currentUserData, refetch: refetchCurrentUser } = useGetCurrentUserQuery(undefined, {
-    skip: !isAuthenticated
+    skip: !isAuthenticated,
   })
 
   /**
    * Kullanıcı girişi yapar
    */
-  const login = useCallback(async (credentials: LoginFormValues) => {
-    try {
+  const login = useCallback(
+    async (credentials: LoginFormValues) => {
       const result = await loginMutation(credentials).unwrap()
-      
       // Token'ları sakla
       const tokenManager = TokenManager.getInstance()
       tokenManager.setTokens(result.token, result.refreshToken)
-      
       // User state'ini güncelle
       dispatch(setUser(result.user))
-      
       return result
-    } catch (error) {
-      throw error
-    }
-  }, [loginMutation, dispatch])
+    },
+    [loginMutation, dispatch],
+  )
 
   /**
    * Kullanıcı çıkışı yapar
@@ -57,7 +56,6 @@ export function useAuth() {
       // Token'ları temizle
       const tokenManager = TokenManager.getInstance()
       tokenManager.removeTokens()
-      
       // Store'dan user bilgilerini temizle
       dispatch(logoutUser())
     }
@@ -68,12 +66,10 @@ export function useAuth() {
    */
   const checkAuthStatus = useCallback(() => {
     const tokenManager = TokenManager.getInstance()
-    
     if (!tokenManager.getAccessToken() || tokenManager.isSessionExpired()) {
       logout()
       return false
     }
-    
     return true
   }, [logout])
 
@@ -108,15 +104,13 @@ export function useAuth() {
     isLoading: isLoading || isLoginLoading || isLogoutLoading,
     isLoginLoading,
     isLogoutLoading,
-    
     // Actions
     login,
     logout,
     refreshUser,
     checkAuthStatus,
-    
     // Utilities
-    getTokenInfo
+    getTokenInfo,
   }
 }
 

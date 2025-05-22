@@ -11,9 +11,7 @@ export interface BaseQueryArgs {
  * RTK Query için Axios base query
  * Redux Toolkit Query ile Axios entegrasyonu sağlar
  */
-export const axiosBaseQuery = (
-  { baseUrl }: BaseQueryArgs = {}
-): BaseQueryFn<
+export const axiosBaseQuery = ({ baseUrl }: BaseQueryArgs = {}): BaseQueryFn<
   {
     url: string
     method?: AxiosRequestConfig['method']
@@ -32,20 +30,19 @@ export const axiosBaseQuery = (
         data,
         params,
         headers,
-        ...config
+        ...config,
       })
 
       return { data: result.data }
     } catch (axiosError) {
       const error = axiosError as ApiError
-      
       return {
         error: {
           status: error.status,
           data: error.message,
           message: error.message,
-          code: error.code
-        }
+          code: error.code,
+        },
       }
     }
   }

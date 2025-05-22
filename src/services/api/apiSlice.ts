@@ -20,17 +20,14 @@ export const apiSlice = createApi({
   tagTypes: ['User', 'Posts', 'Settings', 'Auth', 'Files'],
   endpoints: (builder) => ({
     // Authentication endpoints
-    login: builder.mutation<
-      { user: any; token: string; refreshToken: string },
-      LoginFormValues
-    >({
+    login: builder.mutation<{ user: any; token: string; refreshToken: string }, LoginFormValues>({
       query: (credentials) => ({
         url: API_ENDPOINTS.AUTH.LOGIN,
         method: 'POST',
         data: credentials,
-        skipAuth: true // Login işlemi için auth gerekmiyor
+        skipAuth: true, // Login işlemi için auth gerekmiyor
       }),
-      invalidatesTags: ['Auth', 'User']
+      invalidatesTags: ['Auth', 'User'],
     }),
 
     refreshToken: builder.mutation<
@@ -42,16 +39,16 @@ export const apiSlice = createApi({
         method: 'POST',
         data: { refreshToken },
         skipAuth: true,
-        skipErrorHandling: true // Kendi error handling'ini yapacak
-      })
+        skipErrorHandling: true, // Kendi error handling'ini yapacak
+      }),
     }),
 
     logout: builder.mutation<void, void>({
       query: () => ({
         url: API_ENDPOINTS.AUTH.LOGOUT,
-        method: 'POST'
+        method: 'POST',
       }),
-      invalidatesTags: ['Auth', 'User']
+      invalidatesTags: ['Auth', 'User'],
     }),
 
     register: builder.mutation<
@@ -62,18 +59,18 @@ export const apiSlice = createApi({
         url: API_ENDPOINTS.AUTH.REGISTER,
         method: 'POST',
         data: userData,
-        skipAuth: true
+        skipAuth: true,
       }),
-      invalidatesTags: ['Auth']
+      invalidatesTags: ['Auth'],
     }),
 
     // User endpoints
     getCurrentUser: builder.query<any, void>({
       query: () => ({
         url: API_ENDPOINTS.USER.PROFILE,
-        method: 'GET'
+        method: 'GET',
       }),
-      providesTags: ['User']
+      providesTags: ['User'],
     }),
 
     updateUserProfile: builder.mutation<any, Partial<any>>({
@@ -81,17 +78,17 @@ export const apiSlice = createApi({
         url: API_ENDPOINTS.USER.UPDATE,
         method: 'PUT',
         data: userData,
-        showErrorToast: true // Hata durumunda toast göster
+        showErrorToast: true, // Hata durumunda toast göster
       }),
-      invalidatesTags: ['User']
+      invalidatesTags: ['User'],
     }),
 
     deleteUser: builder.mutation<void, void>({
       query: () => ({
         url: API_ENDPOINTS.USER.DELETE,
-        method: 'DELETE'
+        method: 'DELETE',
       }),
-      invalidatesTags: ['User', 'Auth']
+      invalidatesTags: ['User', 'Auth'],
     }),
 
     // Posts endpoints
@@ -99,96 +96,43 @@ export const apiSlice = createApi({
       query: ({ page = 1, limit = 10, search }) => ({
         url: API_ENDPOINTS.POSTS.LIST,
         method: 'GET',
-        params: { page, limit, search }
+        params: { page, limit, search },
       }),
-      providesTags: ['Posts']
+      providesTags: ['Posts'],
     }),
 
     getPost: builder.query<any, string | number>({
       query: (id) => ({
         url: `${API_ENDPOINTS.POSTS.LIST}/${id}`,
-        method: 'GET'
+        method: 'GET',
       }),
-      providesTags: (result, error, id) => [{ type: 'Posts', id }]
+      providesTags: (result, error, id) => [{ type: 'Posts', id }],
     }),
 
     createPost: builder.mutation<any, { title: string; content: string; tags?: string[] }>({
       query: (postData) => ({
         url: API_ENDPOINTS.POSTS.CREATE,
         method: 'POST',
-        data: postData
+        data: postData,
       }),
-      invalidatesTags: ['Posts']
+      invalidatesTags: ['Posts'],
     }),
 
     updatePost: builder.mutation<any, { id: string | number; data: Partial<any> }>({
       query: ({ id, data }) => ({
         url: `${API_ENDPOINTS.POSTS.UPDATE}/${id}`,
         method: 'PUT',
-        data
+        data,
       }),
-      invalidatesTags: (result, error, { id }) => [{ type: 'Posts', id }, 'Posts']
+      invalidatesTags: (result, error, { id }) => [{ type: 'Posts', id }, 'Posts'],
     }),
 
     deletePost: builder.mutation<void, string | number>({
       query: (id) => ({
         url: `${API_ENDPOINTS.POSTS.DELETE}/${id}`,
-        method: 'DELETE'
+        method: 'DELETE',
       }),
-      invalidatesTags: ['Posts']
-    }),
-
-    // File operations
-    uploadFile: builder.mutation<any, { file: File; onProgress?: (progress: number) => void }>({
-      queryFn: async ({ file, onProgress }) => {
-        try {
-          const { apiService } = await import('./apiService')
-          const result = await apiService.uploadFile(
-            API_ENDPOINTS.FILES.UPLOAD,
-            file,
-            onProgress ? (progressEvent) => {
-              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              onProgress(progress)
-            } : undefined
-          )
-          return { data: result.data }
-        } catch (error) {
-          return { error }
-        }
-      },
-      invalidatesTags: ['Files']
-    }),
-
-    uploadAvatar: builder.mutation<any, { file: File; onProgress?: (progress: number) => void }>({
-      queryFn: async ({ file, onProgress }) => {
-        try {
-          const { apiService } = await import('./apiService')
-          const result = await apiService.uploadFile(
-            API_ENDPOINTS.USER.UPLOAD_AVATAR,
-            file,
-            onProgress ? (progressEvent) => {
-              const progress = Math.round((progressEvent.loaded * 100) / progressEvent.total)
-              onProgress(progress)
-            } : undefined
-          )
-          return { data: result.data }
-        } catch (error) {
-          return { error }
-        }
-      },
-      invalidatesTags: ['User', 'Files']
-    }),
-
-    downloadFile: builder.mutation<Blob, { url: string; filename?: string }>({
-      queryFn: async ({ url, filename }) => {
-        try {
-          const { apiService } = await import('./apiService')
-          const blob = await apiService.downloadFile(url, filename)
-          return { data: blob }
-        } catch (error) {
-          return { error }
-        }
-      }
+      invalidatesTags: ['Posts'],
     }),
 
     // Health check endpoint
@@ -197,8 +141,8 @@ export const apiSlice = createApi({
         url: '/health',
         method: 'GET',
         skipAuth: true,
-        timeout: 5000
-      })
+        timeout: 5000,
+      }),
     }),
 
     // API info endpoint
@@ -206,10 +150,11 @@ export const apiSlice = createApi({
       query: () => ({
         url: '/info',
         method: 'GET',
-        skipAuth: true
-      })
-    })
-  })
+
+        skipAuth: true,
+      }),
+    }),
+  }),
 })
 
 // Export hooks for components
@@ -232,11 +177,6 @@ export const {
   useUpdatePostMutation,
   useDeletePostMutation,
 
-  // File hooks
-  useUploadFileMutation,
-  useUploadAvatarMutation,
-  useDownloadFileMutation,
-
   // System hooks
   useHealthCheckQuery,
   useGetApiInfoQuery,
@@ -244,7 +184,7 @@ export const {
   // Advanced hooks
   useLazyGetPostsQuery,
   useLazyGetCurrentUserQuery,
-  usePrefetch
+  usePrefetch,
 } = apiSlice
 
 export default apiSlice

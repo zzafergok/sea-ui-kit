@@ -1,10 +1,13 @@
 import { AxiosError, AxiosInstance, AxiosResponse, InternalAxiosRequestConfig } from 'axios'
+
+import { store } from '@/store'
+
 import { RequestConfig } from './types'
 import { HTTP_STATUS } from './constants'
 import { TokenManager } from './tokenManager'
 import { RequestQueue } from './requestQueue'
 import { ErrorHandler } from './errorHandler'
-import { store } from '@/store'
+
 import apiConfig from '@/config/api'
 
 /**
@@ -38,7 +41,7 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
           console.log(`🚀 API Request: ${config.method?.toUpperCase()} ${config.url}`, {
             requestId,
             data: config.data,
-            params: config.params
+            params: config.params,
           })
         }
 
@@ -48,14 +51,12 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
         }
 
         const token = tokenManager.getAccessToken()
-        
         if (token) {
           // Token süresi kontrolü
           if (tokenManager.isTokenExpired()) {
             try {
               console.log('Token expired, refreshing...')
               const refreshResult = await tokenManager.refreshAccessToken(axiosInstance)
-              
               if (refreshResult) {
                 config.headers.Authorization = `Bearer ${refreshResult.token}`
                 console.log('Token refreshed successfully')
@@ -89,7 +90,7 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
     (error: AxiosError) => {
       console.error('Request interceptor error:', error)
       return Promise.reject(error)
-    }
+    },
   )
 
   // Response Interceptor
@@ -106,26 +107,27 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
           status: response.status,
           duration: `${duration}ms`,
           requestId,
-          data: response.data
+          data: response.data,
         })
       }
 
       // Performance monitoring
       if (apiConfig.enablePerformanceMonitoring && duration > 3000) {
-        console.warn(`🐌 Slow API Request: ${response.config.method?.toUpperCase()} ${response.config.url} took ${duration}ms`)
+        console.warn(
+          `🐌 Slow API Request: ${response.config.method?.toUpperCase()} ${response.config.url} took ${duration}ms`,
+        )
       }
 
       return response
     },
     async (error: AxiosError) => {
       const originalRequest = error.config as InternalAxiosRequestConfig & RequestConfig
-      
       // Error logging
       if (apiConfig.enableLogging) {
         console.error(`❌ API Error: ${originalRequest?.method?.toUpperCase()} ${originalRequest?.url}`, {
           status: error.response?.status,
           message: error.message,
-          requestId: originalRequest?.headers?.['X-Request-ID']
+          requestId: originalRequest?.headers?.['X-Request-ID'],
         })
       }
 
@@ -136,7 +138,6 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
 
       // 401 hatası ve token yenileme işlemi
       if (error.response?.status === HTTP_STATUS.UNAUTHORIZED && originalRequest && !originalRequest.skipAuth) {
-        
         // Zaten token yenileme işlemi devam ediyorsa, kuyruğa ekle
         if (requestQueue.isRefreshingToken()) {
           try {
@@ -155,16 +156,13 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
 
         try {
           const refreshResult = await tokenManager.refreshAccessToken(axiosInstance)
-          
           if (refreshResult) {
             console.log('Token refresh successful, processing queue...')
             // Başarılı token yenileme
             originalRequest.headers = originalRequest.headers || {}
             originalRequest.headers.Authorization = `Bearer ${refreshResult.token}`
-            
             // Kuyruktaki istekleri işle
             requestQueue.processQueue(null, refreshResult.token)
-            
             // Orijinal isteği tekrar dene
             return axiosInstance(originalRequest)
           } else {
@@ -187,13 +185,12 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
 
       // Genel hata işleme
       const apiError = ErrorHandler.handleError(error)
-      
       // Error reporting (production)
       if (apiConfig.enableErrorReporting) {
         ErrorHandler.reportError(apiError, {
           url: originalRequest?.url,
           method: originalRequest?.method,
-          requestId: originalRequest?.headers?.['X-Request-ID']
+          requestId: originalRequest?.headers?.['X-Request-ID'],
         })
       }
 
@@ -203,7 +200,7 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
       }
 
       return Promise.reject(apiError)
-    }
+    },
   )
 }
 
@@ -244,7 +241,9 @@ export const logResponse = (response: AxiosResponse): void => {
  */
 export const logError = (error: AxiosError): void => {
   if (apiConfig.enableLogging && process.env.NODE_ENV === 'development') {
-    console.group(`❌ ${error.response?.status || 'Network'} ${error.config?.method?.toUpperCase()} ${error.config?.url}`)
+    console.group(
+      `❌ ${error.response?.status || 'Network'} ${error.config?.method?.toUpperCase()} ${error.config?.url}`,
+    )
     console.error('Error:', error.message)
     if (error.response?.data) console.error('Response:', error.response.data)
     console.groupEnd()

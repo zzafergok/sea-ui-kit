@@ -10,14 +10,14 @@ export const createApiInstance = (baseURL?: string): AxiosInstance => {
     baseURL: baseURL || apiConfig.baseURL,
     headers: {
       'Content-Type': 'application/json',
-      'Accept': 'application/json',
-      'X-Requested-With': 'XMLHttpRequest'
+      Accept: 'application/json',
+      'X-Requested-With': 'XMLHttpRequest',
     },
     timeout: apiConfig.timeout,
     withCredentials: false,
     // Retry konfigürasyonu
-    retryAttempts: apiConfig.retryAttempts,
-    retryDelay: apiConfig.retryDelay
+    // retryAttempts: apiConfig.retryAttempts, // These are not standard Axios options
+    // retryDelay: apiConfig.retryDelay,      // Consider implementing retry logic in interceptors
   })
 
   // Interceptor'ları kur
@@ -43,13 +43,11 @@ export const createProductionApiInstance = (): AxiosInstance => {
  */
 export const createDevelopmentApiInstance = (): AxiosInstance => {
   const instance = createApiInstance('http://localhost:3000/api')
-  
   // Development için ek debug bilgileri
   instance.interceptors.request.use((config) => {
     console.log('🔧 Development API Request:', config)
     return config
   })
-  
   return instance
 }
 
@@ -60,9 +58,9 @@ export const createTestApiInstance = (): AxiosInstance => {
   const instance = axios.create({
     baseURL: 'http://localhost:3001/api',
     timeout: 5000,
-    adapter: 'fetch' // Test ortamı için
+    adapter: 'fetch', // Test ortamı için
   })
-  
+
   return instance
 }
 

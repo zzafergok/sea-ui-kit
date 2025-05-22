@@ -5,25 +5,25 @@ export const API_ENDPOINTS = {
     LOGOUT: '/auth/logout',
     REGISTER: '/auth/register',
     FORGOT_PASSWORD: '/auth/forgot-password',
-    RESET_PASSWORD: '/auth/reset-password'
+    RESET_PASSWORD: '/auth/reset-password',
   },
   USER: {
     PROFILE: '/user/profile',
     UPDATE: '/user/update',
     DELETE: '/user/delete',
-    UPLOAD_AVATAR: '/user/avatar'
+    UPLOAD_AVATAR: '/user/avatar',
   },
   POSTS: {
     LIST: '/posts',
     CREATE: '/posts',
     UPDATE: '/posts',
-    DELETE: '/posts'
+    DELETE: '/posts',
   },
   FILES: {
     UPLOAD: '/files/upload',
     DELETE: '/files',
-    DOWNLOAD: '/files/download'
-  }
+    DOWNLOAD: '/files/download',
+  },
 } as const
 
 export const HTTP_STATUS = {
@@ -40,7 +40,7 @@ export const HTTP_STATUS = {
   INTERNAL_SERVER_ERROR: 500,
   BAD_GATEWAY: 502,
   SERVICE_UNAVAILABLE: 503,
-  GATEWAY_TIMEOUT: 504
+  GATEWAY_TIMEOUT: 504,
 } as const
 
 export const ERROR_CODES = {
@@ -51,19 +51,19 @@ export const ERROR_CODES = {
   SERVER_ERROR: 'SERVER_ERROR',
   RATE_LIMIT_EXCEEDED: 'RATE_LIMIT_EXCEEDED',
   PERMISSION_DENIED: 'PERMISSION_DENIED',
-  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND'
+  RESOURCE_NOT_FOUND: 'RESOURCE_NOT_FOUND',
 } as const
 
 export const REQUEST_TIMEOUT = {
   DEFAULT: 10000,
   UPLOAD: 30000,
   DOWNLOAD: 60000,
-  LONG_RUNNING: 120000
+  LONG_RUNNING: 120000,
 } as const
 
 export const CACHE_DURATIONS = {
   SHORT: 60000, // 1 dakika
   MEDIUM: 300000, // 5 dakika
   LONG: 900000, // 15 dakika
-  VERY_LONG: 3600000 // 1 saat
-} as const
+  VERY_LONG: 3600000, // 1 saat
+}

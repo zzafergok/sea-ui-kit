@@ -14,18 +14,18 @@ export function useApi<T>() {
   const [state, setState] = useState<UseApiState<T>>({
     data: null,
     loading: false,
-    error: null
+    error: null,
   })
 
   const execute = useCallback(async (apiCall: () => Promise<ApiResponse<T>>) => {
-    setState(prev => ({ ...prev, loading: true, error: null }))
+    setState((prev) => ({ ...prev, loading: true, error: null }))
 
     try {
       const response = await apiCall()
       setState({
         data: response.data,
         loading: false,
-        error: null
+        error: null,
       })
       return response
     } catch (error) {
@@ -33,7 +33,7 @@ export function useApi<T>() {
       setState({
         data: null,
         loading: false,
-        error: apiError
+        error: apiError,
       })
       throw apiError
     }
@@ -43,14 +43,15 @@ export function useApi<T>() {
     setState({
       data: null,
       loading: false,
-      error: null
+      error: null,
     })
   }, [])
 
   return {
     ...state,
     execute,
-    reset
+    reset,
+    setState,
   }
 }
 
@@ -61,46 +62,51 @@ export function useEnhancedApi<T>() {
   const baseHook = useApi<T>()
   const [progress, setProgress] = useState(0)
 
-  const uploadWithProgress = useCallback(async (
-    uploadFn: (onProgress: (progress: number) => void) => Promise<ApiResponse<T>>
-  ) => {
-    setProgress(0)
-    return baseHook.execute(() => 
-      uploadFn((progress) => setProgress(progress))
-    )
-  }, [baseHook])
+  const uploadWithProgress = useCallback(
+    async (uploadFn: (onProgress: (progress: number) => void) => Promise<ApiResponse<T>>) => {
+      setProgress(0)
+      return baseHook.execute(() => uploadFn((progress) => setProgress(progress)))
+    },
+    [baseHook],
+  )
 
-  const getCached = useCallback(async (
-    apiCall: () => Promise<ApiResponse<T>>,
-    cacheKey: string,
-    cacheTime: number = 300000 // 5 dakika
-  ) => {
-    // Simple cache implementation
-    const cached = sessionStorage.getItem(cacheKey)
-    if (cached) {
-      const { data, timestamp } = JSON.parse(cached)
-      if (Date.now() - timestamp < cacheTime) {
-        setState(prev => ({ ...prev, data, loading: false, error: null }))
-        return { data, success: true } as ApiResponse<T>
+  const getCached = useCallback(
+    async (
+      apiCall: () => Promise<ApiResponse<T>>,
+      cacheKey: string,
+      cacheTime: number = 300000, // 5 dakika
+    ) => {
+      // Simple cache implementation
+      const cached = sessionStorage.getItem(cacheKey)
+      if (cached) {
+        const { data, timestamp } = JSON.parse(cached)
+        if (Date.now() - timestamp < cacheTime) {
+          baseHook.setState({ data, loading: false, error: null })
+          return { data, success: true } as ApiResponse<T>
+        }
       }
-    }
 
-    const result = await baseHook.execute(apiCall)
-    
-    // Cache the result
-    sessionStorage.setItem(cacheKey, JSON.stringify({
-      data: result.data,
-      timestamp: Date.now()
-    }))
+      const result = await baseHook.execute(apiCall)
 
-    return result
-  }, [baseHook])
+      // Cache the result
+      sessionStorage.setItem(
+        cacheKey,
+        JSON.stringify({
+          data: result.data,
+          timestamp: Date.now(),
+        }),
+      )
+
+      return result
+    },
+    [baseHook],
+  )
 
   return {
     ...baseHook,
     progress,
     uploadWithProgress,
-    getCached
+    getCached,
   }
 }
 
