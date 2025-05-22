@@ -1,8 +1,7 @@
-// Theme and styles
 export { seaBlueTheme } from './styles/theme'
 
-// Components
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/Tabs/Tabs'
+
 export {
   Form,
   FormItem,
@@ -12,15 +11,7 @@ export {
   useFormField,
   FormDescription,
 } from './components/Form/Form'
-export {
-  Toast,
-  ToastTitle,
-  ToastClose,
-  ToastAction,
-  ToastProvider,
-  ToastViewport,
-  ToastDescription,
-} from './components/Toast/Toast'
+
 export {
   Dialog,
   DialogTitle,
@@ -30,6 +21,7 @@ export {
   DialogContent,
   DialogDescription,
 } from './components/Dialog/Dialog'
+
 export {
   Select,
   SelectItem,

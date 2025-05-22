@@ -1,5 +1,4 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useRef } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   setUser,
@@ -9,14 +8,9 @@ import {
   selectIsAuthenticated,
   selectIsLoading,
 } from '@/store/slices/userSlice'
-import {
-  useLoginMutation,
-  useLogoutMutation,
-  useGetCurrentUserQuery,
-  useRefreshTokenMutation,
-} from '@/services/api/apiSlice'
+import { useLoginMutation, useLogoutMutation, useGetCurrentUserQuery } from '@/services/api/apiSlice'
 import { LoginFormValues } from '@/lib/validations/auth'
-import { ErrorHandler } from '@/services/api/errorHandler'
+import { useErrorHandler } from './useErrorHandler'
 
 interface AuthTokens {
   accessToken: string
@@ -41,35 +35,43 @@ interface AuthActions {
 
 /**
  * İyileştirilmiş Authentication hook
- * - Döngüsel bağımlılık riski eliminated
- * - Better error handling
- * - Type safety improved
- * - Memory leak prevention
+ * - Döngüsel bağımlılık riski önlendi
+ * - Memory leak koruması eklendi
+ * - Error handling iyileştirildi
+ * - Performance optimizasyonu yapıldı
  */
 export function useAuth(): AuthState & AuthActions {
   const dispatch = useAppDispatch()
+  const { showErrorToast, showSuccessToast, handleAuthError } = useErrorHandler()
+
+  // Refs for preventing unnecessary re-renders
+  const isUnmountedRef = useRef(false)
+  const lastAuthCheckRef = useRef(0)
 
   // Selectors
   const user = useAppSelector(selectUser)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isLoading = useAppSelector(selectIsLoading)
 
-  // API hooks
+  // API mutations
   const [loginMutation, { isLoading: isLoginLoading }] = useLoginMutation()
   const [logoutMutation, { isLoading: isLogoutLoading }] = useLogoutMutation()
-  const [refreshTokenMutation] = useRefreshTokenMutation()
 
-  // Current user query - sadece authenticated ise çalışır
+  // Current user query - memoized skip condition
+  const shouldSkipUserQuery = useMemo(() => !isAuthenticated, [isAuthenticated])
+
   const {
     data: currentUserData,
     refetch: refetchCurrentUser,
     isError: isCurrentUserError,
+    error: currentUserError,
   } = useGetCurrentUserQuery(undefined, {
-    skip: !isAuthenticated,
+    skip: shouldSkipUserQuery,
     pollingInterval: 5 * 60 * 1000, // 5 dakikada bir kontrol
+    refetchOnMountOrArgChange: true,
   })
 
-  // Token management utilities
+  // Token management utilities - memoized
   const tokenUtils = useMemo(
     () => ({
       getTokens: (): AuthTokens | null => {
@@ -108,6 +110,11 @@ export function useAuth(): AuthState & AuthActions {
           localStorage.setItem('lastActivity', Date.now().toString())
         } catch (error) {
           console.error('Token storage error:', error)
+          showErrorToast({
+            message: 'Token saklama hatası oluştu',
+            status: 500,
+            code: 'TOKEN_STORAGE_ERROR',
+          })
         }
       },
 
@@ -115,7 +122,6 @@ export function useAuth(): AuthState & AuthActions {
         if (typeof window === 'undefined') return
 
         const keysToRemove = ['accessToken', 'refreshToken', 'tokenExpiry', 'lastActivity']
-
         keysToRemove.forEach((key) => {
           try {
             localStorage.removeItem(key)
@@ -135,70 +141,90 @@ export function useAuth(): AuthState & AuthActions {
         return Date.now() > parseInt(expiry) - bufferTime
       },
     }),
-    [],
+    [showErrorToast],
   )
 
   /**
-   * Login işlemi
+   * Login işlemi - optimized
    */
   const login = useCallback(
-    async (credentials: LoginFormValues) => {
+    async (credentials: LoginFormValues): Promise<any> => {
+      if (isUnmountedRef.current) return
+
       dispatch(setLoading(true))
 
       try {
-        const result = (await loginMutation(credentials).unwrap()) as {
-          user: any
-          token: string
-          refreshToken: string
-          expiresIn?: number
-        }
+        const result = await loginMutation(credentials).unwrap()
+
+        if (isUnmountedRef.current) return result
 
         // Token'ları güvenli şekilde sakla
         tokenUtils.setTokens({
           accessToken: result.token,
           refreshToken: result.refreshToken,
-          expiresIn: result.expiresIn,
         })
 
         // User state'ini güncelle
         dispatch(setUser(result.user))
 
+        showSuccessToast('Başarıyla giriş yapıldı')
+
         return result
+      } catch (error: any) {
+        if (isUnmountedRef.current) return
+
+        console.error('Login error:', error)
+        throw error // Let the error handler in interceptor handle this
       } finally {
-        dispatch(setLoading(false))
+        if (!isUnmountedRef.current) {
+          dispatch(setLoading(false))
+        }
       }
     },
-    [loginMutation, dispatch, tokenUtils],
+    [loginMutation, dispatch, tokenUtils, showSuccessToast],
   )
 
   /**
-   * Logout işlemi
+   * Logout işlemi - improved
    */
-  const logout = useCallback(async () => {
+  const logout = useCallback(async (): Promise<void> => {
+    if (isUnmountedRef.current) return
+
     dispatch(setLoading(true))
 
     try {
       // Server'a logout isteği gönder
       await logoutMutation().unwrap()
+      showSuccessToast('Başarıyla çıkış yapıldı')
     } catch (error) {
       // Logout hatası olsa bile local cleanup yap
       console.warn('Logout request failed, continuing with local cleanup:', error)
     } finally {
-      // Her durumda local cleanup yap
-      tokenUtils.clearTokens()
-      dispatch(logoutUser())
-      dispatch(setLoading(false))
+      if (!isUnmountedRef.current) {
+        // Her durumda local cleanup yap
+        tokenUtils.clearTokens()
+        dispatch(logoutUser())
+        dispatch(setLoading(false))
+      }
     }
-  }, [logoutMutation, dispatch, tokenUtils])
+  }, [logoutMutation, dispatch, tokenUtils, showSuccessToast])
 
   /**
-   * Auth durumu kontrolü
+   * Auth durumu kontrolü - throttled
    */
   const checkAuthStatus = useCallback((): boolean => {
+    const now = Date.now()
+
+    // Throttle check to prevent excessive calls
+    if (now - lastAuthCheckRef.current < 1000) {
+      return isAuthenticated
+    }
+
+    lastAuthCheckRef.current = now
     const tokens = tokenUtils.getTokens()
 
     if (!tokens || tokenUtils.isTokenExpired()) {
-      if (isAuthenticated) {
+      if (isAuthenticated && !isUnmountedRef.current) {
         // Silent logout
         tokenUtils.clearTokens()
         dispatch(logoutUser())
@@ -212,13 +238,15 @@ export function useAuth(): AuthState & AuthActions {
   /**
    * User bilgilerini yenile
    */
-  const refreshUser = useCallback(async () => {
-    if (!isAuthenticated) {
+  const refreshUser = useCallback(async (): Promise<any> => {
+    if (!isAuthenticated || isUnmountedRef.current) {
       throw new Error('User not authenticated')
     }
 
     try {
       const userData = await refetchCurrentUser().unwrap()
+
+      if (isUnmountedRef.current) return userData
 
       if (userData?.data) {
         dispatch(setUser(userData.data))
@@ -226,48 +254,79 @@ export function useAuth(): AuthState & AuthActions {
       }
 
       throw new Error('Invalid user data received')
-    } catch (error) {
+    } catch (error: any) {
+      if (isUnmountedRef.current) return
+
       console.error('Failed to refresh user data:', error)
 
       // Eğer 401 hatası ise logout yap
-      if ((error as any)?.status === 401) {
-        await logout()
+      if (error?.status === 401) {
+        handleAuthError()
+        return
       }
 
       throw error
     }
-  }, [isAuthenticated, refetchCurrentUser, dispatch, logout])
+  }, [isAuthenticated, refetchCurrentUser, dispatch, handleAuthError])
 
   /**
    * Auth state'ini temizle
    */
   const clearAuthState = useCallback(() => {
+    if (isUnmountedRef.current) return
+
     tokenUtils.clearTokens()
     dispatch(logoutUser())
   }, [tokenUtils, dispatch])
 
   /**
-   * Session validation on mount and user error
+   * Component unmount tracking
+   */
+  useEffect(() => {
+    isUnmountedRef.current = false
+
+    return () => {
+      isUnmountedRef.current = true
+    }
+  }, [])
+
+  /**
+   * Session validation on mount
    */
   useEffect(() => {
     if (isAuthenticated && !checkAuthStatus()) {
       clearAuthState()
     }
-  }, [isAuthenticated, checkAuthStatus, clearAuthState])
+  }, []) // Run only on mount
 
   /**
    * Handle current user fetch errors
    */
   useEffect(() => {
-    if (isCurrentUserError && isAuthenticated) {
-      console.warn('Current user fetch failed, logging out')
-      logout()
-    }
-  }, [isCurrentUserError, isAuthenticated, logout])
+    if (isCurrentUserError && isAuthenticated && !isUnmountedRef.current) {
+      const error = currentUserError as any
 
-  // Session durumu hesaplama
+      if (error?.status === 401) {
+        console.warn('Current user fetch failed with 401, logging out')
+        handleAuthError()
+      } else {
+        console.warn('Current user fetch failed:', error)
+      }
+    }
+  }, [isCurrentUserError, isAuthenticated, handleAuthError, currentUserError])
+
+  /**
+   * Update user data when received from API
+   */
+  useEffect(() => {
+    if (currentUserData?.data && isAuthenticated && !isUnmountedRef.current) {
+      dispatch(setUser(currentUserData.data))
+    }
+  }, [currentUserData, isAuthenticated, dispatch])
+
+  // Session durumu hesaplama - memoized
   const hasValidSession = useMemo(() => {
-    return isAuthenticated && !!user && !!tokenUtils.getTokens()
+    return isAuthenticated && !!user && !!tokenUtils.getTokens() && !tokenUtils.isTokenExpired()
   }, [isAuthenticated, user, tokenUtils])
 
   return {

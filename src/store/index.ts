@@ -9,6 +9,7 @@ import langReducer from './slices/langSlice'
 import userReducer from './slices/userSlice'
 import themeReducer from './slices/themeSlice'
 import toastReducer from './slices/toastSlice'
+import loadingReducer from './slices/loadingSlice' // Yeni eklenen
 import { apiSlice } from '../services/api/apiSlice'
 
 // Utils
@@ -52,11 +53,14 @@ const themeTransform = createTransform(
   (inboundState: any) => inboundState,
   (outboundState: any) => {
     // Rehydrate sonrası sistem temasını kontrol et
-    const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
-    return {
-      ...outboundState,
-      systemPreference,
+    if (typeof window !== 'undefined') {
+      const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
+      return {
+        ...outboundState,
+        systemPreference,
+      }
     }
+    return outboundState
   },
   { whitelist: ['theme'] },
 )
@@ -68,8 +72,8 @@ const persistConfig = {
   key: 'sea-ui-kit',
   version: 1,
   storage,
-  whitelist: ['theme', 'lang', 'user'], // Sadece bu slice'ları persist et
-  blacklist: ['toast', 'api'], // Bu slice'ları persist etme
+  whitelist: ['theme', 'lang', 'user'], // Loading ve toast'ları persist etme
+  blacklist: ['toast', 'api', 'loading'], // Bu slice'ları persist etme
   transforms: [userTransform, themeTransform],
   migrate: (state: any) => {
     // Migration logic for version updates
@@ -92,6 +96,7 @@ const rootReducer = combineReducers({
   lang: langReducer,
   user: userReducer,
   toast: toastReducer,
+  loading: loadingReducer, // Yeni eklenen
   [apiSlice.reducerPath]: apiSlice.reducer,
 })
 
@@ -137,6 +142,58 @@ listenerMiddleware.startListening({
   },
 })
 
+// Loading state değişikliklerini dinle
+listenerMiddleware.startListening({
+  predicate: (action: AnyAction) => typeof action.type === 'string' && action.type.includes('loading/'),
+  effect: (action, listenerApi) => {
+    const state = listenerApi.getState() as RootState
+
+    // Global loading durumunda body scroll'u kontrol et
+    if (typeof document !== 'undefined') {
+      if (state.loading.globalLoading) {
+        document.body.style.overflow = 'hidden'
+      } else {
+        document.body.style.overflow = ''
+      }
+    }
+
+    // Performance monitoring
+    if (isDevelopment) {
+      const loadingItems = Object.values(state.loading.items)
+      const longRunningItems = loadingItems.filter(
+        (item: unknown) => Date.now() - (item as { startTime: number }).startTime > 5000, // 5 saniyeden uzun
+      )
+
+      if (longRunningItems.length > 0) {
+        console.warn('Long running loading items:', longRunningItems)
+      }
+    }
+  },
+})
+
+// Toast otomatik temizleme
+
+// Define a more specific type for the toast payload
+interface ToastPayload {
+  id: string
+  persistent?: boolean
+  duration?: number
+  // Add other properties if they exist, e.g., type, title, message
+}
+
+listenerMiddleware.startListening({
+  predicate: (action: AnyAction): action is AnyAction & { payload: ToastPayload } => action.type === 'toast/showToast',
+  effect: async (action, listenerApi) => {
+    const toast = action.payload as ToastPayload
+
+    // Eğer toast persistent değilse, duration sonrası otomatik kaldır
+    if (!toast.persistent && toast.duration) {
+      await listenerApi.delay(toast.duration)
+      listenerApi.dispatch({ type: 'toast/removeToast', payload: toast.id })
+    }
+  },
+})
+
 /**
  * Store configuration
  */
@@ -145,12 +202,12 @@ export const store = configureStore({
   middleware: (getDefaultMiddleware) =>
     getDefaultMiddleware({
       serializableCheck: {
-        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER, 'toast/showToast'],
-        ignoredPaths: ['toast.toasts', 'api'],
-        ignoredActionsPaths: ['payload.action.onClick', 'meta.arg'],
+        ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER, 'toast/showToast', 'loading/startLoading'],
+        ignoredPaths: ['toast.toasts', 'api', 'loading.items', 'loading.items.*.startTime'],
+        ignoredActionsPaths: ['payload.action.onClick', 'meta.arg', 'payload.startTime'],
       },
       immutableCheck: {
-        ignoredPaths: ['api'],
+        ignoredPaths: ['api', 'loading.items'],
       },
     })
       .concat(apiSlice.middleware as any)
@@ -169,6 +226,19 @@ export const store = configureStore({
         }
       }
       return action
+    },
+    stateSanitizer: (state: any) => {
+      // Loading items'da çok veri varsa kısalt
+      if (state.loading?.items && Object.keys(state.loading.items).length > 10) {
+        return {
+          ...state,
+          loading: {
+            ...state.loading,
+            items: `[${Object.keys(state.loading.items).length} items]`,
+          },
+        }
+      }
+      return state
     },
   },
 })
@@ -197,43 +267,12 @@ export const getStoreState = () => store.getState()
 export const dispatch = store.dispatch
 
 /**
- * Development utilities
+ * Performance monitoring for store
  */
 if (isDevelopment && typeof window !== 'undefined') {
-  // Global store access for debugging - sadece development ortamında
-  const devWindow = window as any
-
-  // Store instance'a güvenli erişim
-  Object.defineProperty(devWindow, '__STORE__', {
-    value: store,
-    writable: false,
-    enumerable: false,
-    configurable: true,
-  })
-
-  // Persistor instance'a güvenli erişim
-  Object.defineProperty(devWindow, '__PERSISTOR__', {
-    value: persistor,
-    writable: false,
-    enumerable: false,
-    configurable: true,
-  })
-
-  // Store snapshot utility
-  devWindow.__STORE_SNAPSHOT__ = () => {
-    const state = store.getState()
-    console.log('Store Snapshot:', JSON.stringify(state, null, 2))
-    return state
-  }
-
-  // Store reset utility
-  devWindow.__RESET_STORE__ = () => {
-    persistor.purge()
-    console.log('Store reset completed')
-  }
-
-  // Performance monitoring
   let actionCount = 0
+  const slowActions: string[] = []
+
   const originalDispatch = store.dispatch
 
   store.dispatch = ((...args: any[]) => {
@@ -244,19 +283,117 @@ if (isDevelopment && typeof window !== 'undefined') {
     const end = performance.now()
     const duration = end - start
 
-    if (duration > 5) {
-      console.warn(`[Redux Performance] Slow action detected: ${args[0]?.type} took ${duration.toFixed(2)}ms`)
+    // Slow action detection
+    if (duration > 10) {
+      const actionType = args[0]?.type || 'unknown'
+      slowActions.push(`${actionType}: ${duration.toFixed(2)}ms`)
+      console.warn(`[Redux Performance] Slow action detected: ${actionType} took ${duration.toFixed(2)}ms`)
     }
 
-    // Her 100 action'da bir özet log
-    if (actionCount % 100 === 0) {
+    // Periodic stats
+    if (actionCount % 50 === 0) {
       console.log(`[Redux Stats] ${actionCount} actions dispatched`)
+      if (slowActions.length > 0) {
+        console.warn(`[Redux Performance] Slow actions summary:`, slowActions.slice(-10))
+      }
     }
 
     return result
   }) as AppDispatch
 
+  // Global store access for debugging
+  const devWindow = window as any
+
+  Object.defineProperty(devWindow, '__STORE__', {
+    value: store,
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  })
+
+  Object.defineProperty(devWindow, '__PERSISTOR__', {
+    value: persistor,
+    writable: false,
+    enumerable: false,
+    configurable: true,
+  })
+
+  // Development utilities
+  devWindow.__STORE_UTILS__ = {
+    // Store snapshot
+    snapshot: () => {
+      const state = store.getState()
+      console.log('Store Snapshot:', JSON.stringify(state, null, 2))
+      return state
+    },
+
+    // Reset store
+    reset: () => {
+      persistor.purge()
+      console.log('Store reset completed')
+    },
+
+    // Performance stats
+    getPerformanceStats: () => ({
+      totalActions: actionCount,
+      slowActions: slowActions.slice(-20),
+      averageActionTime:
+        slowActions.length > 0
+          ? slowActions.reduce((sum, action) => {
+              const timeString = action.split(': ')[1]
+              const time = parseFloat(timeString || '0')
+              return sum + time
+            }, 0) / slowActions.length
+          : 0,
+    }),
+
+    // Loading state helpers
+    loading: {
+      getAll: () => store.getState().loading,
+      clear: () => store.dispatch({ type: 'loading/clearAllLoading' }),
+      simulate: (id: string, duration = 3000) => {
+        store.dispatch({
+          type: 'loading/startLoading',
+          payload: { id, type: 'global', message: 'Test loading...' },
+        })
+        setTimeout(() => {
+          store.dispatch({ type: 'loading/stopLoading', payload: id })
+        }, duration)
+      },
+    },
+
+    // Toast helpers
+    toast: {
+      getAll: () => store.getState().toast,
+      clear: () => store.dispatch({ type: 'toast/clearAllToasts' }),
+      test: (type = 'info') => {
+        store.dispatch({
+          type: 'toast/showToast',
+          payload: {
+            type,
+            title: `Test ${type} toast`,
+            message: 'Bu bir test bildirimidir.',
+            duration: 5000,
+          },
+        })
+      },
+    },
+
+    // Theme helpers
+    theme: {
+      toggle: () => {
+        const currentTheme = store.getState().theme.mode
+        const newTheme = currentTheme === 'dark' ? 'light' : 'dark'
+        store.dispatch({ type: 'theme/setTheme', payload: newTheme })
+      },
+      set: (theme: 'light' | 'dark' | 'system') => {
+        store.dispatch({ type: 'theme/setTheme', payload: theme })
+      },
+    },
+  }
+
   console.log('🔧 Development store utilities loaded')
+  console.log('📊 Available utilities:', Object.keys(devWindow.__STORE_UTILS__))
 }
 
 export default store
