@@ -1,0 +1,9 @@
+{
+  "name": "Sea UI Kit",
+  "short_name": "Sea UI Kit",
+  "description": "Enterprise seviyede React component kütüphanesi",
+  "start_url": "/",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#0ea5e9"
+}

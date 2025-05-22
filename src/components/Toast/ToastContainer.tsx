@@ -1,17 +1,16 @@
-import React, { useEffect, useState } from 'react'
+'use client'
+
+import React, { useEffect, useState, useCallback } from 'react'
 import { createPortal } from 'react-dom'
-import { AnimatePresence, motion } from 'framer-motion'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectToasts, removeToast } from '@/store/slices/toastSlice'
 import { cn } from '@/lib/utils'
 
-export type ToastType = 'success' | 'error' | 'warning' | 'info'
-
-export interface Toast {
+interface Toast {
   id: string
-  type: ToastType
+  type: 'success' | 'error' | 'warning' | 'info'
   title?: string
   message: string
   duration?: number
@@ -30,10 +29,11 @@ interface ToastContainerProps {
 
 /**
  * Toast Container Component
- * Global toast notification sistemi
+ * CSS animasyonları ile çalışan toast notification sistemi
  */
 export function ToastContainer({ position = 'top-right', maxToasts = 5, className }: ToastContainerProps) {
   const [mounted, setMounted] = useState(false)
+  const [removingToasts, setRemovingToasts] = useState<Set<string>>(new Set())
   const dispatch = useAppDispatch()
   const toasts = useAppSelector(selectToasts)
 
@@ -49,35 +49,6 @@ export function ToastContainer({ position = 'top-right', maxToasts = 5, classNam
     'bottom-left': 'bottom-4 left-4',
     'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
     'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2',
-  }
-
-  // Animation variants
-  const toastVariants = {
-    initial: {
-      opacity: 0,
-      x: position.includes('right') ? 100 : position.includes('left') ? -100 : 0,
-      y: position.includes('top') ? -20 : position.includes('bottom') ? 20 : 0,
-      scale: 0.95,
-    },
-    animate: {
-      opacity: 1,
-      x: 0,
-      y: 0,
-      scale: 1,
-      transition: {
-        type: 'spring',
-        stiffness: 300,
-        damping: 30,
-      },
-    },
-    exit: {
-      opacity: 0,
-      x: position.includes('right') ? 100 : position.includes('left') ? -100 : 0,
-      scale: 0.95,
-      transition: {
-        duration: 0.2,
-      },
-    },
   }
 
   // Toast icons
@@ -112,14 +83,27 @@ export function ToastContainer({ position = 'top-right', maxToasts = 5, classNam
       case 'info':
         return cn(baseStyles, 'border-l-blue-500 bg-blue-50 dark:bg-blue-900/20')
       default:
-        return cn(baseStyles, 'border-l-neutral-500 bg-neutral-50 dark:bg-neutral-900/20')
+        return cn(baseStyles, 'border-l-neutral-500 bg-neutral-50 dark:bg-neutral-800')
     }
   }
 
-  // Handle toast removal
-  const handleRemoveToast = (toastId: string) => {
-    dispatch(removeToast(toastId))
-  }
+  // Handle toast removal with animation
+  const handleRemoveToast = useCallback(
+    (toastId: string) => {
+      setRemovingToasts((prev) => new Set(prev).add(toastId))
+
+      // Wait for animation to complete before removing from store
+      setTimeout(() => {
+        dispatch(removeToast(toastId))
+        setRemovingToasts((prev) => {
+          const next = new Set(prev)
+          next.delete(toastId)
+          return next
+        })
+      }, 300) // Animation duration
+    },
+    [dispatch],
+  )
 
   // Auto-remove toasts
   useEffect(() => {
@@ -137,13 +121,12 @@ export function ToastContainer({ position = 'top-right', maxToasts = 5, classNam
     return () => {
       timers.forEach(clearTimeout)
     }
-  }, [toasts])
+  }, [toasts, handleRemoveToast])
 
   if (!mounted) {
     return null
   }
 
-  // Limit toasts
   const visibleToasts = toasts.slice(0, maxToasts)
 
   const containerContent = (
@@ -158,21 +141,32 @@ export function ToastContainer({ position = 'top-right', maxToasts = 5, classNam
       aria-label='Bildirimler'
       aria-live='polite'
     >
-      <AnimatePresence mode='popLayout'>
-        {visibleToasts.map((toast: Toast) => (
-          <motion.div
+      {visibleToasts.map((toast: Toast) => {
+        const isRemoving = removingToasts.has(toast.id)
+        const animationDirection = position.includes('right')
+          ? 'translate-x-full'
+          : position.includes('left')
+            ? '-translate-x-full'
+            : 'translate-y-full'
+
+        return (
+          <div
             key={toast.id}
-            variants={toastVariants}
-            initial='initial'
-            animate='animate'
-            exit='exit'
-            layout
             className={cn(
               'pointer-events-auto relative w-full rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 p-4',
+              'transform transition-all duration-300 ease-in-out',
               getToastStyles(toast.type),
+              isRemoving
+                ? `opacity-0 scale-95 ${animationDirection}`
+                : 'opacity-100 scale-100 translate-x-0 translate-y-0',
+              // Enter animation
+              'animate-slide-in',
             )}
             role='alert'
             aria-describedby={`toast-message-${toast.id}`}
+            style={{
+              animation: isRemoving ? undefined : 'slideIn 0.3s ease-out',
+            }}
           >
             <div className='flex items-start space-x-3'>
               {/* Icon */}
@@ -211,28 +205,68 @@ export function ToastContainer({ position = 'top-right', maxToasts = 5, classNam
             {/* Progress Bar for timed toasts */}
             {!toast.persistent && toast.duration && (
               <div className='absolute bottom-0 left-0 right-0 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-b-lg overflow-hidden'>
-                <motion.div
-                  className='h-full bg-current opacity-30'
-                  initial={{ width: '100%' }}
-                  animate={{ width: '0%' }}
-                  transition={{ duration: toast.duration / 1000, ease: 'linear' }}
+                <div
+                  className='h-full bg-current opacity-30 progress-bar'
+                  style={{
+                    animation: `shrink ${toast.duration}ms linear`,
+                  }}
                 />
               </div>
             )}
-          </motion.div>
-        ))}
-      </AnimatePresence>
+          </div>
+        )
+      })}
 
       {/* Toast limit indicator */}
       {toasts.length > maxToasts && (
-        <motion.div
-          initial={{ opacity: 0, scale: 0.9 }}
-          animate={{ opacity: 1, scale: 1 }}
-          className='pointer-events-auto text-center py-2 px-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-xs text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700'
-        >
+        <div className='pointer-events-auto text-center py-2 px-4 bg-neutral-100 dark:bg-neutral-800 rounded-lg text-xs text-neutral-600 dark:text-neutral-400 border border-neutral-200 dark:border-neutral-700 animate-fade-in'>
           +{toasts.length - maxToasts} daha fazla bildirim
-        </motion.div>
+        </div>
       )}
+
+      {/* CSS Animations */}
+      <style>{`
+        @keyframes slideIn {
+          from {
+            opacity: 0;
+            transform: ${
+              position.includes('right')
+                ? 'translateX(100%)'
+                : position.includes('left')
+                  ? 'translateX(-100%)'
+                  : 'translateY(-20px)'
+            };
+          }
+          to {
+            opacity: 1;
+            transform: translate(0);
+          }
+        }
+
+        @keyframes shrink {
+          from {
+            width: 100%;
+          }
+          to {
+            width: 0%;
+          }
+        }
+
+        @keyframes fadeIn {
+          from {
+            opacity: 0;
+            transform: scale(0.9);
+          }
+          to {
+            opacity: 1;
+            transform: scale(1);
+          }
+        }
+
+        .animate-fade-in {
+          animation: fadeIn 0.3s ease-out;
+        }
+      `}</style>
     </div>
   )
 
@@ -246,75 +280,87 @@ export function ToastContainer({ position = 'top-right', maxToasts = 5, classNam
 export function useToast() {
   const dispatch = useAppDispatch()
 
-  const showToast = (toast: {
-    type: 'success' | 'error' | 'warning' | 'info'
-    title?: string
-    message: string
-    duration?: number
-    persistent?: boolean
-    action?: {
-      label: string
-      onClick: () => void
-    }
-  }) => {
-    dispatch({
-      type: 'toast/showToast',
-      payload: {
-        ...toast,
-        duration: toast.duration ?? (toast.type === 'error' ? 7000 : 5000),
-      },
-    })
-  }
+  const showToast = useCallback(
+    (toast: {
+      type: 'success' | 'error' | 'warning' | 'info'
+      title?: string
+      message: string
+      duration?: number
+      persistent?: boolean
+      action?: {
+        label: string
+        onClick: () => void
+      }
+    }) => {
+      dispatch({
+        type: 'toast/showToast',
+        payload: {
+          ...toast,
+          duration: toast.duration ?? (toast.type === 'error' ? 7000 : 5000),
+        },
+      })
+    },
+    [dispatch],
+  )
 
-  const showSuccess = (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
-    const { title: optionsTitleValue, ...restOptions } = options || {}
-    // Determine the effective title: options.title takes precedence if 'title' property exists in options,
-    // otherwise use the title parameter.
-    const resolvedTitle = options && Object.prototype.hasOwnProperty.call(options, 'title') ? optionsTitleValue : title
+  const showSuccess = useCallback(
+    (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
+      showToast({
+        type: 'success',
+        ...(title !== undefined && { title }),
+        message,
+        ...options,
+      })
+    },
+    [showToast],
+  )
 
-    showToast({
-      type: 'success',
-      message,
-      ...restOptions, // Pass other options, excluding title from options
-      // Conditionally add the title property only if resolvedTitle is not undefined
-      ...(resolvedTitle !== undefined && { title: resolvedTitle }),
-    })
-  }
+  const showError = useCallback(
+    (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
+      showToast({
+        type: 'error',
+        title: title || 'Hata',
+        message,
+        ...options,
+      })
+    },
+    [showToast],
+  )
 
-  const showError = (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
-    showToast({
-      type: 'error',
-      title: title || 'Hata',
-      message,
-      ...options,
-    })
-  }
+  const showWarning = useCallback(
+    (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
+      showToast({
+        type: 'warning',
+        title: title || 'Uyarı',
+        message,
+        ...options,
+      })
+    },
+    [showToast],
+  )
 
-  const showWarning = (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
-    showToast({
-      type: 'warning',
-      title: title || 'Uyarı',
-      message,
-      ...options,
-    })
-  }
+  const showInfo = useCallback(
+    (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
+      showToast({
+        type: 'info',
+        title: title || 'Bilgi',
+        message,
+        ...options,
+      })
+    },
+    [showToast],
+  )
 
-  const showInfo = (message: string, title?: string, options?: Partial<Parameters<typeof showToast>[0]>) => {
-    showToast({
-      type: 'info',
-      title: title || 'Bilgi',
-      message,
-      ...options,
-    })
-  }
+  const removeToast = useCallback(
+    (id: string) => {
+      dispatch({ type: 'toast/removeToast', payload: id })
+    },
+    [dispatch],
+  )
 
-  const removeToast = (id: string) => {
-    dispatch({ type: 'toast/removeToast', payload: id })
-  }
-
-  const clearAllToasts = () => {
+  const clearAllToasts = useCallback(() => {
     dispatch({ type: 'toast/clearAllToasts' })
-  }
+  }, [dispatch])
 
   return {
     showToast,

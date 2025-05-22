@@ -258,6 +258,29 @@ export function GlobalErrorBoundary({
     }
   }, [reportError, onError])
 
+  // Development ortamında daha detaylı error logging
+  useEffect(() => {
+    if (process.env.NODE_ENV === 'development') {
+      console.log('ErrorBoundary mounted successfully')
+
+      // Console'a genel durum bilgisi
+      const logStatus = () => {
+        console.log('ErrorBoundary Status:', {
+          hasError: errorState.hasError,
+          errorCount: errorState.errorCount,
+          enableAutoRecovery,
+          recoveryTimeout,
+        })
+      }
+
+      logStatus()
+
+      return () => {
+        console.log('ErrorBoundary unmounting')
+      }
+    }
+  }, [errorState.hasError, errorState.errorCount, enableAutoRecovery, recoveryTimeout])
+
   // Start auto recovery when error occurs
   useEffect(() => {
     if (errorState.hasError && enableAutoRecovery && !autoRecoveryTimer) {

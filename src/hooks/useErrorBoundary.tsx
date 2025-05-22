@@ -1,3 +1,5 @@
+'use client'
+
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppDispatch } from '@/store'
 import { showToast } from '@/store/slices/toastSlice'

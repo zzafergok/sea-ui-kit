@@ -1,20 +1,23 @@
-/* eslint-disable @typescript-eslint/no-unused-vars */
-import React, { useCallback, useEffect, useState } from 'react'
+'use client'
+
+import React, { useEffect, useState } from 'react'
 import { createPortal } from 'react-dom'
 import { Loader2, Clock, AlertCircle } from 'lucide-react'
-import { useAppDispatch, useAppSelector } from '@/store'
+import { useAppSelector, useAppDispatch } from '@/store'
 import {
   selectGlobalLoading,
-  selectIsLoading,
   selectLoadingItems,
-  selectLoadingMessage,
-  selectLoadingProgress,
-  selectLongestRunningLoading,
-  startLoading as startLoadingAction,
-  updateLoading as updateLoadingAction,
-  stopLoading as stopLoadingAction,
+  startLoading,
+  updateLoading,
+  stopLoading,
 } from '@/store/slices/loadingSlice'
 import { cn } from '@/lib/utils'
+
+interface LoadingItemData {
+  type: 'global' | 'component' | 'page' | 'api'
+  message?: string
+  progress?: number
+}
 
 interface GlobalLoadingOverlayProps {
   className?: string
@@ -42,11 +45,7 @@ export function GlobalLoadingOverlay({
   const [isTimeout, setIsTimeout] = useState(false)
 
   const isGlobalLoading = useAppSelector(selectGlobalLoading)
-  const loadingItems = useAppSelector(selectLoadingItems) as Record<
-    string,
-    { type: string; progress?: number; message?: string }
-  >
-  const longestRunning = useAppSelector(selectLongestRunningLoading)
+  const loadingItems = useAppSelector(selectLoadingItems)
 
   // Mount kontrolü
   useEffect(() => {
@@ -77,8 +76,13 @@ export function GlobalLoadingOverlay({
   }, [isGlobalLoading, timeout, onTimeout])
 
   // Global loading items
-  const globalItems = Object.values(loadingItems).filter((item) => item.type === 'global')
-  const currentItem = globalItems[0] as { type: string; progress?: number; message?: string } | undefined // En son eklenen global loading item
+  const globalItems = Object.values(loadingItems).filter((item: unknown): item is LoadingItemData => {
+    if (item && typeof item === 'object' && 'type' in item) {
+      return (item as LoadingItemData).type === 'global'
+    }
+    return false
+  })
+  const currentItem = globalItems[0] // En son eklenen global loading item
   const hasProgress = currentItem?.progress !== undefined
   const progressValue = currentItem?.progress || 0
 
@@ -252,43 +256,75 @@ export function LoadingProgressBar({ className, height = 3 }: LoadingProgressBar
   const [mounted, setMounted] = useState(false)
   const [progress, setProgress] = useState(0)
   const isGlobalLoading = useAppSelector(selectGlobalLoading)
-  const loadingItems = useAppSelector(selectLoadingItems) as Record<
-    string,
-    { type: string; progress?: number; message?: string }
-  >
+  const loadingItems = useAppSelector(selectLoadingItems)
 
   useEffect(() => {
     setMounted(true)
-  }, [])
 
-  useEffect(() => {
-    if (!isGlobalLoading) {
-      setProgress(0)
-      return
-    }
+    let progressInterval: NodeJS.Timeout | undefined
 
-    // Simulate progress if no actual progress available
-    const globalItems = Object.values(loadingItems).filter((item) => item.type === 'global')
-    const hasRealProgress = globalItems.some((item) => item.progress !== undefined)
+    if (isGlobalLoading) {
+      // When loading starts, if progress was 100 (from a previous completion), reset it.
+      // This allows the bar to animate again if loading restarts.
+      if (progress === 100) {
+        setProgress(0)
+      }
 
-    if (hasRealProgress) {
-      const itemsWithProgress = globalItems.filter((item) => item.progress !== undefined)
-      const avgProgress =
-        itemsWithProgress.reduce((sum, item) => sum + (item.progress || 0), 0) / (itemsWithProgress.length || 1) // Avoid division by zero
-      setProgress(avgProgress)
+      // Filter for global items that have a defined progress property.
+      const globalItemsWithProgress = Object.values(loadingItems).filter(
+        (item: any): item is LoadingItemData & { type: 'global'; progress: number } =>
+          item &&
+          typeof item === 'object' &&
+          item.type === 'global' &&
+          typeof item.progress === 'number' &&
+          item.progress >= 0 &&
+          item.progress <= 100,
+      )
+
+      if (globalItemsWithProgress.length > 0) {
+        // Calculate average progress from items that have it.
+        const totalProgress = globalItemsWithProgress.reduce((sum, item) => sum + item.progress, 0)
+        const avgProgress = totalProgress / globalItemsWithProgress.length
+        setProgress(Math.max(0, Math.min(100, avgProgress))) // Clamp progress between 0 and 100.
+      } else {
+        // No items with real progress, or no global items; simulate progress.
+        // Start simulation only if progress is at 0 or already at the simulation cap,
+        // to avoid restarting an ongoing simulation unnecessarily on re-renders.
+        if (progress === 0 || progress >= 90) {
+          setProgress(20) // Initial simulated progress.
+        }
+        progressInterval = setInterval(() => {
+          setProgress((prev) => {
+            if (prev >= 90) {
+              return 90 // Cap simulated progress.
+            }
+            // Simulate a small, somewhat random increment.
+            return Math.min(90, prev + Math.floor(Math.random() * 8) + 2) // e.g., adds 2 to 9.
+          })
+        }, 600) // Interval for simulation updates.
+      }
     } else {
-      // Simulate progress
-      setProgress(20)
-      const interval = setInterval(() => {
-        setProgress((prev) => {
-          if (prev >= 90) return prev
-          return prev + Math.random() * 10
-        })
-      }, 500)
-
-      return () => clearInterval(interval)
+      // Not global loading: handle progress bar completion or reset.
+      if (progress > 0 && progress < 100) {
+        // If loading finished and progress was shown (not 0 or 100), complete it to 100%.
+        // The bar will then fade out due to opacity change based on isGlobalLoading in CSS.
+        setProgress(100)
+      } else if (progress !== 0 && progress !== 100) {
+        // If progress was stuck (e.g., at 90 from simulation) or in an unexpected state, reset to 0.
+        // This handles cases where loading stops abruptly before completion or simulation cap.
+        setProgress(0)
+      }
+      // If progress is already 0 or 100, no state change is needed here;
+      // opacity CSS will handle visibility correctly.
     }
-  }, [isGlobalLoading, loadingItems])
+
+    // Cleanup function: clear interval if it was set.
+    return () => {
+      if (progressInterval) {
+        clearInterval(progressInterval)
+      }
+    }
+  }, [isGlobalLoading, loadingItems, progress]) // `progress` is included as its value affects the logic for starting/stopping simulation and completing/resetting.
 
   if (!mounted) {
     return null
@@ -316,45 +352,52 @@ export function LoadingProgressBar({ className, height = 3 }: LoadingProgressBar
 }
 
 /**
- * useLoading Hook
- * Component seviyesinde loading state yönetimi
+ * useLoading Hook eksik import sorunu giderme
  */
+import { useCallback } from 'react'
 export function useLoading(id: string) {
   const dispatch = useAppDispatch()
-  const isLoading = useAppSelector((state) => selectIsLoading(state, id))
-  const progress = useAppSelector((state) => selectLoadingProgress(state, id))
-  const message = useAppSelector((state) => selectLoadingMessage(state, id))
+  const isLoading = useAppSelector((state) => (state.loading?.items?.[id] ? true : false))
+  const progress = useAppSelector((state) => state.loading?.items?.[id]?.progress)
+  const message = useAppSelector((state) => state.loading?.items?.[id]?.message)
 
-  const startLoading = useCallback(
-    (options: { type?: 'global' | 'component' | 'page' | 'api'; message?: string; progress?: number }) => {
+  const startLoadingAction = useCallback(
+    (
+      options: {
+        type?: 'global' | 'component' | 'page' | 'api'
+        message?: string
+        progress?: number
+      } = {},
+    ) => {
       dispatch(
-        startLoadingAction({
+        startLoading({
           id,
           type: options.type || 'component',
-          message: options.message ?? '',
-          progress: options.progress ?? 0,
+          message: options.message || '',
+          progress: options.progress ?? 0, // Provide a default value for progress
         }),
       )
     },
     [dispatch, id],
   )
 
-  const updateLoading = useCallback(
+  const updateLoadingAction = useCallback(
     (updates: { progress?: number; message?: string }) => {
-      dispatch(updateLoadingAction({ id, ...updates }))
+      dispatch(updateLoading({ id, ...updates }))
     },
     [dispatch, id],
   )
-  const stopLoading = useCallback(() => {
-    dispatch(stopLoadingAction(id))
+
+  const stopLoadingAction = useCallback(() => {
+    dispatch(stopLoading(id))
   }, [dispatch, id])
 
   return {
     isLoading,
     progress,
     message,
-    startLoading,
-    updateLoading,
-    stopLoading,
+    startLoading: startLoadingAction,
+    updateLoading: updateLoadingAction,
+    stopLoading: stopLoadingAction,
   }
 }

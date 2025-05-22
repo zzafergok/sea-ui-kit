@@ -8,6 +8,8 @@ import { I18nextProvider } from 'react-i18next'
 import { store, persistor } from '@/store'
 import { TokenManagerProvider } from '@/hooks/useTokenManager'
 import { GlobalErrorBoundary } from '@/components/ErrorBoundary/GlobalErrorBoundary'
+import { GlobalLoadingOverlay, PageLoadingOverlay, LoadingProgressBar } from '@/components/Loading/GlobalLoadingOverlay'
+import { ToastContainer } from '@/components/Toast/ToastContainer'
 import { Skeleton } from '@/components/Skeleton/Skeleton'
 import i18n from '@/locales'
 
@@ -58,14 +60,12 @@ function DevelopmentIndicator() {
  */
 function PerformanceMonitor({ children }: { children: React.ReactNode }) {
   useEffect(() => {
-    let observerInstance: PerformanceObserver | null = null
-
     if (process.env.NODE_ENV === 'development') {
       // Monitor slow components
       let renderCount = 0
       const renderTimes: number[] = []
 
-      observerInstance = new PerformanceObserver((list) => {
+      const observer = new PerformanceObserver((list) => {
         const entries = list.getEntries()
         entries.forEach((entry) => {
           if (entry.entryType === 'measure' && entry.name.includes('React')) {
@@ -86,12 +86,10 @@ function PerformanceMonitor({ children }: { children: React.ReactNode }) {
         })
       })
 
-      observerInstance.observe({ entryTypes: ['measure'] })
-    }
+      observer.observe({ entryTypes: ['measure'] })
 
-    return () => {
-      if (observerInstance) {
-        observerInstance.disconnect()
+      return () => {
+        observer.disconnect()
       }
     }
   }, [])
@@ -159,51 +157,36 @@ function ThemeInitializer({ children }: { children: React.ReactNode }) {
 }
 
 /**
- * Error fallback for providers
- */
-function ProvidersErrorFallback(error: Error, errorInfo: React.ErrorInfo, resetError: () => void) {
-  return (
-    <div className='min-h-screen flex items-center justify-center bg-red-50 dark:bg-red-900/20 p-4'>
-      <div className='text-center max-w-md'>
-        <h2 className='text-2xl font-bold text-red-600 dark:text-red-400 mb-4'>Uygulama Başlatılamadı</h2>
-        <p className='text-red-700 dark:text-red-300 mb-6'>
-          Uygulama başlatılırken bir hata oluştu. Bu genellikle tarayıcı depolama sorunlarından kaynaklanır.
-        </p>
-        <div className='space-y-2'>
-          <button
-            onClick={resetError}
-            className='w-full px-4 py-2 bg-red-600 text-white rounded-md hover:bg-red-700 transition-colors'
-          >
-            Tekrar Dene
-          </button>
-          <button
-            onClick={() => {
-              localStorage.clear()
-              sessionStorage.clear()
-              window.location.reload()
-            }}
-            className='w-full px-4 py-2 bg-neutral-600 text-white rounded-md hover:bg-neutral-700 transition-colors'
-          >
-            Önbelleği Temizle ve Yenile
-          </button>
-        </div>
-        {process.env.NODE_ENV === 'development' && (
-          <details className='mt-4 text-left'>
-            <summary className='cursor-pointer text-red-600 font-medium'>Hata Detayları</summary>
-            <pre className='mt-2 p-2 bg-red-100 dark:bg-red-900/30 rounded text-xs overflow-auto'>{error.stack}</pre>
-          </details>
-        )}
-      </div>
-    </div>
-  )
-}
-
-/**
  * Main Providers Component
+ * Artık tüm client-side komponentleri (error boundary dahil) burada sarmalanır
  */
 export function Providers({ children }: { children: React.ReactNode }) {
   return (
-    <GlobalErrorBoundary fallback={ProvidersErrorFallback}>
+    <GlobalErrorBoundary
+      enableAutoRecovery={true}
+      recoveryTimeout={10000}
+      // Error handling mantığı client-side'da
+      onError={(error, errorInfo) => {
+        // Error reporting için
+        console.error('Global Error:', error, errorInfo)
+
+        // Production'da error reporting service'e gönder
+        if (process.env.NODE_ENV === 'production') {
+          // Sentry, LogRocket vs. error reporting
+          try {
+            if (typeof window !== 'undefined' && (window as any).gtag) {
+              return (window as any).gtag('event', 'exception', {
+                description: error.message,
+                fatal: true,
+                component_stack: errorInfo.componentStack,
+              })
+            }
+          } catch (reportError) {
+            console.error('Error reporting failed:', reportError)
+          }
+        }
+      }}
+    >
       <Suspense fallback={<ProvidersLoading />}>
         <ThemeInitializer>
           <Provider store={store}>
@@ -211,7 +194,18 @@ export function Providers({ children }: { children: React.ReactNode }) {
               <TokenManagerProvider>
                 <I18nextProvider i18n={i18n}>
                   <PerformanceMonitor>
+                    {/* Loading Progress Bar */}
+                    <LoadingProgressBar />
+
                     {children}
+
+                    {/* Global Loading Overlays */}
+                    <GlobalLoadingOverlay showProgress={true} showMessage={true} showTimer={true} timeout={30000} />
+                    <PageLoadingOverlay />
+
+                    {/* Toast Notifications */}
+                    <ToastContainer />
+
                     <DevelopmentIndicator />
                   </PerformanceMonitor>
                 </I18nextProvider>
