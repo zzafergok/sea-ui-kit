@@ -4,20 +4,23 @@ import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
 import themeReducer from './slices/themeSlice'
 import langReducer from './slices/langSlice'
 import userReducer from './slices/userSlice'
+import toastReducer from './slices/toastSlice'
 import { apiSlice } from '../services/api/apiSlice'
 
 import { isDevelopment } from '../utils/environment'
 
-// Tipler için ayrı bir dosya oluşturalım
+// Tipler için import
 import type { ThemeState } from './slices/themeSlice'
 import type { LangState } from './slices/langSlice'
 import type { UserState } from './slices/userSlice'
+import type { ToastState } from './slices/toastSlice'
 
 // Store tipi tanımlaması
 export interface AppStore {
   theme: ThemeState
   lang: LangState
   user: UserState
+  toast: ToastState
   api: ReturnType<typeof apiSlice.reducer>
 }
 
@@ -26,9 +29,17 @@ export const store = configureStore({
     theme: themeReducer,
     lang: langReducer,
     user: userReducer,
+    toast: toastReducer,
     [apiSlice.reducerPath]: apiSlice.reducer,
   },
-  middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(apiSlice.middleware),
+  middleware: (getDefaultMiddleware) => 
+    getDefaultMiddleware({
+      serializableCheck: {
+        // Toast slice'ında function'lar olabilir (action.onClick)
+        ignoredActions: ['toast/showToast'],
+        ignoredPaths: ['toast.toasts'],
+      },
+    }).concat(apiSlice.middleware),
   devTools: isDevelopment,
 })
 
