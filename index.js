@@ -86,6 +86,9 @@ async function customizePackageJson(targetDir, projectName) {
       'type-check': 'tsc --noEmit',
       prettier: 'prettier --write "src/**/*.{js,ts,jsx,tsx}"',
       'prettier:check': 'prettier --check "src/**/*.{js,ts,jsx,tsx}"',
+      test: 'jest',
+      'test:watch': 'jest --watch',
+      'test:coverage': 'jest --coverage',
     }
 
     await fs.writeJson(packageJsonPath, packageJson, { spaces: 2 })
@@ -115,6 +118,13 @@ async function copyTemplateFiles(targetDir) {
       'package-lock.json',
       'yarn.lock',
       'pnpm-lock.yaml',
+      '.DS_Store',
+      'Thumbs.db',
+      '.env',
+      '.env.local',
+      '.env.development.local',
+      '.env.test.local',
+      '.env.production.local',
     ]
 
     // Template dosyalarını kopyala
@@ -127,6 +137,77 @@ async function copyTemplateFiles(targetDir) {
         return !excludeFiles.some((exclude) => relativePath.startsWith(exclude) || fileName === exclude)
       },
     })
+
+    // .gitignore dosyasını özel olarak oluştur
+    const gitignoreContent = `# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
+
+# Dependencies
+/node_modules
+/.pnp
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/versions
+
+# Testing
+/coverage
+*.lcov
+
+# Next.js
+/.next/
+/out/
+
+# Production
+/build
+/dist
+
+# Misc
+.DS_Store
+*.pem
+.vscode/
+.idea/
+
+# Debug
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.pnpm-debug.log*
+
+# Local env files
+.env
+.env*.local
+.env.development.local
+.env.test.local
+.env.production.local
+
+# Vercel
+.vercel
+
+# TypeScript
+*.tsbuildinfo
+next-env.d.ts
+
+# Turbo
+.turbo
+
+# Package lock files
+package-lock.json
+yarn.lock
+pnpm-lock.yaml
+
+# OS generated files
+.DS_Store
+.DS_Store?
+._*
+.Spotlight-V100
+.Trashes
+ehthumbs.db
+Thumbs.db
+`
+
+    await fs.writeFile(path.join(targetDir, '.gitignore'), gitignoreContent)
 
     return true
   } catch (error) {
@@ -287,7 +368,7 @@ async function createProject(projectDir, options = {}) {
 program
   .name('sea-ui-kit-stark')
   .description('🌊 Sea UI Kit ile modern Next.js projesi oluşturun')
-  .version('0.1.40')
+  .version('0.1.44')
   .argument('[project-directory]', 'Projenin oluşturulacağı dizin adı')
   .option('--skip-git', 'Git repository initialize etme')
   .option('--verbose', 'Detaylı çıktı göster')

@@ -3,10 +3,18 @@ import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
+  swcMinify: true,
 
-  // Performance optimizations
+  // CSS optimizasyonları
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
+    optimizeCss: true,
+  },
+
+  // Statik dosya optimizasyonları
+  images: {
+    formats: ['image/webp', 'image/avif'],
+    minimumCacheTTL: 31536000,
   },
 
   // Headers for security and favicon
@@ -44,13 +52,26 @@ const nextConfig = {
             key: 'X-XSS-Protection',
             value: '1; mode=block',
           },
+          {
+            key: 'Permissions-Policy',
+            value: 'camera=(), microphone=(), geolocation=()',
+          },
+        ],
+      },
+      {
+        source: '/api/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'no-store, max-age=0',
+          },
         ],
       },
     ]
   },
 
-  // Webpack configuration for bundle analyzer
-  webpack: (config, { isServer }) => {
+  // Webpack configuration for bundle analyzer and CSS optimization
+  webpack: (config, { isServer, dev }) => {
     // Bundle analyzer - sadece analiz modunda
     if (process.env.ANALYZE === 'true') {
       config.plugins.push(
@@ -62,12 +83,45 @@ const nextConfig = {
       )
     }
 
+    // CSS optimizasyonları
+    if (!dev && !isServer) {
+      config.optimization.splitChunks.cacheGroups = {
+        ...config.optimization.splitChunks.cacheGroups,
+        styles: {
+          name: 'styles',
+          test: /\.(css|scss|sass)$/,
+          chunks: 'all',
+          enforce: true,
+        },
+      }
+    }
+
     return config
   },
 
   // Environment variables
   env: {
     CUSTOM_BUILD_ID: process.env.BUILD_ID || 'development',
+  },
+
+  // Redirect yapılandırması
+  async redirects() {
+    return []
+  },
+
+  // Rewrites yapılandırması
+  async rewrites() {
+    return []
+  },
+
+  // TypeScript strict mode
+  typescript: {
+    ignoreBuildErrors: false,
+  },
+
+  // ESLint yapılandırması
+  eslint: {
+    ignoreDuringBuilds: false,
   },
 }
 
