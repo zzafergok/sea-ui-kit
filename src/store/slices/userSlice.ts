@@ -1,5 +1,4 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
-import { RootState } from '../index'
 
 export interface User {
   id: string
@@ -9,7 +8,6 @@ export interface User {
   role: string
 }
 
-// UserState tipini export edin
 export interface UserState {
   user: User | null
   isAuthenticated: boolean
@@ -46,13 +44,12 @@ export const userSlice = createSlice({
   },
 })
 
-// Actions
 export const { setUser, logoutUser, setLoading, setError } = userSlice.actions
 
-// Selectors
-export const selectUser = (state: RootState) => state.user.user
-export const selectIsAuthenticated = (state: RootState) => state.user.isAuthenticated
-export const selectIsLoading = (state: RootState) => state.user.isLoading
-export const selectError = (state: RootState) => state.user.error
+// Selectors with proper typing
+export const selectUser = (state: { user: UserState }) => state.user.user
+export const selectIsAuthenticated = (state: { user: UserState }) => state.user.isAuthenticated
+export const selectIsLoading = (state: { user: UserState }) => state.user.isLoading
+export const selectError = (state: { user: UserState }) => state.user.error
 
 export default userSlice.reducer

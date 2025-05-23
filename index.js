@@ -112,8 +112,6 @@ async function copyTemplateFiles(targetDir) {
       '.next',
       'dist',
       'coverage',
-      '.env.local',
-      '.env',
       'package-lock.json',
       'yarn.lock',
       'pnpm-lock.yaml',

@@ -5,7 +5,8 @@
     "allowJs": true,
     "skipLibCheck": true,
     "strict": true,
-    "noEmit": true,
+    "noEmit": false,
+    "declaration": true,
     "outDir": "dist/esm",
     "esModuleInterop": true,
     "module": "esnext",
@@ -13,7 +14,6 @@
     "resolveJsonModule": true,
     "isolatedModules": true,
     "jsx": "react-jsx",
-    "incremental": true,
     "forceConsistentCasingInFileNames": true,
     "plugins": [{ "name": "next" }],
     "baseUrl": ".",
@@ -25,5 +25,5 @@
     "allowSyntheticDefaultImports": true
   },
   "include": ["next-env.d.ts", "**/*.ts", "**/*.tsx", ".next/types/**/*.ts"],
-  "exclude": ["node_modules", "dist"]
+  "exclude": ["node_modules", "dist", ".next"]
 }

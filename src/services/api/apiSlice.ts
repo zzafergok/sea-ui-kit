@@ -1,15 +1,26 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
 import { axiosBaseQuery } from './axiosBaseQuery'
 import { API_ENDPOINTS } from './constants'
-import { LoginFormValues } from '@/lib/validations/auth'
 
-// API slice tipini export et
-export interface ApiSliceState {
-  queries: Record<string, any>
-  mutations: Record<string, any>
-  provided: Record<string, any>
-  subscriptions: Record<string, any>
-  config: Record<string, any>
+// Tip tanımlarını basitleştiriyoruz
+export interface LoginCredentials {
+  email: string
+  password: string
+  rememberMe?: boolean
+}
+
+export interface ApiUser {
+  id: string
+  username: string
+  email: string
+  name: string
+  role: string
+}
+
+export interface AuthResponse {
+  user: ApiUser
+  token: string
+  refreshToken: string
 }
 
 export const apiSlice = createApi({
@@ -20,12 +31,12 @@ export const apiSlice = createApi({
   tagTypes: ['User', 'Posts', 'Settings', 'Auth', 'Files'],
   endpoints: (builder) => ({
     // Authentication endpoints
-    login: builder.mutation<{ user: any; token: string; refreshToken: string }, LoginFormValues>({
+    login: builder.mutation<AuthResponse, LoginCredentials>({
       query: (credentials) => ({
         url: API_ENDPOINTS.AUTH.LOGIN,
         method: 'POST',
         data: credentials,
-        skipAuth: true, // Login işlemi için auth gerekmiyor
+        skipAuth: true,
       }),
       invalidatesTags: ['Auth', 'User'],
     }),
@@ -34,12 +45,12 @@ export const apiSlice = createApi({
       { token: string; refreshToken: string; expiresIn: number },
       { refreshToken: string }
     >({
-      query: ({ refreshToken }) => ({
+      query: ({ refreshToken }: { refreshToken: string }) => ({
         url: API_ENDPOINTS.AUTH.REFRESH,
         method: 'POST',
         data: { refreshToken },
         skipAuth: true,
-        skipErrorHandling: true, // Kendi error handling'ini yapacak
+        skipErrorHandling: true,
       }),
     }),
 
@@ -52,8 +63,13 @@ export const apiSlice = createApi({
     }),
 
     register: builder.mutation<
-      { user: any; token: string; refreshToken: string },
-      { name: string; email: string; password: string; confirmPassword: string }
+      AuthResponse,
+      {
+        name: string
+        email: string
+        password: string
+        confirmPassword: string
+      }
     >({
       query: (userData) => ({
         url: API_ENDPOINTS.AUTH.REGISTER,
@@ -65,7 +81,7 @@ export const apiSlice = createApi({
     }),
 
     // User endpoints
-    getCurrentUser: builder.query<any, void>({
+    getCurrentUser: builder.query<ApiUser, void>({
       query: () => ({
         url: API_ENDPOINTS.USER.PROFILE,
         method: 'GET',
@@ -73,12 +89,12 @@ export const apiSlice = createApi({
       providesTags: ['User'],
     }),
 
-    updateUserProfile: builder.mutation<any, Partial<any>>({
+    updateUserProfile: builder.mutation<ApiUser, Partial<ApiUser>>({
       query: (userData) => ({
         url: API_ENDPOINTS.USER.UPDATE,
         method: 'PUT',
         data: userData,
-        showErrorToast: true, // Hata durumunda toast göster
+        showErrorToast: true,
       }),
       invalidatesTags: ['User'],
     }),
@@ -91,7 +107,7 @@ export const apiSlice = createApi({
       invalidatesTags: ['User', 'Auth'],
     }),
 
-    // Posts endpoints
+    // Posts endpoints - ApiExampleComponent için ekliyoruz
     getPosts: builder.query<any[], { page?: number; limit?: number; search?: string }>({
       query: ({ page = 1, limit = 10, search }) => ({
         url: API_ENDPOINTS.POSTS.LIST,
@@ -150,14 +166,13 @@ export const apiSlice = createApi({
       query: () => ({
         url: '/info',
         method: 'GET',
-
         skipAuth: true,
       }),
     }),
   }),
 })
 
-// Export hooks for components
+// Export hooks - ApiExampleComponent için gerekli olan hook'ları da ekliyoruz
 export const {
   // Auth hooks
   useLoginMutation,
@@ -170,7 +185,7 @@ export const {
   useUpdateUserProfileMutation,
   useDeleteUserMutation,
 
-  // Posts hooks
+  // Posts hooks - ApiExampleComponent için
   useGetPostsQuery,
   useGetPostQuery,
   useCreatePostMutation,
@@ -182,8 +197,8 @@ export const {
   useGetApiInfoQuery,
 
   // Advanced hooks
-  useLazyGetPostsQuery,
   useLazyGetCurrentUserQuery,
+  useLazyGetPostsQuery,
   usePrefetch,
 } = apiSlice
 

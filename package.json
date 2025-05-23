@@ -1,11 +1,10 @@
 {
   "name": "sea-ui-kit-stark",
-  "version": "0.1.41",
+  "version": "0.1.42",
   "type": "module",
   "description": "Create a Next.js project with Sea UI Kit",
-  "main": "dist/cjs/index.js",
-  "module": "./dist/esm/index.js",
-  "types": "./dist/esm/index.d.ts",
+  "main": "dist/index.cjs",
+  "module": "./dist/index.js",
   "sideEffects": false,
   "license": "MIT",
   "files": [
@@ -27,9 +26,10 @@
   },
   "author": "Zafer Gök (zzafergok)",
   "scripts": {
-    "build": "tsup",
+    "build": "npm run clean && tsup --config tsup.config.ts",
     "build:esm": "tsc",
     "build:cjs": "tsc --project tsconfig.cjs.json",
+    "clean": "rm -rf dist",
     "dev": "next dev",
     "dev:lib": "tsup --watch",
     "start": "next start",

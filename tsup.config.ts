@@ -3,12 +3,15 @@ import { defineConfig } from 'tsup'
 export default defineConfig({
   entry: ['src/index.ts'],
   format: ['cjs', 'esm'],
-  dts: true,
+  dts: false, // DTS build'i tamamen kapatıyoruz
   splitting: false,
   sourcemap: true,
   clean: true,
   treeshake: true,
-  watch: true,
+  watch: false,
+  minify: false,
+  target: 'es2022',
+  skipNodeModulesBundle: true,
   onSuccess: "echo 'Build completed successfully!'",
   external: [
     'react',
@@ -18,6 +21,7 @@ export default defineConfig({
     'tailwindcss',
     '@reduxjs/toolkit',
     'react-redux',
+    'redux-persist',
     'axios',
     'i18next',
     'react-i18next',
@@ -29,10 +33,9 @@ export default defineConfig({
     'lucide-react',
   ],
   esbuildOptions(options) {
-    // Node.js API'lerini browserda kullanabilmek için polyfill ekleyelim
     options.define = {
       ...options.define,
-      'process.env.NODE_ENV': JSON.stringify('development'),
+      'process.env.NODE_ENV': JSON.stringify('production'),
     }
 
     options.banner = {
