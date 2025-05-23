@@ -1,7 +1,7 @@
+/* eslint-disable @typescript-eslint/no-require-imports */
 import { configureStore, combineReducers } from '@reduxjs/toolkit'
-import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
-import storage from 'redux-persist/lib/storage'
 import { TypedUseSelectorHook, useDispatch, useSelector } from 'react-redux'
+import { persistStore, persistReducer, FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER } from 'redux-persist'
 
 // Reducers
 import langReducer from './slices/langSlice'
@@ -11,6 +11,24 @@ import toastReducer from './slices/toastSlice'
 import loadingReducer from './slices/loadingSlice'
 
 import { apiSlice } from '../services/api/apiSlice'
+
+// SSR için koşullu import
+const createNoopStorage = () => {
+  return {
+    getItem() {
+      return Promise.resolve(null)
+    },
+    setItem(_key: any, value: any) {
+      return Promise.resolve(value)
+    },
+    removeItem() {
+      return Promise.resolve()
+    },
+  }
+}
+
+// SSR ile uyumlu storage objesi
+const storage = typeof window !== 'undefined' ? require('redux-persist/lib/storage').default : createNoopStorage()
 
 const persistConfig = {
   key: 'sea-ui-kit',

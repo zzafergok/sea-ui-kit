@@ -1,7 +1,5 @@
-import type { Metadata } from 'next'
-
+import type { Metadata, Viewport } from 'next'
 import React from 'react'
-
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -16,16 +14,6 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/site.webmanifest',
-  themeColor: [
-    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
-    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
-  ],
-  viewport: {
-    width: 'device-width',
-    initialScale: 1.0,
-    maximumScale: 5.0,
-    minimumScale: 1.0,
-  },
   robots: {
     index: true,
     follow: true,
@@ -37,6 +25,18 @@ export const metadata: Metadata = {
       'max-snippet': -1,
     },
   },
+}
+
+// Viewport ayarlarını ayrı bir export olarak tanımlayın
+export const viewport: Viewport = {
+  themeColor: [
+    { media: '(prefers-color-scheme: light)', color: '#ffffff' },
+    { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
+  ],
+  width: 'device-width',
+  initialScale: 1.0,
+  maximumScale: 5.0,
+  minimumScale: 1.0,
 }
 
 export default function RootLayout({ children }: { children: React.ReactNode }) {
