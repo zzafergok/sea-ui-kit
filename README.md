@@ -1,264 +1,471 @@
-# 🌊 Sea UI Kit - Project Structure
+# 🌊 Sea UI Kit - Enterprise React Component Library
 
-## Introduction
+## Giriş
 
-Sea UI Kit is a comprehensive component library built on Radix UI primitives with a beautiful sea blue theme. It provides a complete system of components, hooks, utilities, and styling for building modern React and Next.js applications.
+Sea UI Kit, Radix UI primitifleri üzerine inşa edilmiş kapsamlı bir React component kütüphanesidir. Modern Next.js ve React uygulamaları için deniz mavisi temasıyla tasarlanmış, enterprise seviyede bir tasarım sistemi sunar.
 
-## Installation and Usage
+## Hızlı Başlangıç
 
-To create a new project with Sea UI Kit:
-
-bash
+### Yeni Proje Oluşturma
 
 ```bash
-npx sea-ui-kit-stark
+npx sea-ui-kit-stark my-app
+cd my-app
+npm install
+npm run dev
+
 ```
 
-This will guide you through setting up a new project with all the Sea UI Kit components and configurations.
+Bu komut, Sea UI Kit ile tam olarak yapılandırılmış yeni bir Next.js projesi oluşturur.
 
-## Key Features
+### Mevcut Projeye Kurulum
 
-- 🎨 **Sea Blue Theme**: Custom color palette with shades of sea blue
-- 🌙 **Dark Mode Support**: Built-in light/dark theming system
-- 🌐 **Internationalization**: Supports English and Turkish languages
-- 📝 **Form Integration**: React Hook Form + Zod validation
-- 🔄 **State Management**: Redux Toolkit setup with common slices
-- 🔌 **API Integration**: Axios with interceptors for authentication
-- 📱 **Responsive Design**: Components work across all screen sizes
-- 🧩 **TypeScript**: Full type safety and autocompletion
+```bash
+npm install sea-ui-kit-stark
 
-## Project Structure
+```
+
+## Ana Özellikler
+
+### 🎨 Tasarım Sistemi
+
+- **Deniz Mavisi Teması**: Özel renk paleti ile tutarlı görsel kimlik
+- **Karanlık Mod Desteği**: Otomatik sistem tercihi algılama
+- **Responsive Tasarım**: Tüm ekran boyutlarında mükemmel görünüm
+- **CSS Variables**: Kolay tema özelleştirmesi
+
+### 🌐 Uluslararasılaştırma
+
+- **Çoklu Dil Desteği**: İngilizce ve Türkçe hazır çeviriler
+- **React i18next Entegrasyonu**: Dinamik dil değiştirme
+- **RTL Desteği**: Sağdan sola yazılan diller için hazır altyapı
+
+### 📝 Form Yönetimi
+
+- **React Hook Form Entegrasyonu**: Performanslı form yönetimi
+- **Zod Validation**: TypeScript-first şema doğrulama
+- **Özelleştirilmiş Hook'lar**: `useForm`, `useFormValidation`
+- **Otomatik Hata Çevirileri**: Çoklu dil hata mesajları
+
+### 🔄 State Management
+
+- **Redux Toolkit**: Modern state yönetimi
+- **Redux Persist**: Otomatik state kalıcılığı
+- **RTK Query**: API state yönetimi
+- **Özel Slice'lar**: Theme, dil, kullanıcı, toast, loading
+
+### 🔐 Güvenlik ve Authentication
+
+- **JWT Token Yönetimi**: Otomatik token yenileme
+- **Güvenli Local Storage**: Şifrelenmiş veri saklama
+- **CSRF Koruması**: Cross-site request forgery koruması
+- **XSS Koruması**: Cross-site scripting koruması
+- **Rate Limiting**: API çağrı sınırlaması
+
+### 📊 Performans ve Monitoring
+
+- **Error Boundary**: Kapsamlı hata yönetimi
+- **Performance Monitoring**: Render performance takibi
+- **Loading States**: Global ve component seviyesi loading
+- **Virtualization**: Büyük liste performansı
+
+## Proje Yapısı
 
 ```
 sea-ui-kit/
 ├── src/
-│   ├── components/          # UI Components
-│   │   ├── Alert/
-│   │   ├── Avatar/
-│   │   ├── Badge/
-│   │   ├── Button/
-│   │   ├── Card/
-│   │   ├── Checkbox/
-│   │   ├── Dialog/
-│   │   ├── Dropdown/
-│   │   ├── Form/
-│   │   ├── Input/
-│   │   ├── LanguageToggle/
-│   │   ├── Select/
-│   │   ├── Switch/
-│   │   ├── Tabs/
-│   │   ├── Textarea/
-│   │   ├── ThemeToggle/
-│   │   ├── Toast/
-│   │   └── auth/            # Authentication components
+│   ├── app/                     # Next.js App Router
+│   │   ├── (auth)/             # Korumalı sayfalar
+│   │   │   ├── dashboard/
+│   │   │   ├── profile/
+│   │   │   ├── settings/
+│   │   │   └── users/
+│   │   ├── (public)/           # Genel erişim sayfalar
+│   │   │   ├── about/
+│   │   │   ├── contact/
+│   │   │   └── pricing/
+│   │   ├── auth/               # Authentication sayfaları
+│   │   │   ├── login/
+│   │   │   ├── register/
+│   │   │   └── forgot-password/
+│   │   ├── globals.css         # Global stiller
+│   │   ├── layout.tsx          # Root layout
+│   │   ├── page.tsx            # Ana sayfa
+│   │   ├── not-found.tsx       # 404 sayfası
+│   │   └── client-root.tsx     # Client provider wrapper
 │   │
-│   ├── hooks/               # Custom React hooks
-│   │   ├── useForm.ts       # Form handling with Zod
-│   │   └── useTheme.ts      # Theme management
+│   ├── components/             # UI Komponenleri
+│   │   ├── auth/              # Authentication bileşenleri
+│   │   │   └── LoginForm.tsx
+│   │   ├── Button/            # Button bileşeni
+│   │   ├── Checkbox/          # Checkbox bileşeni
+│   │   ├── DataTable/         # Veri tablosu bileşeni
+│   │   ├── Dialog/            # Modal dialog bileşeni
+│   │   ├── ErrorBoundary/     # Hata yakalama bileşeni
+│   │   ├── Form/              # Form bileşenleri
+│   │   ├── FormBuilder/       # Dinamik form oluşturucu
+│   │   ├── Input/             # Input bileşeni
+│   │   ├── LanguageToggle/    # Dil değiştirici
+│   │   ├── Loading/           # Loading bileşenleri
+│   │   ├── Select/            # Select dropdown bileşeni
+│   │   ├── Skeleton/          # Loading skeleton bileşeni
+│   │   ├── Switch/            # Toggle switch bileşeni
+│   │   ├── Tabs/              # Tab navigation bileşeni
+│   │   ├── Textarea/          # Textarea bileşeni
+│   │   ├── ThemeToggle/       # Tema değiştirici
+│   │   └── Toast/             # Bildirim bileşeni
 │   │
-│   ├── lib/                 # Utility functions
-│   │   ├── utils.ts         # General utilities
-│   │   └── validations/     # Zod validation schemas
+│   ├── hooks/                 # Özel React Hook'ları
+│   │   ├── useAuth.ts         # Authentication hook
+│   │   ├── useComponent.ts    # Component lifecycle hook
+│   │   ├── useErrorBoundary.tsx # Error handling hook
+│   │   ├── useErrorHandler.ts # API error handling hook
+│   │   ├── useForm.ts         # Form management hook
+│   │   ├── useFormValidation.ts # Form validation hook
+│   │   ├── useOptimizedRender.ts # Performance hook
+│   │   ├── usePerformance.ts  # Performance monitoring hook
+│   │   ├── useSecurityValidation.ts # Security validation hook
+│   │   ├── useTheme.ts        # Theme management hook
+│   │   └── useTokenManager.tsx # Token management hook
 │   │
-│   ├── locales/             # i18n translations
-│   │   ├── en/              # English translations
-│   │   └── tr/              # Turkish translations
+│   ├── lib/                   # Utility kütüphaneleri
+│   │   ├── utils.ts           # Genel utility fonksiyonları
+│   │   └── validations/       # Zod validation şemaları
+│   │       └── auth.ts
 │   │
-│   ├── store/               # Redux store setup
-│   │   ├── index.ts         # Store configuration
-│   │   ├── slices/          # Redux slices
-│   │   │   ├── themeSlice.ts
-│   │   │   ├── langSlice.ts
-│   │   │   └── userSlice.ts
-│   │   └── api/             # API integration
-│   │       ├── apiSlice.ts
-│   │       ├── axiosBaseQuery.ts
-│   │       └── axiosInterceptors.ts
+│   ├── locales/               # Çoklu dil dosyaları
+│   │   ├── en/               # İngilizce çeviriler
+│   │   │   └── translation.json
+│   │   ├── tr/               # Türkçe çeviriler
+│   │   │   └── translation.json
+│   │   └── index.ts          # i18n konfigürasyonu
 │   │
-│   ├── styles/              # Theme and global styles
-│   │   └── theme.ts         # Theme configuration
+│   ├── providers/            # React Context Provider'ları
+│   │   └── Providers.tsx     # Ana provider wrapper
 │   │
-│   └── index.ts             # Main entry point
+│   ├── services/             # API servisleri
+│   │   └── api/              # API katmanı
+│   │       ├── apiService.ts # Ana API servis sınıfı
+│   │       ├── apiSlice.ts   # RTK Query API slice
+│   │       ├── axiosBaseQuery.ts # Axios RTK Query entegrasyonu
+│   │       ├── axiosInstance.ts # Axios instance konfigürasyonu
+│   │       ├── axiosInterceptors.ts # Request/Response interceptor'ları
+│   │       ├── constants.ts  # API sabitleri
+│   │       ├── errorHandler.ts # API hata yönetimi
+│   │       ├── requestQueue.ts # Token yenileme queue sistemi
+│   │       ├── tokenManager.ts # JWT token yönetimi
+│   │       └── types.ts      # API tip tanımları
+│   │
+│   ├── store/                # Redux store
+│   │   ├── index.ts          # Store konfigürasyonu
+│   │   ├── middleware/       # Custom middleware'ler
+│   │   │   └── errorMiddleware.ts
+│   │   ├── slices/           # Redux slice'ları
+│   │   │   ├── langSlice.ts  # Dil state yönetimi
+│   │   │   ├── loadingSlice.ts # Loading state yönetimi
+│   │   │   ├── themeSlice.ts # Tema state yönetimi
+│   │   │   ├── toastSlice.ts # Toast bildirim yönetimi
+│   │   │   └── userSlice.ts  # Kullanıcı state yönetimi
+│   │   └── types.ts          # Store tip tanımları
+│   │
+│   ├── styles/               # Stil dosyaları
+│   │   └── theme.ts          # Tema konfigürasyonu
+│   │
+│   ├── types/                # TypeScript tip tanımları
+│   │   ├── index.ts          # Genel tip tanımları
+│   │   └── react.d.ts        # React tip genişletmeleri
+│   │
+│   ├── utils/                # Utility fonksiyonları
+│   │   └── security.ts       # Güvenlik utility'leri
+│   │
+│   ├── middleware.ts         # Next.js middleware
+│   └── index.ts              # Ana export dosyası
 │
-│   └── nextjs-app/          # Next.js integration
+├── public/                   # Statik dosyalar
+│   ├── favicon.svg
+│   ├── site.webmanifest
+│   └── robots.txt
 │
-├── package.json             # Package configuration
-├── tsconfig.json            # TypeScript configuration
-├── tsup.config.ts           # Build configuration
-├── README.md                # Documentation
-└── .npmrc                   # NPM configuration
+├── .env.local               # Environment variables
+├── .eslintrc.cjs           # ESLint konfigürasyonu
+├── .gitignore              # Git ignore dosyası
+├── .npmignore              # NPM ignore dosyası
+├── .prettierrc.json        # Prettier konfigürasyonu
+├── index.js                # CLI entry point
+├── next.config.mjs         # Next.js konfigürasyonu
+├── package.json            # Paket konfigürasyonu
+├── postcss.config.mjs      # PostCSS konfigürasyonu
+├── tailwind.config.mjs     # Tailwind CSS konfigürasyonu
+├── tsconfig.json           # TypeScript konfigürasyonu
+├── tsconfig.cjs.json       # CommonJS TypeScript konfigürasyonu
+└── tsup.config.ts          # Build konfigürasyonu
+
 ```
 
-## Component Categories
+## Komponent Kategorileri
 
-### Input Components
+### Temel Input Bileşenleri
 
-- Button
-- Checkbox
-- Input
-- Textarea
-- Select
-- Switch
+- **Button**: Çeşitli varyant ve boyutlarda buton bileşeni
+- **Input**: Gelişmiş validasyon destekli input alanı
+- **Textarea**: Çok satırlı metin girişi
+- **Checkbox**: Onay kutusu bileşeni
+- **Switch**: Toggle switch bileşeni
+- **Select**: Dropdown seçim bileşeni
 
-### Layout Components
+### Layout Bileşenleri
 
-- Card
-- Dialog
-- Tabs
+- **Dialog**: Modal dialog penceresi
+- **Tabs**: Sekmeli navigation bileşeni
+- **DataTable**: Gelişmiş veri tablosu (sıralama, filtreleme, sayfalama)
 
-### Feedback Components
+### Form Bileşenleri
 
-- Alert
-- Toast
-- Badge
+- **Form**: React Hook Form entegrasyonlu form wrapper
+- **FormField**: Otomatik validasyon ile form alanı
+- **FormBuilder**: Dinamik form oluşturucu
+- **FormItem**, **FormLabel**, **FormMessage**: Form yardımcı bileşenleri
 
-### Navigation Components
+### Geri Bildirim Bileşenleri
 
-- Dropdown
-- ThemeToggle
-- LanguageToggle
+- **Toast**: Bildirim sistemi
+- **LoadingSpinner**: Yükleme animasyonları
+- **Skeleton**: İçerik yükleme placeholder'ları
+- **ErrorBoundary**: Hata yakalama ve gösterimi
 
-### Data Display Components
+### Navigation Bileşenleri
 
-- Avatar
+- **ThemeToggle**: Açık/koyu tema değiştirici
+- **LanguageToggle**: Dil değiştirici
 
-### Form Components
+### Özel Bileşenler
 
-- Form
-- FormField
-- FormItem
-- FormLabel
-- FormDescription
-- FormMessage
+- **LoginForm**: Hazır giriş formu
+- **GlobalErrorBoundary**: Global hata yönetimi
+- **ToastContainer**: Toast bildirim container'ı
 
-## Key Implementation Details
+## Gelişmiş Özellikler
 
-### Theme System
+### Theme Sistemi
 
-The theme is built around CSS variables with a sea blue color palette as the primary color. It supports both light and dark modes and includes:
+Sea UI Kit, CSS değişkenleri tabanlı güçlü bir tema sistemi sunar:
 
-- Primary colors (sea blue)
-- Accent colors (teal)
-- Neutral colors
-- Semantic colors (success, warning, error, info)
-- Border radius, shadows, and transitions
-
-### Form Handling
-
-Forms are implemented using React Hook Form with Zod validation:
-
-- Custom `useForm` hook that combines React Hook Form with Zod
-- Form components for consistent layout and styling
-- Validation schemas for common forms (login, register, etc.)
-- Internationalized error messages
-
-### State Management
-
-Redux Toolkit is used for state management:
-
-- Theme state (light, dark, system)
-- Language state (en, tr)
-- User authentication state
-- API integration with Redux Toolkit Query
-
-### Internationalization
-
-i18next is used for internationalization:
-
-- English and Turkish translations
-- Translation keys for all UI text
-- Language detection and switching
-- Right-to-left support
-
-### API Integration
-
-Axios is used for API integration:
-
-- Base query setup for Redux Toolkit Query
-- Interceptors for authentication
-- Token refresh handling
-- Global error handling
-
-## Usage Example
-
-tsx
-
-```tsx
-import { ThemeProvider, Button, Input, Form, FormField, FormItem, FormLabel, FormMessage, useForm } from 'sea-ui-kit'
-import { z } from 'zod'
-
-// Define a schema for form validation
-const loginSchema = z.object({
-  email: z.string().email(),
-  password: z.string().min(8),
-})
-
-function LoginPage() {
-  // Use the form hook with schema validation
-  const form = useForm(loginSchema, {
-    defaultValues: {
-      email: '',
-      password: '',
-    },
-  })
-
-  const onSubmit = (data) => {
-    console.log(data)
-  }
-
-  return (
-    <Form form={form} onSubmit={onSubmit} className='space-y-6'>
-      <FormField
-        control={form.control}
-        name='email'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Email</FormLabel>
-            <Input type='email' {...field} />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <FormField
-        control={form.control}
-        name='password'
-        render={({ field }) => (
-          <FormItem>
-            <FormLabel>Password</FormLabel>
-            <Input type='password' {...field} />
-            <FormMessage />
-          </FormItem>
-        )}
-      />
-
-      <Button type='submit'>Login</Button>
-    </Form>
-  )
+```css
+:root {
+  --primary-500: hsl(200, 80%, 50%); /* Ana deniz mavisi */
+  --accent-500: hsl(180, 80%, 50%); /* Teal vurgu rengi */
+  --neutral-500: hsl(200, 10%, 50%); /* Nötr renkler */
 }
 ```
 
-## Creating a New Project
+### Form Sistemi
 
-You can quickly scaffold a new project with Sea UI Kit using our CLI:
+React Hook Form ve Zod entegrasyonlu gelişmiş form sistemi:
 
-bash
+```tsx
+import { useForm } from '@/hooks/useForm'
+import { loginSchema } from '@/lib/validations/auth'
 
-```bash
-npx sea-ui-kit-stark my-app
+const form = useForm(loginSchema, {
+  defaultValues: {
+    email: '',
+    password: '',
+  },
+})
 ```
 
-This command creates a new directory with a fully configured Next.js application using Sea UI Kit components, theming, and all essential configurations.
+### API Entegrasyonu
 
-## Publishing to NPM
+Axios tabanlı gelişmiş API katmanı:
 
-The library is configured for publishing to NPM:
+```tsx
+import { apiService } from '@/services/api/apiService'
 
-- Package information in `package.json`
-- Build configuration with `tsup`
-- GitHub Actions workflow for automatic publishing
-- TypeScript configuration for type declarations
+// Otomatik token yönetimi ile API çağrısı
+const data = await apiService.get('/users')
+```
 
-## Conclusion
+### State Management
 
-Sea UI Kit provides a comprehensive solution for building React and Next.js applications with a beautiful sea blue theme. It includes everything you need to create a consistent, accessible, and visually appealing user interface.
+Redux Toolkit ile merkezi state yönetimi:
+
+```tsx
+import { useAppSelector, useAppDispatch } from '@/store'
+import { setTheme } from '@/store/slices/themeSlice'
+
+const theme = useAppSelector((state) => state.theme.mode)
+const dispatch = useAppDispatch()
+```
+
+## Güvenlik Özellikleri
+
+### Veri Koruması
+
+- **Şifrelenmiş Local Storage**: Hassas verilerin güvenli saklanması
+- **XSS Koruması**: Otomatik input sanitizasyonu
+- **CSRF Token'ları**: Cross-site request forgery koruması
+
+### Authentication
+
+- **JWT Token Yönetimi**: Otomatik token yenileme
+- **Güvenli Şifre Politikaları**: Karmaşık şifre gereksinimleri
+- **Rate Limiting**: API çağrı sınırlaması
+
+### Input Validation
+
+- **Client-side Validation**: Zod ile tip güvenli validasyon
+- **Server-side Validation**: API seviyesinde doğrulama
+- **Sanitization**: Otomatik input temizleme
+
+## Performans Optimizasyonları
+
+### Component Optimizasyonu
+
+- **React.memo**: Gereksiz re-render'ları önleme
+- **useCallback/useMemo**: Expensive hesaplamaları cache'leme
+- **Code Splitting**: Lazy loading ile bundle boyutu optimizasyonu
+
+### Data Management
+
+- **Virtualization**: Büyük listelerde performans
+- **Pagination**: Veri sayfalama sistemi
+- **Caching**: RTK Query ile otomatik cache yönetimi
+
+### Bundle Optimizasyonu
+
+- **Tree Shaking**: Kullanılmayan kodların elenmesi
+- **Dynamic Imports**: İhtiyaç duyulduğunda yükleme
+- **Asset Optimization**: Resim ve font optimizasyonu
+
+## Testing Stratejisi
+
+### Unit Testing
+
+```bash
+npm run test           # Jest ile unit testler
+npm run test:watch     # Watch modunda testler
+npm run test:coverage  # Coverage raporu
+
+```
+
+### Component Testing
+
+- **React Testing Library**: Component davranış testleri
+- **Jest**: JavaScript unit testleri
+- **MSW**: API mock'lama
+
+### E2E Testing
+
+- **Cypress**: End-to-end test senaryoları
+- **Playwright**: Cross-browser testing
+
+## Deployment ve DevOps
+
+### Build Process
+
+```bash
+npm run build          # Production build
+npm run start          # Production server
+npm run analyze        # Bundle analizi
+
+```
+
+### Environment Management
+
+- **Development**: Hot reload, debug tools
+- **Staging**: Production benzeri test ortamı
+- **Production**: Optimized build, monitoring
+
+### CI/CD Pipeline
+
+- **GitHub Actions**: Otomatik test ve deployment
+- **ESLint/Prettier**: Code quality kontrolleri
+- **TypeScript**: Tip kontrolü
+
+## Browser Support
+
+### Desteklenen Tarayıcılar
+
+- **Chrome**: 90+
+- **Firefox**: 88+
+- **Safari**: 14+
+- **Edge**: 90+
+
+### Progressive Enhancement
+
+- **Modern Features**: ES2022+ syntax kullanımı
+- **Polyfills**: Eski tarayıcılar için fallback'ler
+- **Graceful Degradation**: Özellik eksikliğinde geri dönüş
+
+## Katkıda Bulunma
+
+### Development Setup
+
+```bash
+git clone https://github.com/zzafergok/sea-ui-kit.git
+cd sea-ui-kit
+npm install
+npm run dev
+
+```
+
+### Code Standards
+
+- **TypeScript**: Tip güvenli kod yazımı
+- **ESLint**: Code quality kuralları
+- **Prettier**: Kod formatlama
+- **Conventional Commits**: Standardize commit mesajları
+
+### Pull Request Process
+
+1.  Feature branch oluşturma
+2.  Testlerin yazılması
+3.  Code review süreci
+4.  Documentation güncelleme
+
+## Lisans ve Destek
+
+### Lisans
+
+MIT License - Ticari ve açık kaynak projelerde kullanım serbesttir.
+
+### Topluluk Desteği
+
+- **GitHub Issues**: Bug raporları ve feature istekleri
+- **Discussions**: Topluluk tartışmaları
+- **Documentation**: Kapsamlı dokümantasyon
+
+### Enterprise Destek
+
+- **Özel Eğitimler**: Ekip eğitimleri
+- **Konsültasyon**: Mimari danışmanlığı
+- **SLA**: Guaranteed response time
+
+## Roadmap
+
+### v1.0 (Mevcut)
+
+- ✅ Temel component kütüphanesi
+- ✅ Theme sistemi
+- ✅ Form yönetimi
+- ✅ Authentication
+
+### v1.1 (Yakında)
+
+- 🔄 Advanced DataTable özellikleri
+- 🔄 Chart bileşenleri
+- 🔄 File upload bileşeni
+- 🔄 Gelişmiş animation sistemi
+
+### v1.2 (Planlanan)
+
+- 📋 Dashboard template'leri
+- 📋 E-commerce bileşenleri
+- 📋 Real-time özellikler
+- 📋 Mobile-first optimizasyonlar
+
+## Sonuç
+
+Sea UI Kit, modern React uygulamaları için kapsamlı, güvenli ve performanslı bir çözüm sunar. Enterprise seviyede projeler için gerekli tüm araçları ve bileşenleri barındırır. Sürekli geliştirme ve topluluk desteği ile evrim geçirmeye devam etmektedir.
+
+Daha fazla bilgi için [GitHub repository](https://github.com/zzafergok/sea-ui-kit) adresini ziyaret edebilir veya [dokümantasyonu](https://sea-ui-kit.vercel.app/) inceleyebilirsiniz.
