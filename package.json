@@ -1,6 +1,6 @@
 {
   "name": "sea-ui-kit-stark",
-  "version": "0.1.48",
+  "version": "0.1.49",
   "type": "module",
   "description": "Create a Next.js project with Sea UI Kit",
   "main": "dist/index.cjs",
@@ -14,9 +14,16 @@
     "public",
     "next.config.mjs",
     "tailwind.config.mjs",
+    "postcss.config.mjs",
     "tsconfig.json",
+    "tsconfig.cjs.json",
+    ".eslintrc.cjs",
+    ".prettierrc.json",
+    "jest.config.mjs",
+    "jest.setup.mjs",
+    ".env.local",
     "package-template.json"
-  ],
+  ]
   "bin": {
     "sea-ui-kit-stark": "./index.js",
     "create-sea-ui-kit": "./index.js"

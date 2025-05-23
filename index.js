@@ -107,9 +107,9 @@ async function copyTemplateFiles(targetDir) {
   const templateDir = path.join(__dirname)
 
   try {
-    // Kopyalanmayacak dosyalar
+    // Kopyalanmayacak dosyalar - sadece runtime ve build dosyaları
     const excludeFiles = [
-      'index.js',
+      'index.js', // CLI dosyası
       'node_modules',
       '.git',
       '.next',
@@ -120,11 +120,8 @@ async function copyTemplateFiles(targetDir) {
       'pnpm-lock.yaml',
       '.DS_Store',
       'Thumbs.db',
-      '.env',
-      '.env.local',
-      '.env.development.local',
-      '.env.test.local',
-      '.env.production.local',
+      // .env dosyalarını exclude listesinden kaldırdık
+      // Konfigürasyon dosyalarını da kaldırdık
     ]
 
     // Template dosyalarını kopyala
@@ -138,7 +135,7 @@ async function copyTemplateFiles(targetDir) {
       },
     })
 
-    // .gitignore dosyasını özel olarak oluştur
+    // .gitignore dosyasını özel olarak oluştur (çünkü npm publish sırasında .gitignore dosyası ignore edilebilir)
     const gitignoreContent = `# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
 
 # Dependencies

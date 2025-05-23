@@ -1,0 +1,18 @@
+# Test files
+src/**/*.test.*
+src/**/*.spec.*
+src/**/__tests__
+
+# Development files
+.next
+node_modules
+coverage
+*.log
+
+# Don't ignore config files
+!postcss.config.mjs
+!.eslintrc.cjs
+!.prettierrc.json
+!jest.config.mjs
+!jest.setup.mjs
+!.env.local
