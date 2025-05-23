@@ -5,21 +5,81 @@ const nextConfig = {
   reactStrictMode: false,
   swcMinify: true,
 
-  // CSS optimizasyonları
+  // CSS ve Tailwind optimizasyonları
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
     optimizeCss: true,
+    turbo: {
+      rules: {
+        '*.css': {
+          loaders: ['postcss-loader'],
+          as: '*.css',
+        },
+      },
+    },
   },
 
-  // Statik dosya optimizasyonları
-  images: {
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 31536000,
+  // Webpack CSS yapılandırması
+  webpack: (config, { isServer, dev }) => {
+    // Bundle analyzer
+    if (process.env.ANALYZE === 'true') {
+      config.plugins.push(
+        new BundleAnalyzerPlugin({
+          analyzerMode: 'server',
+          analyzerPort: isServer ? 8888 : 8889,
+          openAnalyzer: true,
+        }),
+      )
+    }
+
+    // CSS handling improvements
+    if (!isServer) {
+      config.resolve.fallback = {
+        ...config.resolve.fallback,
+        fs: false,
+      }
+    }
+
+    // Ensure CSS is processed correctly
+    config.module.rules.forEach((rule) => {
+      if (rule.oneOf) {
+        rule.oneOf.forEach((oneOfRule) => {
+          if (oneOfRule.test && oneOfRule.test.toString().includes('css')) {
+            oneOfRule.use?.forEach((useItem) => {
+              if (typeof useItem === 'object' && useItem.loader && useItem.loader.includes('postcss-loader')) {
+                useItem.options = {
+                  ...useItem.options,
+                  postcssOptions: {
+                    plugins: [
+                      'postcss-import',
+                      ['tailwindcss/nesting', 'postcss-nesting'],
+                      'tailwindcss',
+                      'autoprefixer',
+                    ],
+                  },
+                }
+              }
+            })
+          }
+        })
+      }
+    })
+
+    return config
   },
 
-  // Headers for security and favicon
+  // Headers
   async headers() {
     return [
+      {
+        source: '/_next/static/css/(.*)',
+        headers: [
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/favicon.ico',
         headers: [
@@ -33,95 +93,12 @@ const nextConfig = {
           },
         ],
       },
-      {
-        source: '/(.*)',
-        headers: [
-          {
-            key: 'X-Frame-Options',
-            value: 'DENY',
-          },
-          {
-            key: 'X-Content-Type-Options',
-            value: 'nosniff',
-          },
-          {
-            key: 'Referrer-Policy',
-            value: 'strict-origin-when-cross-origin',
-          },
-          {
-            key: 'X-XSS-Protection',
-            value: '1; mode=block',
-          },
-          {
-            key: 'Permissions-Policy',
-            value: 'camera=(), microphone=(), geolocation=()',
-          },
-        ],
-      },
-      {
-        source: '/api/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'no-store, max-age=0',
-          },
-        ],
-      },
     ]
-  },
-
-  // Webpack configuration for bundle analyzer and CSS optimization
-  webpack: (config, { isServer, dev }) => {
-    // Bundle analyzer - sadece analiz modunda
-    if (process.env.ANALYZE === 'true') {
-      config.plugins.push(
-        new BundleAnalyzerPlugin({
-          analyzerMode: 'server',
-          analyzerPort: isServer ? 8888 : 8889,
-          openAnalyzer: true,
-        }),
-      )
-    }
-
-    // CSS optimizasyonları
-    if (!dev && !isServer) {
-      config.optimization.splitChunks.cacheGroups = {
-        ...config.optimization.splitChunks.cacheGroups,
-        styles: {
-          name: 'styles',
-          test: /\.(css|scss|sass)$/,
-          chunks: 'all',
-          enforce: true,
-        },
-      }
-    }
-
-    return config
   },
 
   // Environment variables
   env: {
     CUSTOM_BUILD_ID: process.env.BUILD_ID || 'development',
-  },
-
-  // Redirect yapılandırması
-  async redirects() {
-    return []
-  },
-
-  // Rewrites yapılandırması
-  async rewrites() {
-    return []
-  },
-
-  // TypeScript strict mode
-  typescript: {
-    ignoreBuildErrors: false,
-  },
-
-  // ESLint yapılandırması
-  eslint: {
-    ignoreDuringBuilds: false,
   },
 }
 
