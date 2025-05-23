@@ -1,32 +1,28 @@
-import path from 'path'
-import { fileURLToPath } from 'url'
-
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = path.dirname(__filename)
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
-  swcMinify: true,
 
   // Performance optimizations
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
   },
 
-  // Compression
-  compress: true,
-
-  // Image optimization
-  images: {
-    domains: ['localhost'],
-    formats: ['image/webp', 'image/avif'],
-    minimumCacheTTL: 60,
-  },
-
-  // Headers for security
+  // Headers for security and favicon
   async headers() {
     return [
+      {
+        source: '/favicon.ico',
+        headers: [
+          {
+            key: 'Content-Type',
+            value: 'image/x-icon',
+          },
+          {
+            key: 'Cache-Control',
+            value: 'public, max-age=31536000, immutable',
+          },
+        ],
+      },
       {
         source: '/(.*)',
         headers: [
@@ -51,11 +47,11 @@ const nextConfig = {
     ]
   },
 
-  // Webpack configuration
-  webpack: async (config, { isServer }) => {
+  // Webpack configuration - sync version
+  webpack: (config, { isServer }) => {
     // Bundle analyzer - sadece analiz modunda
     if (process.env.ANALYZE === 'true') {
-      const { BundleAnalyzerPlugin } = await import('webpack-bundle-analyzer')
+      const { BundleAnalyzerPlugin } = eval('require')('webpack-bundle-analyzer')
       config.plugins.push(
         new BundleAnalyzerPlugin({
           analyzerMode: 'server',
@@ -63,12 +59,6 @@ const nextConfig = {
           openAnalyzer: true,
         }),
       )
-    }
-
-    // Resolve alias
-    config.resolve.alias = {
-      ...config.resolve.alias,
-      '@': path.resolve(__dirname, './src'),
     }
 
     return config
