@@ -9,6 +9,8 @@ import userReducer from './slices/userSlice'
 import themeReducer from './slices/themeSlice'
 import toastReducer from './slices/toastSlice'
 import loadingReducer from './slices/loadingSlice'
+import enhancedUserReducer from './slices/enhancedUserSlice'
+
 import { apiSlice } from '../services/api/apiSlice'
 
 const persistConfig = {
@@ -23,6 +25,7 @@ const rootReducer = combineReducers({
   theme: themeReducer,
   lang: langReducer,
   user: userReducer,
+  enhancedUser: enhancedUserReducer,
   toast: toastReducer,
   loading: loadingReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
