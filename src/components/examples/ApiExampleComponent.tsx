@@ -121,18 +121,22 @@ export function ApiExampleComponent() {
         <h2 className='text-xl font-semibold mb-4'>Custom Hook Kullanımı</h2>
         <div className='space-y-4'>
           <p className='text-neutral-600 dark:text-neutral-400'>
-            useApi hook'u kullanarak state management ile API çağrısı
+            useApi hook&apos;u kullanarak state management ile API çağrısı
           </p>
 
           <Button onClick={handleCustomHookCall} disabled={userApi.loading}>
             {userApi.loading ? 'Yükleniyor...' : 'User Profile Getir'}
           </Button>
 
-          {userApi.error && <div className='text-red-500'>Hata: {userApi.error.message}</div>}
-
-          {userApi.data && (
-            <div className='bg-neutral-100 dark:bg-neutral-700 rounded p-4'>
-              <pre className='text-sm overflow-auto'>{JSON.stringify(userApi.data, null, 2)}</pre>
+          {userApi.error && (
+            <div className='text-red-500'>
+              Hata:{' '}
+              {typeof userApi.error === 'object' &&
+              userApi.error !== null &&
+              'message' in userApi.error &&
+              typeof (userApi.error as { message: unknown }).message === 'string'
+                ? (userApi.error as { message: string }).message
+                : String(userApi.error)}
             </div>
           )}
         </div>

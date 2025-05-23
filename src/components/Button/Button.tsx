@@ -42,7 +42,7 @@ export interface ButtonProps
   fullWidth?: boolean
   children: React.ReactNode
   size?: 'sm' | 'md' | 'lg' | 'icon'
-  variant?: 'default' | 'secondary' | 'outline' | 'ghost'
+  variant?: 'default' | 'secondary' | 'outline' | 'ghost' | 'destructive'
 }
 
 const Button = memo(

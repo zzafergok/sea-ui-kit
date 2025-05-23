@@ -32,7 +32,7 @@ export default defineConfig({
     // Node.js API'lerini browserda kullanabilmek için polyfill ekleyelim
     options.define = {
       ...options.define,
-      'process.env.NODE_ENV': JSON.stringify(process.env.NODE_ENV || 'development'),
+      'process.env.NODE_ENV': JSON.stringify('development'),
     }
 
     options.banner = {

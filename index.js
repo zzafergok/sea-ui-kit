@@ -5,6 +5,8 @@ import path from 'path'
 import degit from 'degit'
 import { program } from 'commander'
 
+console.log('✅ Sea UI CLI çalıştırıldı')
+
 // Chalk'ı dinamik import ile yükle
 let chalk
 try {

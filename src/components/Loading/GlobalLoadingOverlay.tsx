@@ -283,7 +283,10 @@ export function LoadingProgressBar({ className, height = 3 }: LoadingProgressBar
 
       if (globalItemsWithProgress.length > 0) {
         // Calculate average progress from items that have it.
-        const totalProgress = globalItemsWithProgress.reduce((sum, item) => sum + item.progress, 0)
+        const totalProgress = globalItemsWithProgress.reduce(
+          (sum, item) => (item.progress ? sum + item.progress : sum),
+          0,
+        )
         const avgProgress = totalProgress / globalItemsWithProgress.length
         setProgress(Math.max(0, Math.min(100, avgProgress))) // Clamp progress between 0 and 100.
       } else {
