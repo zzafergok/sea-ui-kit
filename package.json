@@ -23,7 +23,7 @@
     "jest.setup.mjs",
     ".env.local",
     "package-template.json"
-  ]
+  ],
   "bin": {
     "sea-ui-kit-stark": "./index.js",
     "create-sea-ui-kit": "./index.js"
