@@ -1,3 +1,5 @@
+'use client'
+
 import { useCallback, useRef } from 'react'
 import { AxiosError } from 'axios'
 import { useAppDispatch } from '@/store'
@@ -23,7 +25,7 @@ export function useErrorHandler() {
 
     errorCountRef.current++
     if (errorCountRef.current > MAX_ERRORS_PER_MINUTE) {
-      console.warn('Too many API errors, some errors may be suppressed')
+      console.warn('Too many API errors detected')
       return {
         message: 'Çok fazla hata oluştu, lütfen sayfayı yenileyin',
         status: 429,
@@ -39,16 +41,14 @@ export function useErrorHandler() {
 
   const createApiError = useCallback((status: number, responseData: any, originalError: AxiosError): ApiError => {
     const userMessage = getUserFriendlyMessage(status, responseData)
-    const developerMessage = getDeveloperMessage(originalError)
 
     if (process.env.NODE_ENV === 'development') {
       console.error('API Error Details:', {
         status,
         userMessage,
-        developerMessage,
         url: originalError.config?.url,
         method: originalError.config?.method,
-        stack: originalError.stack,
+        responseData,
       })
     }
 
@@ -89,10 +89,6 @@ export function useErrorHandler() {
     }
   }, [])
 
-  const getDeveloperMessage = useCallback((error: AxiosError): string => {
-    return `${error.message} - ${error.config?.method?.toUpperCase()} ${error.config?.url}`
-  }, [])
-
   const getErrorCode = useCallback((status: number): string => {
     switch (status) {
       case HTTP_STATUS.BAD_REQUEST:
@@ -123,7 +119,7 @@ export function useErrorHandler() {
           }),
         )
       } catch (toastError) {
-        console.error('error.message: ', error.message, 'Toast error:', toastError)
+        console.error('Toast error:', toastError)
       }
     },
     [dispatch],
@@ -141,27 +137,33 @@ export function useErrorHandler() {
           }),
         )
       } catch (toastError) {
-        console.log('error:', toastError)
+        console.error('Toast error:', toastError)
       }
     },
     [dispatch],
   )
 
   const handleAuthError = useCallback((): void => {
-    tokenManager.removeTokens()
-    dispatch(logoutUser())
+    try {
+      tokenManager.removeTokens()
+      dispatch(logoutUser())
 
-    showErrorToast({
-      message: 'Oturumunuz sonlandırıldı, lütfen tekrar giriş yapın',
-      status: 401,
-      code: ERROR_CODES.TOKEN_EXPIRED,
-    })
+      showErrorToast({
+        message: 'Oturumunuz sonlandırıldı, lütfen tekrar giriş yapın',
+        status: 401,
+        code: ERROR_CODES.TOKEN_EXPIRED,
+      })
 
-    if (typeof window !== 'undefined') {
-      const currentPath = window.location.pathname
-      if (currentPath !== '/login' && currentPath !== '/register') {
-        window.location.href = '/login'
+      if (typeof window !== 'undefined') {
+        const currentPath = window.location.pathname
+        if (currentPath !== '/login' && currentPath !== '/register') {
+          setTimeout(() => {
+            window.location.href = '/login'
+          }, 2000)
+        }
       }
+    } catch (error) {
+      console.error('Auth error handling failed:', error)
     }
   }, [tokenManager, dispatch, showErrorToast])
 
@@ -201,41 +203,20 @@ export function useErrorHandler() {
     [showErrorToast],
   )
 
-  const handleApiError = useCallback(
-    (error: ApiError): void => {
-      switch (error.code) {
-        case ERROR_CODES.TOKEN_EXPIRED:
-        case ERROR_CODES.INVALID_TOKEN:
-          handleAuthError()
-          break
-        case ERROR_CODES.RATE_LIMIT_EXCEEDED:
-          handleRateLimitError()
-          break
-        case ERROR_CODES.NETWORK_ERROR:
-          handleNetworkError()
-          break
-        case ERROR_CODES.VALIDATION_ERROR:
-          handleValidationError(error.details)
-          break
-        default:
-          showErrorToast(error)
-      }
-    },
-    [handleAuthError, handleRateLimitError, handleNetworkError, handleValidationError, showErrorToast],
-  )
-
   const reportError = useCallback((error: ApiError, context?: any): void => {
     if (process.env.NODE_ENV === 'production') {
-      if (typeof window !== 'undefined' && (window as any).gtag) {
-        return (window as any).gtag('event', 'api_error', {
-          error_code: error.code,
-          error_message: error.message,
-          error_status: error.status,
-          context: JSON.stringify(context),
-        })
+      try {
+        if (typeof window !== 'undefined' && (window as any).gtag) {
+          return (window as any).gtag('event', 'api_error', {
+            error_code: error.code,
+            error_message: error.message,
+            error_status: error.status,
+            context: JSON.stringify(context),
+          })
+        }
+      } catch (reportingError) {
+        console.error('Error reporting failed:', reportingError)
       }
-
-      console.error(`API Error [${error.code}]:`, error.message)
     }
   }, [])
 
@@ -251,12 +232,11 @@ export function useErrorHandler() {
     handleError,
     showErrorToast,
     showSuccessToast,
-    handleApiError,
-    reportError,
-    isRetryableError,
     handleAuthError,
     handleRateLimitError,
     handleNetworkError,
     handleValidationError,
+    reportError,
+    isRetryableError,
   }
 }

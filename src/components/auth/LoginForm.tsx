@@ -2,13 +2,11 @@
 
 import React, { useEffect, useState } from 'react'
 import { useTranslation } from 'react-i18next'
-
 import { Input } from '../Input/Input'
 import { Button } from '../Button/Button'
 import { useForm } from '@/hooks/useForm'
 import { Checkbox } from '../Checkbox/Checkbox'
 import { Form, FormItem, FormField, FormLabel, FormMessage } from '../Form/Form'
-
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth'
 import { useAuth } from '@/hooks/useAuth'
 
@@ -21,15 +19,10 @@ interface LoginFormProps {
 export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/dashboard' }: LoginFormProps) {
   const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
-  const { login, isLoginLoading } = useAuth()
+  const { login, isLoading: isLoginLoading, isAuthenticated, user } = useAuth()
 
-  // Hydration mismatch'i önlemek için
   useEffect(() => {
-    const timer = setTimeout(() => {
-      setMounted(true)
-    }, 100)
-
-    return () => clearTimeout(timer)
+    setMounted(true)
   }, [])
 
   const form = useForm(loginSchema, {
@@ -40,7 +33,19 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
     },
   })
 
-  // Form mount olana kadar loading göster
+  // Login success handling
+  useEffect(() => {
+    if (isAuthenticated && user && mounted) {
+      console.log('User successfully logged in:', user)
+      if (redirectOnSuccess && typeof window !== 'undefined') {
+        // Redirect after successful login
+        setTimeout(() => {
+          window.location.href = redirectOnSuccess
+        }, 1000)
+      }
+    }
+  }, [isAuthenticated, user, mounted, redirectOnSuccess])
+
   if (!mounted) {
     return (
       <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
@@ -60,23 +65,34 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
     )
   }
 
+  // Show success message if already logged in
+  if (isAuthenticated && user) {
+    return (
+      <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
+        <div className='w-full max-w-md p-6 bg-white dark:bg-neutral-800 rounded-lg shadow-md text-center'>
+          <div className='mb-4'>
+            <div className='w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4'>
+              <svg className='w-8 h-8 text-green-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
+                <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
+              </svg>
+            </div>
+            <h2 className='text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2'>Hoş Geldiniz!</h2>
+            <p className='text-neutral-600 dark:text-neutral-400 mb-4'>{user.name} olarak giriş yaptınız.</p>
+            <Button onClick={() => (window.location.href = redirectOnSuccess)} className='w-full'>
+              Devam Et
+            </Button>
+          </div>
+        </div>
+      </div>
+    )
+  }
+
   const handleFormSubmit = async (data: LoginFormValues) => {
     try {
-      // useAuth hook'unu kullan
       await login(data)
-      
-      // Custom onSubmit varsa çağır
-      if (onSubmit) {
-        onSubmit(data)
-      }
-
-      // Başarılı login sonrası yönlendirme
-      if (typeof window !== 'undefined' && redirectOnSuccess) {
-        window.location.href = redirectOnSuccess
-      }
+      onSubmit?.(data)
     } catch (error) {
       console.error('Login failed:', error)
-      // Hata zaten interceptor tarafından handle edildi
     }
   }
 
@@ -114,12 +130,7 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>{t('auth.password')}</FormLabel>
-                <Input 
-                  type='password' 
-                  disabled={isFormLoading} 
-                  autoComplete='current-password' 
-                  {...field} 
-                />
+                <Input type='password' disabled={isFormLoading} autoComplete='current-password' {...field} />
                 <FormMessage />
               </FormItem>
             )}
@@ -152,12 +163,7 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
             </Button>
           </div>
 
-          <Button 
-            type='submit' 
-            fullWidth 
-            disabled={isFormLoading || !form.formState.isValid} 
-            className='mt-6'
-          >
+          <Button type='submit' fullWidth disabled={isFormLoading || !form.formState.isValid} className='mt-6'>
             {isFormLoading ? t('components.button.loadingText') : t('auth.login')}
           </Button>
         </Form>
@@ -165,7 +171,10 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
         <div className='mt-6 text-center'>
           <p className='text-sm text-neutral-600 dark:text-neutral-400'>
             Hesabınız yok mu?{' '}
-            <Button variant='link' className='p-0 h-auto font-normal text-sm'>
+            <Button
+              variant='ghost'
+              className='p-0 h-auto font-normal text-sm text-primary-700 dark:text-primary-500 hover:underline'
+            >
               Kayıt olun
             </Button>
           </p>
