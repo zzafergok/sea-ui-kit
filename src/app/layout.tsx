@@ -1,5 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import React from 'react'
+import { ClientRootProvider } from './client-root'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -16,39 +17,6 @@ export const metadata: Metadata = {
   },
   manifest: '/site.webmanifest',
   metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
-  openGraph: {
-    title: 'Sea UI Kit',
-    description: 'Enterprise seviyede React component kütüphanesi',
-    url: '/',
-    siteName: 'Sea UI Kit',
-    // images: [
-    //   {
-    //     url: '/og-image.png',
-    //     width: 1200,
-    //     height: 630,
-    //     alt: 'Sea UI Kit',
-    //   },
-    // ],
-    locale: 'tr_TR',
-    type: 'website',
-  },
-  twitter: {
-    card: 'summary_large_image',
-    title: 'Sea UI Kit',
-    description: 'Enterprise seviyede React component kütüphanesi',
-    // images: ['/og-image.png'],
-  },
-  robots: {
-    index: true,
-    follow: true,
-    googleBot: {
-      index: true,
-      follow: true,
-      'max-video-preview': -1,
-      'max-image-preview': 'large',
-      'max-snippet': -1,
-    },
-  },
 }
 
 export const viewport: Viewport = {
@@ -69,11 +37,27 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
       <head>
         <meta name='msapplication-TileColor' content='#0ea5e9' />
         <meta name='msapplication-config' content='/browserconfig.xml' />
-        <link rel='preconnect' href='https://fonts.googleapis.com' />
-        <link rel='preconnect' href='https://fonts.gstatic.com' crossOrigin='' />
+        <script
+          dangerouslySetInnerHTML={{
+            __html: `
+              (function() {
+                try {
+                  var savedTheme = localStorage.getItem('theme');
+                  var systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+                  var effectiveTheme = savedTheme === 'system' ? systemPreference : (savedTheme || systemPreference);
+                  
+                  document.documentElement.classList.add(effectiveTheme);
+                  document.documentElement.style.overflow = 'hidden auto';
+                } catch (e) {
+                  console.warn('Theme initialization failed:', e);
+                }
+              })();
+            `,
+          }}
+        />
       </head>
-      <body suppressHydrationWarning className='min-h-screen bg-background text-foreground antialiased'>
-        {children}
+      <body suppressHydrationWarning className='w-full overflow-x-hidden bg-background text-foreground'>
+        <ClientRootProvider>{children}</ClientRootProvider>
       </body>
     </html>
   )

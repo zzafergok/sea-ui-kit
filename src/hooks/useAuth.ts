@@ -1,6 +1,6 @@
 'use client'
 
-import { useCallback } from 'react'
+import { useCallback, useEffect } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import {
   setUser,
@@ -23,6 +23,7 @@ interface AuthState {
 interface AuthActions {
   login: (credentials: LoginFormValues) => Promise<any>
   logout: () => Promise<void>
+  checkAuth: () => Promise<void>
 }
 
 export function useAuth(): AuthState & AuthActions {
@@ -32,6 +33,33 @@ export function useAuth(): AuthState & AuthActions {
   const user = useAppSelector(selectUser)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isLoading = useAppSelector(selectIsLoading)
+
+  const checkAuth = useCallback(async (): Promise<void> => {
+    const token = tokenManager.getAccessToken()
+
+    if (token) {
+      try {
+        // Token'ın geçerliliğini kontrol et
+        if (!tokenManager.isTokenExpired()) {
+          // Mock user data - gerçek projede API'dan user bilgilerini al
+          const mockUser = {
+            id: '1',
+            name: 'Test User',
+            username: 'testuser',
+            email: 'test@example.com',
+            role: 'user',
+          }
+          dispatch(setUser(mockUser))
+        } else {
+          // Token süresi dolmuş, logout yap
+          await logout()
+        }
+      } catch (error) {
+        console.error('Auth check failed:', error)
+        await logout()
+      }
+    }
+  }, [dispatch, tokenManager])
 
   const login = useCallback(
     async (credentials: LoginFormValues): Promise<any> => {
@@ -44,7 +72,7 @@ export function useAuth(): AuthState & AuthActions {
         const mockUser = {
           id: '1',
           name: 'Test User',
-          username: 'Test User', // Add username property
+          username: 'testuser',
           email: credentials.email,
           role: 'user',
         }
@@ -106,11 +134,17 @@ export function useAuth(): AuthState & AuthActions {
     }
   }, [dispatch, tokenManager])
 
+  // Component mount olduğunda auth durumunu kontrol et
+  useEffect(() => {
+    checkAuth()
+  }, [checkAuth])
+
   return {
     user,
     isAuthenticated,
     isLoading,
     login,
     logout,
+    checkAuth,
   }
 }
