@@ -1,38 +1,32 @@
-import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
-
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-  reactStrictMode: false,
-  swcMinify: true,
+  reactStrictMode: true,
 
-  // CSS ve Tailwind optimizasyonları
+  // CSS optimizasyonlarını devre dışı bırak
   experimental: {
     optimizePackageImports: ['lucide-react', '@radix-ui/react-icons'],
-    optimizeCss: true,
-    turbo: {
-      rules: {
-        '*.css': {
-          loaders: ['postcss-loader'],
-          as: '*.css',
-        },
-      },
-    },
+    // optimizeCss seçeneğini geçici olarak kaldır
   },
 
-  // Webpack CSS yapılandırması
-  webpack: (config, { isServer, dev }) => {
-    // Bundle analyzer
-    if (process.env.ANALYZE === 'true') {
+  // Turbopack için basit konfigürasyon
+  turbopack: {
+    // CSS loader'larını kaldır
+  },
+
+  // Webpack konfigürasyonunu minimal tut
+  webpack: (config, { isServer }) => {
+    // Bundle analyzer sadece production için
+    if (process.env.ANALYZE === 'true' && !isServer) {
+      const { BundleAnalyzerPlugin } = require('webpack-bundle-analyzer')
       config.plugins.push(
         new BundleAnalyzerPlugin({
-          analyzerMode: 'server',
-          analyzerPort: isServer ? 8888 : 8889,
-          openAnalyzer: true,
+          analyzerMode: 'static',
+          openAnalyzer: false,
         }),
       )
     }
 
-    // CSS handling improvements
+    // Server-side için fallback ayarları
     if (!isServer) {
       config.resolve.fallback = {
         ...config.resolve.fallback,
@@ -40,60 +34,7 @@ const nextConfig = {
       }
     }
 
-    // Ensure CSS is processed correctly
-    config.module.rules.forEach((rule) => {
-      if (rule.oneOf) {
-        rule.oneOf.forEach((oneOfRule) => {
-          if (oneOfRule.test && oneOfRule.test.toString().includes('css')) {
-            oneOfRule.use?.forEach((useItem) => {
-              if (typeof useItem === 'object' && useItem.loader && useItem.loader.includes('postcss-loader')) {
-                useItem.options = {
-                  ...useItem.options,
-                  postcssOptions: {
-                    plugins: [
-                      'postcss-import',
-                      ['tailwindcss/nesting', 'postcss-nesting'],
-                      'tailwindcss',
-                      'autoprefixer',
-                    ],
-                  },
-                }
-              }
-            })
-          }
-        })
-      }
-    })
-
     return config
-  },
-
-  // Headers
-  async headers() {
-    return [
-      {
-        source: '/_next/static/css/(.*)',
-        headers: [
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-      {
-        source: '/favicon.ico',
-        headers: [
-          {
-            key: 'Content-Type',
-            value: 'image/x-icon',
-          },
-          {
-            key: 'Cache-Control',
-            value: 'public, max-age=31536000, immutable',
-          },
-        ],
-      },
-    ]
   },
 
   // Environment variables
