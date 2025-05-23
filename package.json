@@ -36,7 +36,7 @@
     "analyze": "ANALYZE=true npm run build",
     "build:analyze": "npm run analyze",
     "pre-commit": "lint-staged",
-    "generate-favicons": "node scripts/generate-favicons.js",
+    "generate-favicons": "node scripts/generate-favicons.mjs",
     "postinstall": "npm run generate-favicons"
   },
   "repository": {

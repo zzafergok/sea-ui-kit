@@ -1,3 +1,5 @@
+import { BundleAnalyzerPlugin } from 'webpack-bundle-analyzer'
+
 /** @type {import('next').NextConfig} */
 const nextConfig = {
   reactStrictMode: false,
@@ -47,11 +49,10 @@ const nextConfig = {
     ]
   },
 
-  // Webpack configuration - sync version
+  // Webpack configuration for bundle analyzer
   webpack: (config, { isServer }) => {
     // Bundle analyzer - sadece analiz modunda
     if (process.env.ANALYZE === 'true') {
-      const { BundleAnalyzerPlugin } = eval('require')('webpack-bundle-analyzer')
       config.plugins.push(
         new BundleAnalyzerPlugin({
           analyzerMode: 'server',
