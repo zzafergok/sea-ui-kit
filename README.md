@@ -80,7 +80,6 @@ sea-ui-kit/
 │   │
 │   └── index.ts             # Main entry point
 │
-├── examples/                # Usage examples
 │   └── nextjs-app/          # Next.js integration
 │
 ├── package.json             # Package configuration
