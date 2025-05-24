@@ -9,7 +9,14 @@
     "delete": "Delete",
     "search": "Search",
     "filter": "Filter",
-    "noResults": "No results found"
+    "noResults": "No results found",
+    "close": "Close",
+    "continue": "Continue",
+    "back": "Back",
+    "next": "Next",
+    "previous": "Previous",
+    "retry": "Retry",
+    "refresh": "Refresh"
   },
   "auth": {
     "login": "Login",
@@ -20,7 +27,15 @@
     "password": "Password",
     "confirmPassword": "Confirm Password",
     "username": "Username",
-    "rememberMe": "Remember Me"
+    "rememberMe": "Remember Me",
+    "welcomeBack": "Welcome back!",
+    "loginSuccess": "Successfully logged in",
+    "logoutSuccess": "Successfully logged out",
+    "loginFailed": "Login failed",
+    "alreadyLoggedIn": "You are already logged in as {{name}}",
+    "pleaseLogin": "Please log in to continue",
+    "dontHaveAccount": "Don't have an account?",
+    "signUpHere": "Sign up here"
   },
   "navigation": {
     "home": "Home",
@@ -28,7 +43,91 @@
     "settings": "Settings",
     "dashboard": "Dashboard",
     "users": "Users",
-    "about": "About"
+    "about": "About",
+    "contact": "Contact",
+    "pricing": "Pricing",
+    "notifications": "Notifications",
+    "help": "Help",
+    "support": "Support",
+    "privacy": "Privacy",
+    "terms": "Terms of Service",
+    "cookies": "Cookie Policy",
+    "quickLinks": "Quick Links",
+    "legal": "Legal",
+    "madeWith": "Made with ❤️ in Turkey"
+  },
+  "pages": {
+    "home": {
+      "title": "Welcome to Sea UI Kit",
+      "subtitle": "Comprehensive component library designed for modern React applications. Radix UI based, accessible and customizable components.",
+      "getStarted": "Get Started",
+      "learnMore": "Learn More",
+      "goToDashboard": "Go to Dashboard",
+      "features": {
+        "title": "Features",
+        "subtitle": "Build modern applications with Sea UI Kit",
+        "modern": {
+          "title": "Modern Design",
+          "description": "Create modern and elegant interfaces with sea blue theme"
+        },
+        "performance": {
+          "title": "Performance",
+          "description": "Build fast applications with optimized components"
+        },
+        "customizable": {
+          "title": "Customizable",
+          "description": "All components can be customized according to your needs"
+        }
+      },
+      "footer": {
+        "copyright": "© 2024 Sea UI Kit. All rights reserved."
+      }
+    },
+    "dashboard": {
+      "welcome": "Welcome, {{name}}!",
+      "description": "This page can only be viewed by logged-in users.",
+      "viewProfile": "View Profile",
+      "logout": "Logout"
+    },
+    "notFound": {
+      "title": "404",
+      "heading": "Page Not Found",
+      "description": "The page you're looking for doesn't exist or has been removed.",
+      "goHome": "Go to Homepage",
+      "goBack": "Go Back"
+    },
+    "about": {
+      "title": "About Us",
+      "content": "Learn more about Sea UI Kit and our mission."
+    },
+    "contact": {
+      "title": "Contact",
+      "content": "Get in touch with our team."
+    },
+    "pricing": {
+      "title": "Pricing",
+      "content": "Choose the plan that's right for you."
+    },
+    "profile": {
+      "title": "Profile",
+      "content": "Manage your profile information."
+    },
+    "settings": {
+      "title": "Settings",
+      "content": "Configure your application preferences."
+    },
+    "users": {
+      "title": "Users",
+      "content": "Manage system users."
+    },
+    "register": {
+      "title": "Register",
+      "content": "Create a new account."
+    },
+    "forgotPassword": {
+      "title": "Forgot Password",
+      "content": "Reset your password."
+    }
   },
   "validation": {
     "required": "This field is required",
@@ -53,6 +152,12 @@
     "datePicker": {
       "placeholder": "Select date...",
       "today": "Today"
+    },
+    "navbar": {
+      "searchPlaceholder": "Search...",
+      "notifications": "Notifications",
+      "noNotifications": "No new notifications",
+      "viewAllNotifications": "View all notifications"
     }
   }
 }

@@ -76,10 +76,14 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
               </svg>
             </div>
-            <h2 className='text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2'>Hoş Geldiniz!</h2>
-            <p className='text-neutral-600 dark:text-neutral-400 mb-4'>{user.name} olarak giriş yaptınız.</p>
+            <h2 className='text-xl font-semibold text-neutral-900 dark:text-neutral-100 mb-2'>
+              {t('auth.welcomeBack')}
+            </h2>
+            <p className='text-neutral-600 dark:text-neutral-400 mb-4'>
+              {t('auth.alreadyLoggedIn', { name: user.name })}
+            </p>
             <Button onClick={() => (window.location.href = redirectOnSuccess)} className='w-full'>
-              Devam Et
+              {t('common.continue')}
             </Button>
           </div>
         </div>
@@ -170,12 +174,12 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
 
         <div className='mt-6 text-center'>
           <p className='text-sm text-neutral-600 dark:text-neutral-400'>
-            Hesabınız yok mu?{' '}
+            {t('auth.dontHaveAccount')}{' '}
             <Button
               variant='ghost'
               className='p-0 h-auto font-normal text-sm text-primary-700 dark:text-primary-500 hover:underline'
             >
-              Kayıt olun
+              {t('auth.signUpHere')}
             </Button>
           </p>
         </div>

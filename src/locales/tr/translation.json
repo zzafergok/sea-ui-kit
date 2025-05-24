@@ -9,7 +9,14 @@
     "delete": "Sil",
     "search": "Ara",
     "filter": "Filtrele",
-    "noResults": "Sonuç bulunamadı"
+    "noResults": "Sonuç bulunamadı",
+    "close": "Kapat",
+    "continue": "Devam Et",
+    "back": "Geri",
+    "next": "İleri",
+    "previous": "Önceki",
+    "retry": "Tekrar Dene",
+    "refresh": "Yenile"
   },
   "auth": {
     "login": "Giriş Yap",
@@ -20,7 +27,15 @@
     "password": "Şifre",
     "confirmPassword": "Şifre Tekrar",
     "username": "Kullanıcı Adı",
-    "rememberMe": "Beni Hatırla"
+    "rememberMe": "Beni Hatırla",
+    "welcomeBack": "Hoş geldiniz!",
+    "loginSuccess": "Başarıyla giriş yapıldı",
+    "logoutSuccess": "Başarıyla çıkış yapıldı",
+    "loginFailed": "Giriş başarısız",
+    "alreadyLoggedIn": "{{name}} olarak zaten giriş yapmışsınız",
+    "pleaseLogin": "Devam etmek için lütfen giriş yapın",
+    "dontHaveAccount": "Hesabınız yok mu?",
+    "signUpHere": "Kayıt olun"
   },
   "navigation": {
     "home": "Ana Sayfa",
@@ -28,7 +43,91 @@
     "settings": "Ayarlar",
     "dashboard": "Kontrol Paneli",
     "users": "Kullanıcılar",
-    "about": "Hakkında"
+    "about": "Hakkında",
+    "contact": "İletişim",
+    "pricing": "Fiyatlandırma",
+    "notifications": "Bildirimler",
+    "help": "Yardım",
+    "support": "Destek",
+    "privacy": "Gizlilik",
+    "terms": "Kullanım Şartları",
+    "cookies": "Çerez Politikası",
+    "quickLinks": "Hızlı Linkler",
+    "legal": "Yasal",
+    "madeWith": "Türkiye'de ❤️ ile yapıldı"
+  },
+  "pages": {
+    "home": {
+      "title": "Sea UI Kit'e Hoş Geldiniz",
+      "subtitle": "Modern React uygulamaları için tasarlanmış kapsamlı component kütüphanesi. Radix UI tabanlı, erişilebilir ve özelleştirilebilir komponentler.",
+      "getStarted": "Başlayın",
+      "learnMore": "Daha Fazla Bilgi",
+      "goToDashboard": "Dashboard'a Git",
+      "features": {
+        "title": "Özellikler",
+        "subtitle": "Sea UI Kit ile modern uygulamalar geliştirin",
+        "modern": {
+          "title": "Modern Tasarım",
+          "description": "Sea blue teması ile modern ve şık arayüzler oluşturun"
+        },
+        "performance": {
+          "title": "Performans",
+          "description": "Optimize edilmiş komponentler ile hızlı uygulamalar geliştirin"
+        },
+        "customizable": {
+          "title": "Özelleştirilebilir",
+          "description": "Tüm komponentler ihtiyaçlarınıza göre özelleştirilebilir"
+        }
+      },
+      "footer": {
+        "copyright": "© 2024 Sea UI Kit. Tüm hakları saklıdır."
+      }
+    },
+    "dashboard": {
+      "welcome": "Hoş Geldiniz, {{name}}!",
+      "description": "Bu sayfa sadece giriş yapmış kullanıcılar tarafından görülebilir.",
+      "viewProfile": "Profili Görüntüle",
+      "logout": "Çıkış Yap"
+    },
+    "notFound": {
+      "title": "404",
+      "heading": "Sayfa Bulunamadı",
+      "description": "Aradığınız sayfa mevcut değil veya kaldırılmış olabilir.",
+      "goHome": "Ana Sayfaya Dön",
+      "goBack": "Geri Git"
+    },
+    "about": {
+      "title": "Hakkımızda",
+      "content": "Sea UI Kit ve misyonumuz hakkında daha fazla bilgi edinin."
+    },
+    "contact": {
+      "title": "İletişim",
+      "content": "Ekibimizle iletişime geçin."
+    },
+    "pricing": {
+      "title": "Fiyatlandırma",
+      "content": "Size uygun planı seçin."
+    },
+    "profile": {
+      "title": "Profil",
+      "content": "Profil bilgilerinizi yönetin."
+    },
+    "settings": {
+      "title": "Ayarlar",
+      "content": "Uygulama tercihlerinizi yapılandırın."
+    },
+    "users": {
+      "title": "Kullanıcılar",
+      "content": "Sistem kullanıcılarını yönetin."
+    },
+    "register": {
+      "title": "Kayıt Ol",
+      "content": "Yeni hesap oluşturun."
+    },
+    "forgotPassword": {
+      "title": "Şifremi Unuttum",
+      "content": "Şifrenizi sıfırlayın."
+    }
   },
   "validation": {
     "required": "Bu alan zorunludur",
@@ -53,6 +152,12 @@
     "datePicker": {
       "placeholder": "Tarih seçin...",
       "today": "Bugün"
+    },
+    "navbar": {
+      "searchPlaceholder": "Arama yapın...",
+      "notifications": "Bildirimler",
+      "noNotifications": "Yeni bildirim yok",
+      "viewAllNotifications": "Tüm bildirimleri görüntüle"
     }
   }
 }

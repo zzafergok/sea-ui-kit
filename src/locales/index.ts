@@ -25,12 +25,33 @@ if (!isInitialized) {
       resources,
       lng: 'tr', // Türkçe varsayılan olarak ayarla
       fallbackLng: 'en',
+      debug: process.env.NODE_ENV === 'development',
       interpolation: {
         escapeValue: false,
       },
       detection: {
-        order: ['localStorage', 'navigator'],
+        order: ['localStorage', 'navigator', 'htmlTag'],
         lookupLocalStorage: 'language',
+        lookupFromPathIndex: 0,
+        lookupFromSubdomainIndex: 0,
+        caches: ['localStorage'],
+        excludeCacheFor: ['cimode'],
+      },
+      // Namespace ve key separator ayarları
+      defaultNS: 'translation',
+      keySeparator: '.',
+      nsSeparator: ':',
+      pluralSeparator: '_',
+      contextSeparator: '_',
+
+      // React i18next ayarları
+      react: {
+        useSuspense: false,
+        bindI18n: 'languageChanged',
+        bindI18nStore: '',
+        transEmptyNodeValue: '',
+        transSupportBasicHtmlNodes: true,
+        transKeepBasicHtmlNodesFor: ['br', 'strong', 'i'],
       },
     })
   isInitialized = true
