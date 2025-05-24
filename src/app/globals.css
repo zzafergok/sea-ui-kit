@@ -125,12 +125,6 @@ html.dark {
   visibility: visible;
 }
 
-/* Container constraints */
-.max-w-7xl {
-  max-width: 80rem;
-  width: 100%;
-}
-
 /* Responsive text sizing */
 @media (max-width: 640px) {
   .text-4xl {
@@ -151,29 +145,10 @@ html.dark {
   }
 }
 
-/* Grid responsive fixes */
-.grid {
-  width: 100%;
-}
-
-.grid-cols-1 {
-  grid-template-columns: repeat(1, minmax(0, 1fr));
-}
-
 @media (min-width: 768px) {
   .md\:grid-cols-3 {
     grid-template-columns: repeat(3, minmax(0, 1fr));
   }
-}
-
-/* Flex responsive fixes */
-.flex {
-  display: flex;
-  width: 100%;
-}
-
-.flex-col {
-  flex-direction: column;
 }
 
 @media (min-width: 640px) {

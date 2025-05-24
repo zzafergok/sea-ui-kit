@@ -39,7 +39,7 @@ export default function HomePage() {
 
       {/* Hero Section */}
       <section className='w-full bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900 dark:to-accent-900 pt-16 lg:pt-20'>
-        <div className='w-full max-w-7xl mx-auto px-4 py-16 sm:px-6 sm:py-24 lg:px-8'>
+        <div className='w-full max-w-7xl mx-auto px-4 py-12 sm:px-6 sm:py-24 lg:px-8'>
           <div className='text-center'>
             <h1 className='text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-6 leading-tight'>
               {t('pages.home.title')}
