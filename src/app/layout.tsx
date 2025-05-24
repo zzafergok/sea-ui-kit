@@ -1,6 +1,6 @@
 import type { Metadata, Viewport } from 'next'
 import React from 'react'
-import { ClientRootProvider } from './client-root'
+import { ClientProviders } from '@/providers/ClientProviders'
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -16,7 +16,7 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/site.webmanifest',
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  metadataBase: new URL('http://localhost:3000'),
 }
 
 export const viewport: Viewport = {
@@ -35,29 +35,23 @@ export default function RootLayout({ children }: { children: React.ReactNode }) 
   return (
     <html lang='tr' suppressHydrationWarning>
       <head>
-        <meta name='msapplication-TileColor' content='#0ea5e9' />
-        <meta name='msapplication-config' content='/browserconfig.xml' />
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              (function() {
-                try {
-                  var savedTheme = localStorage.getItem('theme');
-                  var systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
-                  var effectiveTheme = savedTheme === 'system' ? systemPreference : (savedTheme || systemPreference);
-                  
-                  document.documentElement.classList.add(effectiveTheme);
-                  document.documentElement.style.overflow = 'hidden auto';
-                } catch (e) {
-                  console.warn('Theme initialization failed:', e);
-                }
-              })();
+              try {
+                var theme = localStorage.getItem('theme') || 'system';
+                var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                var effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
+                document.documentElement.classList.add(effectiveTheme);
+              } catch (e) {
+                console.warn('Theme initialization failed:', e);
+              }
             `,
           }}
         />
       </head>
-      <body suppressHydrationWarning className='w-full overflow-x-hidden bg-background text-foreground'>
-        <ClientRootProvider>{children}</ClientRootProvider>
+      <body suppressHydrationWarning className='bg-background text-foreground'>
+        <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
   )

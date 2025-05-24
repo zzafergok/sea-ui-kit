@@ -9,19 +9,20 @@ import {
   selectUser,
   selectIsAuthenticated,
   selectIsLoading,
+  User,
 } from '@/store/slices/userSlice'
 import { showToast } from '@/store/slices/toastSlice'
 import { useTokenManagerContext } from './useTokenManager'
 import { LoginFormValues } from '@/lib/validations/auth'
 
 interface AuthState {
-  user: any
+  user: User | null
   isAuthenticated: boolean
   isLoading: boolean
 }
 
 interface AuthActions {
-  login: (credentials: LoginFormValues) => Promise<any>
+  login: (credentials: LoginFormValues) => Promise<User>
   logout: () => Promise<void>
   checkAuth: () => Promise<void>
 }
@@ -59,10 +60,11 @@ export function useAuth(): AuthState & AuthActions {
         await logout()
       }
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [dispatch, tokenManager])
 
   const login = useCallback(
-    async (credentials: LoginFormValues): Promise<any> => {
+    async (credentials: LoginFormValues): Promise<User> => {
       dispatch(setLoading(true))
 
       try {
@@ -95,7 +97,7 @@ export function useAuth(): AuthState & AuthActions {
         )
 
         return mockUser
-      } catch (error: any) {
+      } catch (error: unknown) {
         dispatch(
           showToast({
             type: 'error',

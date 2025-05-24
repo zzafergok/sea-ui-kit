@@ -117,14 +117,9 @@ sea-ui-kit/
 │   │
 │   ├── hooks/                 # Özel React Hook'ları
 │   │   ├── useAuth.ts         # Authentication hook
-│   │   ├── useComponent.ts    # Component lifecycle hook
-│   │   ├── useErrorBoundary.tsx # Error handling hook
 │   │   ├── useErrorHandler.ts # API error handling hook
 │   │   ├── useForm.ts         # Form management hook
 │   │   ├── useFormValidation.ts # Form validation hook
-│   │   ├── useOptimizedRender.ts # Performance hook
-│   │   ├── usePerformance.ts  # Performance monitoring hook
-│   │   ├── useSecurityValidation.ts # Security validation hook
 │   │   ├── useTheme.ts        # Theme management hook
 │   │   └── useTokenManager.tsx # Token management hook
 │   │
