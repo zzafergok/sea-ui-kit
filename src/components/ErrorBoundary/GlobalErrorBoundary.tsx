@@ -357,12 +357,13 @@ export function GlobalErrorBoundary({
                   {recoveryCountdown} saniye sonra otomatik olarak düzelmeye çalışılacak
                 </span>
               </div>
-              <button
+
+              <Button
                 onClick={handleStopRecovery}
                 className='mt-2 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline'
               >
                 Otomatik düzeltmeyi durdur
-              </button>
+              </Button>
             </div>
           )}
 

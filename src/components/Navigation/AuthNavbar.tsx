@@ -94,7 +94,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
 
           <div className='hidden lg:flex lg:items-center lg:space-x-6'>
             {navigation.map((item) => (
-              <button
+              <Button
                 key={item.name}
                 onClick={() => handleNavigate(item.href)}
                 className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
@@ -104,7 +104,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                 }`}
               >
                 {item.name}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -166,9 +166,9 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                   </div>
                   {mockNotifications.length > 0 && (
                     <div className='p-3 border-t border-neutral-200 dark:border-neutral-700'>
-                      <button className='text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300'>
+                      <Button className='text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300'>
                         {t('components.navbar.viewAllNotifications')}
-                      </button>
+                      </Button>
                     </div>
                   )}
                 </div>
@@ -192,7 +192,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
               {isProfileMenuOpen && (
                 <div className='absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 z-50'>
                   <div className='p-2'>
-                    <button
+                    <Button
                       onClick={() => {
                         handleNavigate('/profile')
                         setIsProfileMenuOpen(false)
@@ -201,8 +201,9 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                     >
                       <User className='h-4 w-4' />
                       <span>{t('navigation.profile')}</span>
-                    </button>
-                    <button
+                    </Button>
+
+                    <Button
                       onClick={() => {
                         handleNavigate('/settings')
                         setIsProfileMenuOpen(false)
@@ -211,9 +212,11 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                     >
                       <Settings className='h-4 w-4' />
                       <span>{t('navigation.settings')}</span>
-                    </button>
+                    </Button>
+
                     <hr className='my-2 border-neutral-200 dark:border-neutral-700' />
-                    <button
+
+                    <Button
                       onClick={() => {
                         handleLogout()
                         setIsProfileMenuOpen(false)
@@ -222,7 +225,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                     >
                       <LogOut className='h-4 w-4' />
                       <span>{t('auth.logout')}</span>
-                    </button>
+                    </Button>
                   </div>
                 </div>
               )}
@@ -244,7 +247,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
             </div>
 
             {navigation.map((item) => (
-              <button
+              <Button
                 key={item.name}
                 onClick={() => handleNavigate(item.href)}
                 className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
@@ -254,7 +257,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                 }`}
               >
                 {item.name}
-              </button>
+              </Button>
             ))}
 
             <div className='flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-neutral-800 sm:hidden'>

@@ -2,7 +2,7 @@
 
 import React, { useState, useEffect } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X } from 'lucide-react'
 import { Button } from '../Button/Button'
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import { LanguageToggle } from '../LanguageToggle/LanguageToggle'
@@ -74,13 +74,13 @@ export function PublicNavbar({ className }: PublicNavbarProps) {
 
           <div className='hidden lg:flex lg:items-center lg:space-x-8'>
             {navigation.map((item) => (
-              <button
+              <Button
                 key={item.name}
                 onClick={() => handleNavigate(item.href)}
                 className='text-neutral-700 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200 font-medium'
               >
                 {item.name}
-              </button>
+              </Button>
             ))}
           </div>
 
@@ -124,13 +124,13 @@ export function PublicNavbar({ className }: PublicNavbarProps) {
           <div className='px-4 py-6 space-y-6'>
             <div className='space-y-4'>
               {navigation.map((item) => (
-                <button
+                <Button
                   key={item.name}
                   onClick={() => handleNavigate(item.href)}
                   className='block w-full text-left px-4 py-3 text-lg font-medium text-neutral-700 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-neutral-50 dark:hover:bg-neutral-800 rounded-lg transition-all duration-200'
                 >
                   {item.name}
-                </button>
+                </Button>
               ))}
             </div>
 

@@ -3,6 +3,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react'
 import { useAppDispatch } from '@/store'
 import { showToast } from '@/store/slices/toastSlice'
+import { Button } from '@/components/Button/Button'
 
 interface ErrorInfo {
   componentStack?: string
@@ -303,19 +304,20 @@ export function withErrorHandler<P extends object>(
           <p className='text-red-600 dark:text-red-400 text-sm mb-4'>{error.message}</p>
           <div className='flex space-x-2'>
             {canRetry && (
-              <button
+              <Button
                 onClick={retry}
                 className='px-3 py-1 bg-red-600 text-white rounded text-sm hover:bg-red-700 transition-colors'
               >
                 Tekrar Dene
-              </button>
+              </Button>
             )}
-            <button
+
+            <Button
               onClick={resetError}
               className='px-3 py-1 bg-neutral-600 text-white rounded text-sm hover:bg-neutral-700 transition-colors'
             >
               Sıfırla
-            </button>
+            </Button>
           </div>
         </div>
       )

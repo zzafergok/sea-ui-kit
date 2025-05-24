@@ -7,6 +7,7 @@ import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectToasts, removeToast } from '@/store/slices/toastSlice'
 import { cn } from '@/lib/utils'
+import { Button } from '../Button/Button'
 
 interface Toast {
   id: string
@@ -183,23 +184,23 @@ export function ToastContainer({ position = 'top-right', maxToasts = 5, classNam
 
                 {/* Action Button */}
                 {toast.action && (
-                  <button
+                  <Button
                     onClick={toast.action.onClick}
                     className='mt-2 text-xs font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 underline'
                   >
                     {toast.action.label}
-                  </button>
+                  </Button>
                 )}
               </div>
 
               {/* Close Button */}
-              <button
+              <Button
                 onClick={() => handleRemoveToast(toast.id)}
                 className='flex-shrink-0 p-1 rounded-md text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-200 transition-colors'
                 aria-label='Bildirimi kapat'
               >
                 <X className='h-4 w-4' />
-              </button>
+              </Button>
             </div>
 
             {/* Progress Bar for timed toasts */}

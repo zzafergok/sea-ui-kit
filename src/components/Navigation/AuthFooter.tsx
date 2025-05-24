@@ -2,6 +2,7 @@
 
 import React from 'react'
 import { useTranslation } from 'react-i18next'
+import { Button } from '../Button/Button'
 
 interface AuthFooterProps {
   className?: string
@@ -29,13 +30,14 @@ export function AuthFooter({ className }: AuthFooterProps) {
             <p>{t('pages.home.footer.copyright')}</p>
             <div className='flex space-x-6 mt-2 sm:mt-0'>
               {footerLinks.map((link) => (
-                <button
+                <Button
                   key={link.name}
+                  variant='outline'
                   onClick={() => handleLinkClick(link.href)}
                   className='hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors'
                 >
                   {link.name}
-                </button>
+                </Button>
               ))}
             </div>
           </div>

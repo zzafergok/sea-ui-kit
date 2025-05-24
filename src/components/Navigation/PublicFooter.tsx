@@ -4,6 +4,7 @@ import React from 'react'
 import { useTranslation } from 'react-i18next'
 import { Github, Twitter, Linkedin, Mail } from 'lucide-react'
 import { useRouter } from 'next/navigation'
+import { Button } from '../Button/Button'
 
 interface PublicFooterProps {
   className?: string
@@ -45,60 +46,62 @@ export function PublicFooter({ className }: PublicFooterProps) {
     <footer className={`bg-neutral-900 dark:bg-neutral-950 text-white ${className}`}>
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='py-12 lg:py-16'>
-          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
-            <div className='col-span-1 lg:col-span-2'>
-              <div className='flex items-center space-x-2 mb-4'>
-                <div className='w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center'>
-                  <span className='text-white font-bold'>S</span>
-                </div>
-                <span className='text-2xl font-bold text-white'>Sea UI Kit</span>
+          <div className='w-full flex gap-8'>
+            <div className='flex items-center space-x-2 mb-4'>
+              <div className='w-10 h-10 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center'>
+                <span className='text-white font-bold'>S</span>
               </div>
-              <p className='text-neutral-300 mb-6 max-w-md leading-relaxed'>{t('pages.home.subtitle')}</p>
-              <div className='flex space-x-4'>
-                {navigation.social.map((item) => (
-                  <button
-                    key={item.name}
-                    onClick={() => handleNavigate(item.href)}
-                    className='w-10 h-10 bg-neutral-800 hover:bg-primary-600 rounded-lg flex items-center justify-center transition-colors duration-200'
-                    aria-label={item.name}
-                  >
-                    <item.icon className='h-5 w-5' />
-                  </button>
-                ))}
-              </div>
+              <span className='text-2xl font-bold text-white'>Sea UI Kit</span>
+            </div>
+            <p className='text-neutral-300 mb-6 max-w-md leading-relaxed'>{t('pages.home.subtitle')}</p>
+            <div className='flex justify-end space-x-4'>
+              {navigation.social.map((item) => (
+                <Button
+                  key={item.name}
+                  onClick={() => handleNavigate(item.href)}
+                  className='w-10 h-10 bg-neutral-800 hover:bg-primary-600 rounded-lg flex items-center justify-center transition-colors duration-200'
+                  aria-label={item.name}
+                >
+                  <item.icon className='h-5 w-5' />
+                </Button>
+              ))}
             </div>
 
-            <div>
-              <h3 className='text-lg font-semibold text-white mb-4'>{t('navigation.quickLinks')}</h3>
-              <ul className='space-y-3'>
+            {/* <div className='flex flex-col space-y-6'>
+              <h3 className='text-lg font-semibold text-white mb-4 w-full flex justify-center'>
+                {t('navigation.quickLinks')}
+              </h3>
+              <ul className='space-y-3 flex flex-col items-center'>
                 {navigation.main.map((item) => (
                   <li key={item.name}>
-                    <button
+                    <Button
+                      variant='ghost'
                       onClick={() => handleNavigate(item.href)}
-                      className='text-neutral-300 hover:text-white transition-colors duration-200'
+                      className='text-neutral-300 transition-colors duration-200'
                     >
                       {item.name}
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
 
-            <div>
+            {/* <div>
               <h3 className='text-lg font-semibold text-white mb-4'>{t('navigation.legal')}</h3>
               <ul className='space-y-3'>
                 {navigation.legal.map((item) => (
                   <li key={item.name}>
-                    <button
+                    <Button
+                      variant='ghost'
                       onClick={() => handleNavigate(item.href)}
-                      className='text-neutral-300 hover:text-white transition-colors duration-200'
+                      className='text-neutral-300 transition-colors duration-200'
                     >
                       {item.name}
-                    </button>
+                    </Button>
                   </li>
                 ))}
               </ul>
-            </div>
+            </div> */}
           </div>
         </div>
 
