@@ -7,7 +7,7 @@ import { I18nextProvider } from 'react-i18next'
 import { store, persistor } from '@/store'
 import { TokenManagerProvider } from '@/hooks/useTokenManager'
 import { GlobalErrorBoundary } from '@/components/ErrorBoundary/GlobalErrorBoundary'
-import { ToastContainer } from '@/components/Toast/ToastContainer'
+import { ToastContainer } from '@/components/ToastContainer/ToastContainer'
 import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
 import i18n from '@/locales'
 
