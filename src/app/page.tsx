@@ -12,9 +12,9 @@ export default function HomePage() {
   const { isAuthenticated } = useAuth()
 
   return (
-    <>
-      <section className='bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900 dark:to-accent-900 pt-16 lg:pt-20'>
-        <div className='max-w-7xl mx-auto px-4 py-12 sm:px-6 sm:py-24 lg:px-8'>
+    <div className='flex flex-col min-h-screen'>
+      <section className='flex-1 bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-900 dark:to-accent-900 flex items-center'>
+        <div className='max-w-7xl mx-auto px-4 py-12 sm:px-6 sm:py-24 lg:px-8 w-full'>
           <div className='text-center'>
             <h1 className='text-3xl sm:text-4xl font-bold text-neutral-900 dark:text-neutral-100 mb-6'>
               {t('pages.home.title')}
@@ -43,8 +43,8 @@ export default function HomePage() {
         </div>
       </section>
 
-      <section className='bg-white dark:bg-neutral-800 py-16'>
-        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+      <section className='flex-1 bg-white dark:bg-neutral-800 flex items-center'>
+        <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 w-full'>
           <div className='text-center mb-12'>
             <h2 className='text-2xl sm:text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-4'>
               {t('pages.home.features.title')}
@@ -89,6 +89,6 @@ export default function HomePage() {
           </div>
         </div>
       </section>
-    </>
+    </div>
   )
 }
