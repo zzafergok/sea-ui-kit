@@ -9,41 +9,49 @@ import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
 import { Button } from '@/components/Button/Button'
 import { ArrowLeft } from 'lucide-react'
 
-// SearchParams component for better error handling
 function LoginPageContent() {
   const router = useRouter()
   const searchParams = useSearchParams()
-  const { isAuthenticated, login } = useAuth()
+  const { isAuthenticated, login, isLoading } = useAuth()
 
-  // URL'den redirect parametresini al
   const redirectTo = searchParams.get('redirect') || '/dashboard'
   const error = searchParams.get('error')
-
-  // Zaten giriş yapılmışsa yönlendir
-  useEffect(() => {
-    if (isAuthenticated) {
-      router.push(redirectTo)
-    }
-  }, [isAuthenticated, router, redirectTo])
 
   // Login işlemi
   const handleLogin = async (data: LoginFormValues) => {
     try {
-      await login(data)
-      // Başarılı giriş sonrası LoginForm bileşeni otomatik yönlendirecek
+      console.log('Login form submitted')
+      const user = await login(data)
+
+      if (user) {
+        console.log('Login successful, redirecting to:', redirectTo)
+        // Router.push ile yönlendirme
+        setTimeout(() => {
+          router.push(redirectTo)
+        }, 1000)
+      }
     } catch (error) {
       console.error('Login failed:', error)
-      // Hata LoginForm bileşeninde handle edilecek
     }
   }
 
-  // Zaten giriş yapılmışsa loading göster
-  if (isAuthenticated) {
+  // Zaten giriş yapılmışsa yönlendir
+  useEffect(() => {
+    if (isAuthenticated && !isLoading) {
+      console.log('Already authenticated, redirecting to:', redirectTo)
+      router.push(redirectTo)
+    }
+  }, [isAuthenticated, isLoading, router, redirectTo])
+
+  // Loading durumunda spinner göster
+  if (isLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>
         <div className='text-center space-y-4'>
           <LoadingSpinner size='lg' />
-          <p className='text-sm text-neutral-600 dark:text-neutral-400'>Yönlendiriliyor...</p>
+          <p className='text-sm text-neutral-600 dark:text-neutral-400'>
+            {isAuthenticated ? 'Yönlendiriliyor...' : 'Kimlik doğrulanıyor...'}
+          </p>
         </div>
       </div>
     )
@@ -88,7 +96,6 @@ function LoginPageContent() {
   )
 }
 
-// Ana sayfa component'i
 export default function LoginPage() {
   return (
     <Suspense

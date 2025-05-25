@@ -1,19 +1,46 @@
 'use client'
 
 import React from 'react'
-import { useTranslation } from 'react-i18next'
 import { useAuth } from '@/hooks/useAuth'
 import { Button } from '@/components/Button/Button'
 import { useRouter } from 'next/navigation'
+import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
 
 export default function DashboardPage() {
-  const { t } = useTranslation()
-  const { user, logout } = useAuth()
+  const { user, logout, isLoading } = useAuth()
   const router = useRouter()
 
   const handleLogout = async () => {
-    await logout()
-    router.push('/')
+    try {
+      await logout()
+      router.push('/')
+    } catch (error) {
+      console.error('Logout failed:', error)
+    }
+  }
+
+  if (isLoading) {
+    return (
+      <div className='flex items-center justify-center min-h-96'>
+        <div className='text-center space-y-4'>
+          <LoadingSpinner size='lg' />
+          <p className='text-sm text-neutral-600 dark:text-neutral-400'>Yükleniyor...</p>
+        </div>
+      </div>
+    )
+  }
+
+  if (!user) {
+    return (
+      <div className='flex items-center justify-center min-h-96'>
+        <div className='text-center'>
+          <p className='text-neutral-600 dark:text-neutral-400'>Kullanıcı bilgileri yüklenemedi</p>
+          <Button onClick={() => router.push('/auth/login')} className='mt-4'>
+            Giriş Yap
+          </Button>
+        </div>
+      </div>
+    )
   }
 
   return (
@@ -21,13 +48,15 @@ export default function DashboardPage() {
       <div className='border-4 border-dashed border-neutral-200 dark:border-neutral-700 rounded-lg p-8'>
         <div className='text-center'>
           <h1 className='text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-4'>
-            {t('pages.dashboard.welcome', { name: user?.name })}
+            Hoş Geldiniz, {user.email || 'Kullanıcı'}!
           </h1>
-          <p className='text-neutral-600 dark:text-neutral-400 mb-8'>{t('pages.dashboard.description')}</p>
+          <p className='text-neutral-600 dark:text-neutral-400 mb-8'>
+            Bu sayfa sadece giriş yapmış kullanıcılar tarafından görülebilir.
+          </p>
           <div className='space-x-4'>
-            <Button onClick={() => router.push('/profile')}>{t('pages.dashboard.viewProfile')}</Button>
+            <Button onClick={() => router.push('/profile')}>Profili Görüntüle</Button>
             <Button variant='outline' onClick={handleLogout}>
-              {t('pages.dashboard.logout')}
+              Çıkış Yap
             </Button>
           </div>
         </div>

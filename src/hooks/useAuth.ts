@@ -73,16 +73,32 @@ export function useAuth(): AuthState & AuthActions {
   const dispatch = useAppDispatch()
   const tokenManager = useTokenManagerContext()
   const initializationRef = useRef<boolean>(false)
+  const isInitializing = useRef<boolean>(false)
 
   const user = useAppSelector(selectUser)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
   const isLoading = useAppSelector(selectIsLoading)
   const error = useAppSelector(selectError)
 
+  // Cookie'lerde token'ları ayarlama
+  const setTokensInCookies = useCallback((accessToken: string, refreshToken: string) => {
+    document.cookie = `accessToken=${accessToken}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`
+    document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`
+  }, [])
+
+  // Cookie'lerden token'ları temizleme
+  const clearTokensFromCookies = useCallback(() => {
+    document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+  }, [])
+
   // Auth durumu kontrolü
   const checkAuth = useCallback(async (): Promise<void> => {
-    if (initializationRef.current) return
+    if (initializationRef.current || isInitializing.current) {
+      return
+    }
 
+    isInitializing.current = true
     dispatch(setLoading(true))
     dispatch(setError(null))
 
@@ -91,21 +107,24 @@ export function useAuth(): AuthState & AuthActions {
       const refreshToken = tokenManager.getRefreshToken()
 
       if (!token || !refreshToken) {
+        console.log('No tokens found, user not authenticated')
         await logout()
         return
       }
 
-      // Token süresi kontrolü
+      // Token geçerliliği kontrolü
       if (tokenManager.isTokenExpired()) {
-        // Refresh token ile yenileme deniyoruz
+        console.log('Token expired, attempting refresh')
         try {
-          // Mock token refresh - gerçek projede API çağrısı
+          // Mock token refresh
           await new Promise((resolve) => setTimeout(resolve, 500))
 
-          // Yeni token'ları kaydet
-          tokenManager.setTokens('new-access-token', 'new-refresh-token', 3600)
+          const newAccessToken = `mock-access-token-refreshed-${Date.now()}`
+          const newRefreshToken = `mock-refresh-token-refreshed-${Date.now()}`
 
-          // Kullanıcı bilgilerini yükle
+          tokenManager.setTokens(newAccessToken, newRefreshToken, 3600)
+          setTokensInCookies(newAccessToken, newRefreshToken)
+
           await refreshUser()
         } catch (refreshError) {
           console.error('Token refresh failed:', refreshError)
@@ -113,7 +132,7 @@ export function useAuth(): AuthState & AuthActions {
           return
         }
       } else {
-        // Token geçerli, kullanıcı bilgilerini yükle
+        console.log('Token valid, refreshing user')
         await refreshUser()
       }
     } catch (error) {
@@ -123,16 +142,19 @@ export function useAuth(): AuthState & AuthActions {
     } finally {
       dispatch(setLoading(false))
       initializationRef.current = true
+      isInitializing.current = false
     }
-  }, [dispatch, tokenManager])
+  }, [dispatch, tokenManager, setTokensInCookies])
 
   // Kullanıcı bilgilerini yenileme
   const refreshUser = useCallback(async (): Promise<void> => {
     try {
       const token = tokenManager.getAccessToken()
-      if (!token) return
+      if (!token) {
+        throw new Error('No access token available')
+      }
 
-      // Mock user fetch - gerçek projede API çağrısı
+      // Mock user fetch
       await new Promise((resolve) => setTimeout(resolve, 300))
 
       // Token'dan user ID'yi decode et (mock)
@@ -147,6 +169,9 @@ export function useAuth(): AuthState & AuthActions {
             avatar: userWithoutPassword.avatar || undefined,
           }),
         )
+        console.log('User refreshed successfully')
+      } else {
+        throw new Error('User not found')
       }
     } catch (error) {
       console.error('User refresh failed:', error)
@@ -161,10 +186,11 @@ export function useAuth(): AuthState & AuthActions {
       dispatch(setError(null))
 
       try {
-        // Mock authentication - gerçek projede API çağrısı
+        console.log('Attempting login with:', credentials.email)
+
+        // Mock authentication
         await new Promise((resolve) => setTimeout(resolve, 1000))
 
-        // Kullanıcı doğrulama
         const foundUser = MOCK_USERS_DB.find(
           (user) => user.email === credentials.email && user.password === credentials.password,
         )
@@ -177,19 +203,22 @@ export function useAuth(): AuthState & AuthActions {
         const mockTokens = {
           accessToken: `mock-access-token-${foundUser.id}-${Date.now()}`,
           refreshToken: `mock-refresh-token-${foundUser.id}-${Date.now()}`,
-          expiresIn: credentials.rememberMe ? 7 * 24 * 3600 : 3600, // 7 gün vs 1 saat
+          expiresIn: credentials.rememberMe ? 7 * 24 * 3600 : 3600,
         }
+
+        console.log('Login successful, setting tokens')
 
         // Token'ları kaydet
         tokenManager.setTokens(mockTokens.accessToken, mockTokens.refreshToken, mockTokens.expiresIn)
+        setTokensInCookies(mockTokens.accessToken, mockTokens.refreshToken)
 
-        // Kullanıcı bilgilerini kaydet (şifre hariç)
-        // Kullanıcı bilgilerini kaydet (şifre hariç)
+        // Kullanıcı bilgilerini kaydet
         const { password: _password, ...userWithoutPassword } = foundUser
         const loginUser: User = {
           ...userWithoutPassword,
           avatar: userWithoutPassword.avatar || undefined,
         }
+
         dispatch(setUser(loginUser))
 
         // Başarı mesajı
@@ -202,9 +231,11 @@ export function useAuth(): AuthState & AuthActions {
           }),
         )
 
+        console.log('Login process completed')
         return loginUser
       } catch (error: unknown) {
         const errorMessage = error instanceof Error ? error.message : 'Giriş başarısız'
+        console.error('Login failed:', errorMessage)
 
         dispatch(setError(errorMessage))
         dispatch(
@@ -221,45 +252,48 @@ export function useAuth(): AuthState & AuthActions {
         dispatch(setLoading(false))
       }
     },
-    [dispatch, tokenManager],
+    [dispatch, tokenManager, setTokensInCookies],
   )
 
   // Çıkış işlemi
   const logout = useCallback(async (): Promise<void> => {
+    console.log('Logout initiated')
     dispatch(setLoading(true))
 
     try {
-      // Server'a logout request gönder (mock)
-      if (tokenManager.getAccessToken()) {
-        await new Promise((resolve) => setTimeout(resolve, 300))
-      }
-
       // Token'ları temizle
       tokenManager.removeTokens()
+      clearTokensFromCookies()
 
       // Store'u temizle
       dispatch(logoutUser())
       dispatch(setError(null))
 
-      // Başarı mesajı
-      dispatch(
-        showToast({
-          type: 'success',
-          title: 'Çıkış Yapıldı',
-          message: 'Güvenli bir şekilde çıkış yaptınız',
-          duration: 3000,
-        }),
-      )
+      console.log('Logout completed')
+
+      // Başarı mesajı (sadece manuel logout'ta)
+      if (user) {
+        dispatch(
+          showToast({
+            type: 'success',
+            title: 'Çıkış Yapıldı',
+            message: 'Güvenli bir şekilde çıkış yaptınız',
+            duration: 3000,
+          }),
+        )
+      }
     } catch (error) {
       console.warn('Logout error:', error)
       // Hata olsa bile local cleanup yapıyoruz
       tokenManager.removeTokens()
+      clearTokensFromCookies()
       dispatch(logoutUser())
     } finally {
       dispatch(setLoading(false))
       initializationRef.current = false
+      isInitializing.current = false
     }
-  }, [dispatch, tokenManager])
+  }, [dispatch, tokenManager, clearTokensFromCookies, user])
 
   // Hata temizleme
   const clearError = useCallback(() => {
@@ -268,24 +302,11 @@ export function useAuth(): AuthState & AuthActions {
 
   // Component mount olduğunda auth durumunu kontrol et
   useEffect(() => {
-    if (!initializationRef.current) {
+    if (!initializationRef.current && !isInitializing.current) {
+      console.log('Initializing auth check')
       checkAuth()
     }
   }, [checkAuth])
-
-  // Token süresini periyodik olarak kontrol et
-  useEffect(() => {
-    if (!isAuthenticated) return
-
-    const intervalId = setInterval(() => {
-      if (tokenManager.isTokenExpired()) {
-        console.warn('Token expired, logging out')
-        logout()
-      }
-    }, 60000) // Her dakika kontrol et
-
-    return () => clearInterval(intervalId)
-  }, [isAuthenticated, tokenManager, logout])
 
   return {
     user,

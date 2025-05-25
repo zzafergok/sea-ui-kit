@@ -18,7 +18,7 @@ const createNoopStorage = () => {
     getItem() {
       return Promise.resolve(null)
     },
-    setItem(_key: any, value: any) {
+    setItem(_key: string, value: unknown) {
       return Promise.resolve(value)
     },
     removeItem() {
@@ -35,14 +35,14 @@ const persistConfig = {
   version: 1,
   storage,
   whitelist: ['theme', 'lang', 'user'],
-  blacklist: ['toast', 'api', 'loading'],
+  blacklist: ['toast', 'api', 'loading'], // Toast'ları persist etmiyoruz
 }
 
 const rootReducer = combineReducers({
   theme: themeReducer,
   lang: langReducer,
   user: userReducer,
-  toast: toastReducer,
+  toast: toastReducer, // Toast slice'ını persist dışında tutuyoruz
   loading: loadingReducer,
   [apiSlice.reducerPath]: apiSlice.reducer,
 })
@@ -55,10 +55,11 @@ export const store = configureStore({
     getDefaultMiddleware({
       serializableCheck: {
         ignoredActions: [FLUSH, REHYDRATE, PAUSE, PERSIST, PURGE, REGISTER],
-        ignoredPaths: ['api'],
+        ignoredPaths: ['api', 'toast.messageHashes'], // Toast state'ını serializable check'ten hariç tutuyoruz
+        ignoredActionsPaths: ['meta.arg', 'payload.timestamp'],
       },
       immutableCheck: {
-        ignoredPaths: ['api'],
+        ignoredPaths: ['api', 'toast'],
       },
     }).concat(apiSlice.middleware),
   devTools: process.env.NODE_ENV === 'development',

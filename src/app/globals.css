@@ -250,6 +250,71 @@ button {
   background: var(--neutral-500);
 }
 
+/* Toast Animations - Modern */
+@keyframes toast-slide-in-right {
+  from {
+    opacity: 0;
+    transform: translateX(100%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-slide-in-left {
+  from {
+    opacity: 0;
+    transform: translateX(-100%) scale(0.8);
+  }
+  to {
+    opacity: 1;
+    transform: translateX(0) scale(1);
+  }
+}
+
+@keyframes toast-fade-in {
+  from {
+    opacity: 0;
+    transform: translateY(-20px) scale(0.9);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+@keyframes toast-progress {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Toast Container z-index fix */
+.toast-container {
+  z-index: 9999;
+}
+
+/* Improved backdrop blur support */
+@supports (backdrop-filter: blur(8px)) {
+  .toast-backdrop-blur {
+    backdrop-filter: blur(8px);
+  }
+}
+
+@supports not (backdrop-filter: blur(8px)) {
+  .toast-backdrop-blur {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+
+  .dark .toast-backdrop-blur {
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+}
+
 /* Toast Animations */
 @keyframes slideInRight {
   from {
