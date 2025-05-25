@@ -35,7 +35,12 @@
     "alreadyLoggedIn": "You are already logged in as {{name}}",
     "pleaseLogin": "Please log in to continue",
     "dontHaveAccount": "Don't have an account?",
-    "signUpHere": "Sign up here"
+    "signUpHere": "Sign up here",
+    "invalidCredentials": "E-posta veya şifre hatalı",
+    "sessionExpired": "Oturumunuz sona erdi",
+    "tokenRefreshFailed": "Token yenileme başarısız",
+    "accountLocked": "Hesabınız kilitlendi",
+    "tooManyAttempts": "Çok fazla başarısız deneme"
   },
   "navigation": {
     "home": "Home",
@@ -135,7 +140,27 @@
     "minLength": "Must be at least {{min}} characters",
     "maxLength": "Must be at most {{max}} characters",
     "passwordMatch": "Passwords must match",
-    "invalidFormat": "Invalid format"
+    "invalidFormat": "Invalid format",
+    "passwordComplexity": "Şifre en az bir büyük harf, küçük harf, rakam ve özel karakter içermelidir",
+    "emailDomainNotAllowed": "Bu e-posta domaini desteklenmiyor",
+    "phoneFormat": "Geçerli bir telefon numarası girin",
+    "passwordWeak": "Şifre çok zayıf",
+    "passwordMedium": "Şifre orta güçte",
+    "passwordStrong": "Şifre güçlü",
+    "invalidType": "{{expected}} tipinde değer bekleniyor, {{received}} alındı",
+    "minValue": "En az {{min}} olmalıdır",
+    "maxValue": "En fazla {{max}} olmalıdır",
+    "minItems": "En az {{min}} öğe içermelidir",
+    "maxItems": "En fazla {{max}} öğe içerebilir",
+    "url": "Geçerli bir URL girin",
+    "uuid": "Geçerli bir UUID girin",
+    "pattern": "Geçersiz format",
+    "mustBe": "{{value}} olmalıdır",
+    "unknownKeys": "Bilinmeyen alanlar: {{keys}}",
+    "invalidOption": "Geçersiz seçenek",
+    "invalidDate": "Geçersiz tarih",
+    "custom": "Geçersiz değer",
+    "invalid": "Geçersiz değer"
   },
   "theme": {
     "light": "Light",

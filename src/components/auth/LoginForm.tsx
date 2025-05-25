@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useEffect, useState, useCallback, useMemo } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Input } from '../Input/Input'
 import { Button } from '../Button/Button'
@@ -9,48 +9,163 @@ import { Checkbox } from '../Checkbox/Checkbox'
 import { Form, FormItem, FormField, FormLabel, FormMessage } from '../Form/Form'
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth'
 import { useAuth } from '@/hooks/useAuth'
+import { LoadingSpinner } from '../Loading/LoadingSpinner'
+import { useRouter } from 'next/navigation'
+import { cn } from '@/lib/utils'
 
 interface LoginFormProps {
-  onSubmit?: (data: LoginFormValues) => void
+  onSubmit?: (data: LoginFormValues) => void | Promise<void>
   isLoading?: boolean
   redirectOnSuccess?: string
+  showRememberMe?: boolean
+  showForgotPassword?: boolean
+  showRegisterLink?: boolean
+  className?: string
+  variant?: 'default' | 'modal' | 'minimal'
 }
 
-export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/dashboard' }: LoginFormProps) {
-  const { t } = useTranslation()
-  const [mounted, setMounted] = useState(false)
-  const { login, isLoading: isLoginLoading, isAuthenticated, user } = useAuth()
+// Mock kullanıcı verileri - production'da API'dan gelecek
+const MOCK_USERS = [
+  {
+    email: 'admin@example.com',
+    password: 'Admin123!',
+    role: 'admin',
+    name: 'Admin Kullanıcı',
+  },
+  {
+    email: 'user@example.com',
+    password: 'User123!',
+    role: 'user',
+    name: 'Standart Kullanıcı',
+  },
+  {
+    email: 'demo@example.com',
+    password: 'Demo123!',
+    role: 'demo',
+    name: 'Demo Kullanıcı',
+  },
+] as const
 
+export function LoginForm({
+  onSubmit,
+  isLoading: externalLoading = false,
+  redirectOnSuccess = '/dashboard',
+  showRememberMe = true,
+  showForgotPassword = true,
+  showRegisterLink = true,
+  className,
+  variant = 'default',
+}: LoginFormProps) {
+  const { t } = useTranslation()
+  const router = useRouter()
+  const [mounted, setMounted] = useState(false)
+  const [selectedMockUser, setSelectedMockUser] = useState<(typeof MOCK_USERS)[number] | null>(null)
+
+  const { login, isLoading: authLoading, isAuthenticated, user } = useAuth()
+
+  // Hydration kontrolü
   useEffect(() => {
     setMounted(true)
   }, [])
 
+  // Form konfigürasyonunu güncelle
   const form = useForm(loginSchema, {
     defaultValues: {
       email: '',
       password: '',
       rememberMe: false,
     },
+    mode: 'onBlur', // onChange yerine onBlur kullan
+    reValidateMode: 'onChange',
   })
 
-  // Login success handling
+  // Loading durumu - harici veya dahili loading
+  const isFormLoading = useMemo(() => externalLoading || authLoading, [externalLoading, authLoading])
+
+  // Form alanlarını izle
+  const emailValue = form.watch('email')
+  const passwordValue = form.watch('password')
+
+  // Button disable koşulunu güncelle
+  const isButtonDisabled = useMemo(() => {
+    // Sadece temel alanlar dolu mu kontrol et
+    const hasRequiredFields = emailValue.trim().length > 0 && passwordValue.length > 0
+
+    // Loading durumu veya temel alanlar boşsa disable et
+    return isFormLoading || !hasRequiredFields
+  }, [isFormLoading, emailValue, passwordValue])
+
+  // Variant'a göre stil sınıfları
+  const containerClasses = useMemo(() => {
+    const baseClasses = 'bg-white dark:bg-neutral-800 rounded-lg shadow-md'
+
+    switch (variant) {
+      case 'modal':
+        return cn(baseClasses, 'p-6 w-full max-w-sm')
+      case 'minimal':
+        return cn('bg-transparent shadow-none', 'p-4')
+      default:
+        return cn(baseClasses, 'p-6 w-full max-w-md')
+    }
+  }, [variant])
+
+  // Mock kullanıcı seçimi
+  const handleMockUserSelect = useCallback(
+    (mockUser: (typeof MOCK_USERS)[number]) => {
+      setSelectedMockUser(mockUser)
+      form.setValue('email', mockUser.email)
+      form.setValue('password', mockUser.password)
+    },
+    [form],
+  )
+
+  // Form submit işlemi
+  const handleFormSubmit = useCallback(
+    async (data: LoginFormValues) => {
+      try {
+        if (onSubmit) {
+          await onSubmit(data)
+        } else {
+          await login(data)
+        }
+      } catch (error) {
+        console.error('Login failed:', error)
+        // Hata durumunda form alanlarını temizle
+        if (error instanceof Error && error.message.includes('Invalid credentials')) {
+          form.setError('password', {
+            type: 'manual',
+            message: t('auth.invalidCredentials'),
+          })
+        }
+      }
+    },
+    [onSubmit, login, form, t],
+  )
+
+  // Başarılı giriş sonrası yönlendirme
   useEffect(() => {
     if (isAuthenticated && user && mounted) {
-      console.log('User successfully logged in:', user)
-      if (redirectOnSuccess && typeof window !== 'undefined') {
-        // Redirect after successful login
-        setTimeout(() => {
-          window.location.href = redirectOnSuccess
-        }, 1000)
-      }
-    }
-  }, [isAuthenticated, user, mounted, redirectOnSuccess])
+      const timer = setTimeout(() => {
+        if (redirectOnSuccess && typeof window !== 'undefined') {
+          router.push(redirectOnSuccess)
+        }
+      }, 1000)
 
+      return () => clearTimeout(timer)
+    }
+  }, [isAuthenticated, user, mounted, redirectOnSuccess, router])
+
+  // SSR hydration kontrolü
   if (!mounted) {
     return (
-      <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
-        <div className='w-full max-w-md p-6 bg-white dark:bg-neutral-800 rounded-lg shadow-md'>
-          <div className='animate-pulse'>
+      <div
+        className={cn(
+          'min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900',
+          className,
+        )}
+      >
+        <div className={containerClasses}>
+          <div className='animate-pulse space-y-4'>
             <div className='h-8 bg-neutral-200 dark:bg-neutral-700 rounded mb-6'></div>
             <div className='space-y-4'>
               <div className='h-4 bg-neutral-200 dark:bg-neutral-700 rounded'></div>
@@ -65,12 +180,17 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
     )
   }
 
-  // Show success message if already logged in
+  // Zaten giriş yapılmış durumu
   if (isAuthenticated && user) {
     return (
-      <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
-        <div className='w-full max-w-md p-6 bg-white dark:bg-neutral-800 rounded-lg shadow-md text-center'>
-          <div className='mb-4'>
+      <div
+        className={cn(
+          'min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900',
+          className,
+        )}
+      >
+        <div className={containerClasses}>
+          <div className='text-center'>
             <div className='w-16 h-16 bg-green-100 dark:bg-green-900/20 rounded-full flex items-center justify-center mx-auto mb-4'>
               <svg className='w-8 h-8 text-green-500' fill='none' viewBox='0 0 24 24' stroke='currentColor'>
                 <path strokeLinecap='round' strokeLinejoin='round' strokeWidth={2} d='M5 13l4 4L19 7' />
@@ -80,9 +200,9 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
               {t('auth.welcomeBack')}
             </h2>
             <p className='text-neutral-600 dark:text-neutral-400 mb-4'>
-              {t('auth.alreadyLoggedIn', { name: user.name })}
+              {t('auth.alreadyLoggedIn', { name: user.email })}
             </p>
-            <Button onClick={() => (window.location.href = redirectOnSuccess)} className='w-full'>
+            <Button onClick={() => router.push(redirectOnSuccess)} className='w-full' disabled={isFormLoading}>
               {t('common.continue')}
             </Button>
           </div>
@@ -91,25 +211,52 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
     )
   }
 
-  const handleFormSubmit = async (data: LoginFormValues) => {
-    try {
-      await login(data)
-      onSubmit?.(data)
-    } catch (error) {
-      console.error('Login failed:', error)
-    }
-  }
-
-  const isFormLoading = isLoading || isLoginLoading
-
   return (
-    <div className='min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
-      <div className='w-full max-w-md p-6 bg-white dark:bg-neutral-800 rounded-lg shadow-md'>
-        <h2 className='text-2xl font-semibold text-center mb-6 text-primary-700 dark:text-primary-500'>
-          {t('auth.login')}
-        </h2>
+    <div
+      className={cn(
+        'min-h-screen w-full flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900',
+        className,
+      )}
+    >
+      <div className={containerClasses}>
+        {/* Header */}
+        <div className='text-center mb-6'>
+          <h2 className='text-2xl font-semibold text-primary-700 dark:text-primary-500'>{t('auth.login')}</h2>
+          {variant !== 'minimal' && (
+            <p className='mt-2 text-sm text-neutral-600 dark:text-neutral-400'>{t('auth.pleaseLogin')}</p>
+          )}
+        </div>
 
+        {/* Mock Kullanıcı Seçimi - Sadece development ortamında */}
+        {process.env.NODE_ENV === 'development' && (
+          <div className='mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 rounded-lg border border-blue-200 dark:border-blue-800'>
+            <h3 className='text-sm font-medium text-blue-800 dark:text-blue-200 mb-3'>Demo Hesapları (Development)</h3>
+            <div className='grid gap-2'>
+              {MOCK_USERS.map((mockUser) => (
+                <button
+                  key={mockUser.email}
+                  type='button'
+                  onClick={() => handleMockUserSelect(mockUser)}
+                  className={cn(
+                    'text-left p-2 rounded text-xs transition-colors',
+                    selectedMockUser?.email === mockUser.email
+                      ? 'bg-blue-200 dark:bg-blue-800 text-blue-900 dark:text-blue-100'
+                      : 'bg-blue-100 dark:bg-blue-900/50 text-blue-800 dark:text-blue-200 hover:bg-blue-150 dark:hover:bg-blue-800/70',
+                  )}
+                  disabled={isFormLoading}
+                >
+                  <div className='font-medium'>{mockUser.name}</div>
+                  <div className='text-blue-600 dark:text-blue-300'>{mockUser.email}</div>
+                  <div className='text-blue-500 dark:text-blue-400'>Şifre: {mockUser.password}</div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
+
+        {/* Login Form */}
         <Form form={form} onSubmit={handleFormSubmit} className='space-y-6'>
+          {/* Email Field */}
           <FormField
             control={form.control}
             name='email'
@@ -121,6 +268,7 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
                   placeholder='email@example.com'
                   disabled={isFormLoading}
                   autoComplete='email'
+                  autoFocus
                   {...field}
                 />
                 <FormMessage />
@@ -128,61 +276,92 @@ export function LoginForm({ onSubmit, isLoading = false, redirectOnSuccess = '/d
             )}
           />
 
+          {/* Password Field */}
           <FormField
             control={form.control}
             name='password'
             render={({ field }) => (
               <FormItem>
                 <FormLabel required>{t('auth.password')}</FormLabel>
-                <Input type='password' disabled={isFormLoading} autoComplete='current-password' {...field} />
+                <Input
+                  type='password'
+                  placeholder='••••••••'
+                  disabled={isFormLoading}
+                  autoComplete='current-password'
+                  {...field}
+                />
                 <FormMessage />
               </FormItem>
             )}
           />
 
+          {/* Remember Me & Forgot Password */}
           <div className='flex items-center justify-between'>
-            <FormField
-              control={form.control}
-              name='rememberMe'
-              render={({ field }) => (
-                <div className='flex items-center space-x-2'>
-                  <Checkbox
-                    id='rememberMe'
-                    checked={field.value}
-                    onCheckedChange={field.onChange}
-                    disabled={isFormLoading}
-                  />
-                  <label
-                    htmlFor='rememberMe'
-                    className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70'
-                  >
-                    {t('auth.rememberMe')}
-                  </label>
-                </div>
-              )}
-            />
+            {showRememberMe && (
+              <FormField
+                control={form.control}
+                name='rememberMe'
+                render={({ field }) => (
+                  <div className='flex items-center space-x-2'>
+                    <Checkbox
+                      id='rememberMe'
+                      checked={field.value}
+                      onCheckedChange={field.onChange}
+                      disabled={isFormLoading}
+                    />
+                    <label
+                      htmlFor='rememberMe'
+                      className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 cursor-pointer'
+                    >
+                      {t('auth.rememberMe')}
+                    </label>
+                  </div>
+                )}
+              />
+            )}
 
-            <Button variant='ghost' className='px-0 text-sm' disabled={isFormLoading} type='button'>
-              {t('auth.forgotPassword')}
-            </Button>
+            {showForgotPassword && (
+              <Button
+                variant='ghost'
+                className='px-0 text-sm h-auto font-normal'
+                disabled={isFormLoading}
+                type='button'
+                onClick={() => router.push('/auth/forgot-password')}
+              >
+                {t('auth.forgotPassword')}
+              </Button>
+            )}
           </div>
 
-          <Button type='submit' fullWidth disabled={isFormLoading || !form.formState.isValid} className='mt-6'>
-            {isFormLoading ? t('components.button.loadingText') : t('auth.login')}
+          {/* Submit Button */}
+          <Button type='submit' fullWidth disabled={isButtonDisabled} className='mt-6'>
+            {isFormLoading ? (
+              <div className='flex items-center space-x-2'>
+                <LoadingSpinner size='sm' />
+                <span>{t('components.button.loadingText')}</span>
+              </div>
+            ) : (
+              t('auth.login')
+            )}
           </Button>
         </Form>
 
-        <div className='mt-6 text-center'>
-          <p className='text-sm text-neutral-600 dark:text-neutral-400'>
-            {t('auth.dontHaveAccount')}{' '}
-            <Button
-              variant='ghost'
-              className='p-0 h-auto font-normal text-sm text-primary-700 dark:text-primary-500 hover:underline'
-            >
-              {t('auth.signUpHere')}
-            </Button>
-          </p>
-        </div>
+        {/* Register Link */}
+        {showRegisterLink && (
+          <div className='mt-6 text-center'>
+            <p className='text-sm text-neutral-600 dark:text-neutral-400'>
+              {t('auth.dontHaveAccount')}{' '}
+              <Button
+                variant='ghost'
+                className='p-0 h-auto font-normal text-sm text-primary-700 dark:text-primary-500 hover:underline'
+                onClick={() => router.push('/auth/register')}
+                disabled={isFormLoading}
+              >
+                {t('auth.signUpHere')}
+              </Button>
+            </p>
+          </div>
+        )}
       </div>
     </div>
   )
