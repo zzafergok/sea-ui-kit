@@ -1,496 +1,330 @@
 'use client'
 
-import React, { ReactNode, useEffect, useState, useCallback } from 'react'
-import { Button } from '../Button/Button'
-import { AlertTriangle, RefreshCw, Home, Bug, Clock } from 'lucide-react'
+import React, { Component, ErrorInfo, ReactNode } from 'react'
+import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
 
-interface ErrorInfo {
-  componentStack: string
-  errorBoundary?: string
-  errorBoundaryStack?: string
-}
+import { Button } from '@/components/Button/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card/Card'
 
-interface ErrorBoundaryProps {
+interface Props {
   children: ReactNode
-  fallback?: (error: Error, errorInfo: ErrorInfo, resetError: () => void) => ReactNode
+  fallback?: ReactNode
   onError?: (error: Error, errorInfo: ErrorInfo) => void
+  enableReporting?: boolean
   enableAutoRecovery?: boolean
   recoveryTimeout?: number
 }
 
-interface ErrorState {
+interface State {
   hasError: boolean
   error: Error | null
   errorInfo: ErrorInfo | null
-  errorBoundaryId: string
-  errorCount: number
-  lastErrorTime: number
+  errorId: string | null
+  retryCount: number
+  isAutoRecovering: boolean
 }
 
-/**
- * Modern Function Component Error Boundary
- * React 18+ uyumlu, hook tabanlı error boundary implementasyonu
- */
-export function GlobalErrorBoundary({
-  children,
-  fallback,
-  onError,
-  enableAutoRecovery = true,
-  recoveryTimeout = 10000,
-}: ErrorBoundaryProps) {
-  const [errorState, setErrorState] = useState<ErrorState>({
-    hasError: false,
-    error: null,
-    errorInfo: null,
-    errorBoundaryId: `error-boundary-${Date.now()}-${Math.random().toString(36).substr(2, 9)}`,
-    errorCount: 0,
-    lastErrorTime: 0,
-  })
+export class GlobalErrorBoundary extends Component<Props, State> {
+  private autoRecoveryTimer: NodeJS.Timeout | null = null
+  private maxRetries = 3
 
-  const [autoRecoveryTimer, setAutoRecoveryTimer] = useState<number | null>(null)
-  const [recoveryCountdown, setRecoveryCountdown] = useState<number>(0)
+  constructor(props: Props) {
+    super(props)
 
-  // Error reporting function
-  const reportError = useCallback(
-    (error: Error, errorInfo: ErrorInfo) => {
-      if (process.env.NODE_ENV === 'production') {
-        try {
-          // Send to error reporting service
-          if (typeof window !== 'undefined' && (window as any).gtag) {
-            return (window as any).gtag('event', 'exception', {
-              description: error.message,
-              fatal: true,
-              error_boundary_id: errorState.errorBoundaryId,
-              component_stack: errorInfo.componentStack,
-              error_count: errorState.errorCount + 1,
-            })
-          }
-
-          // Send to custom error endpoint
-          fetch('/api/errors', {
-            method: 'POST',
-            headers: {
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              message: error.message,
-              stack: error.stack,
-              componentStack: errorInfo.componentStack,
-              userAgent: navigator.userAgent,
-              url: window.location.href,
-              timestamp: new Date().toISOString(),
-              errorBoundaryId: errorState.errorBoundaryId,
-              errorCount: errorState.errorCount + 1,
-              sessionId: sessionStorage.getItem('sessionId'),
-            }),
-          }).catch((reportError) => {
-            console.error('Failed to report error:', reportError)
-          })
-        } catch (reportError) {
-          console.error('Error reporting failed:', reportError)
-        }
-      }
-    },
-    [errorState.errorBoundaryId, errorState.errorCount],
-  )
-
-  // Reset error state
-  const resetError = useCallback(() => {
-    setErrorState((prev) => ({
-      ...prev,
+    this.state = {
       hasError: false,
       error: null,
       errorInfo: null,
-    }))
-
-    if (autoRecoveryTimer) {
-      clearTimeout(autoRecoveryTimer)
-      setAutoRecoveryTimer(null)
+      errorId: null,
+      retryCount: 0,
+      isAutoRecovering: false,
     }
-
-    setRecoveryCountdown(0)
-  }, [autoRecoveryTimer])
-
-  // Auto recovery with countdown
-  const startAutoRecovery = useCallback(() => {
-    if (!enableAutoRecovery) return
-
-    const countdownInterval = setInterval(() => {
-      setRecoveryCountdown((prev) => {
-        if (prev <= 1) {
-          clearInterval(countdownInterval)
-          return 0
-        }
-        return prev - 1
-      })
-    }, 1000)
-
-    setRecoveryCountdown(recoveryTimeout / 1000)
-
-    const timer = setTimeout(() => {
-      clearInterval(countdownInterval)
-      resetError()
-    }, recoveryTimeout)
-
-    setAutoRecoveryTimer(timer as any)
-  }, [enableAutoRecovery, recoveryTimeout, resetError])
-
-  // Handle actions
-  const handleReload = useCallback(() => {
-    window.location.reload()
-  }, [])
-
-  const handleGoHome = useCallback(() => {
-    window.location.href = '/'
-  }, [])
-
-  const handleReportBug = useCallback(() => {
-    const { error, errorInfo } = errorState
-
-    const bugReportData = {
-      error: error?.message,
-      stack: error?.stack,
-      componentStack: errorInfo?.componentStack,
-      userAgent: navigator.userAgent,
-      url: window.location.href,
-      timestamp: new Date().toISOString(),
-      errorCount: errorState.errorCount,
-    }
-
-    const subject = encodeURIComponent('Bug Report: Application Error')
-    const body = encodeURIComponent(
-      `Bir hata oluştu:\n\n` +
-        `Hata: ${error?.message}\n` +
-        `URL: ${window.location.href}\n` +
-        `Zaman: ${new Date().toLocaleString('tr-TR')}\n` +
-        `Hata Sayısı: ${errorState.errorCount}\n\n` +
-        `Teknik Detaylar:\n${JSON.stringify(bugReportData, null, 2)}`,
-    )
-
-    window.open(`mailto:support@yourcompany.com?subject=${subject}&body=${body}`)
-  }, [errorState])
-
-  const handleStopRecovery = useCallback(() => {
-    if (autoRecoveryTimer) {
-      clearTimeout(autoRecoveryTimer)
-      setAutoRecoveryTimer(null)
-    }
-    setRecoveryCountdown(0)
-  }, [autoRecoveryTimer])
-
-  // Global error listeners
-  useEffect(() => {
-    const handleError = (event: ErrorEvent) => {
-      const error = event.error || new Error(event.message)
-      const errorInfo: ErrorInfo = {
-        componentStack: event.filename || 'unknown',
-      }
-
-      setErrorState((prev) => ({
-        ...prev,
-        hasError: true,
-        error,
-        errorInfo,
-        errorCount: prev.errorCount + 1,
-        lastErrorTime: Date.now(),
-      }))
-
-      reportError(error, errorInfo)
-      onError?.(error, errorInfo)
-
-      if (process.env.NODE_ENV === 'development') {
-        console.group('🚨 Global Error Caught')
-        console.error('Error:', error)
-        console.error('Event:', event)
-        console.groupEnd()
-      }
-    }
-
-    const handleUnhandledRejection = (event: PromiseRejectionEvent) => {
-      const error = new Error(event.reason?.message || 'Unhandled Promise Rejection')
-      const errorInfo: ErrorInfo = {
-        componentStack: 'Promise Rejection',
-      }
-
-      setErrorState((prev) => ({
-        ...prev,
-        hasError: true,
-        error,
-        errorInfo,
-        errorCount: prev.errorCount + 1,
-        lastErrorTime: Date.now(),
-      }))
-
-      reportError(error, errorInfo)
-      onError?.(error, errorInfo)
-    }
-
-    const handleChunkError = (event: Event) => {
-      const target = event.target as HTMLScriptElement | HTMLLinkElement
-      if (target && (target.tagName === 'SCRIPT' || target.tagName === 'LINK')) {
-        const url = target.tagName === 'SCRIPT' ? (target as HTMLScriptElement).src : (target as HTMLLinkElement).href
-        const error = new Error(`Chunk load error: ${url}`)
-        const errorInfo: ErrorInfo = {
-          componentStack: 'Chunk Loading',
-        }
-
-        setErrorState((prev) => ({
-          ...prev,
-          hasError: true,
-          error,
-          errorInfo,
-          errorCount: prev.errorCount + 1,
-          lastErrorTime: Date.now(),
-        }))
-
-        reportError(error, errorInfo)
-      }
-    }
-
-    window.addEventListener('error', handleError)
-    window.addEventListener('unhandledrejection', handleUnhandledRejection)
-    document.addEventListener('error', handleChunkError, true)
-
-    return () => {
-      window.removeEventListener('error', handleError)
-      window.removeEventListener('unhandledrejection', handleUnhandledRejection)
-      document.removeEventListener('error', handleChunkError, true)
-    }
-  }, [reportError, onError])
-
-  // Development ortamında daha detaylı error logging
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      console.log('ErrorBoundary mounted successfully')
-
-      // Console'a genel durum bilgisi
-      const logStatus = () => {
-        console.log('ErrorBoundary Status:', {
-          hasError: errorState.hasError,
-          errorCount: errorState.errorCount,
-          enableAutoRecovery,
-          recoveryTimeout,
-        })
-      }
-
-      logStatus()
-
-      return () => {
-        console.log('ErrorBoundary unmounting')
-      }
-    }
-  }, [errorState.hasError, errorState.errorCount, enableAutoRecovery, recoveryTimeout])
-
-  // Start auto recovery when error occurs
-  useEffect(() => {
-    if (errorState.hasError && enableAutoRecovery && !autoRecoveryTimer) {
-      startAutoRecovery()
-    }
-  }, [errorState.hasError, enableAutoRecovery, autoRecoveryTimer, startAutoRecovery])
-
-  // Cleanup on unmount
-  useEffect(() => {
-    return () => {
-      if (autoRecoveryTimer) {
-        clearTimeout(autoRecoveryTimer)
-      }
-    }
-  }, [autoRecoveryTimer])
-
-  if (errorState.hasError && errorState.error) {
-    if (fallback) {
-      return fallback(errorState.error, errorState.errorInfo!, resetError)
-    }
-
-    // Determine error type for better UX
-    const isChunkError =
-      errorState.error.message?.includes('Loading chunk') ||
-      errorState.error.message?.includes('Loading CSS chunk') ||
-      errorState.error.message?.includes('Chunk load error')
-
-    const isNetworkError =
-      errorState.error.message?.includes('NetworkError') ||
-      errorState.error.message?.includes('fetch') ||
-      errorState.error.message?.includes('network')
-
-    const isRepeatedError = errorState.errorCount > 1
-
-    return (
-      <div className='min-h-screen flex items-center justify-center p-4 bg-neutral-50 dark:bg-neutral-900'>
-        <div className='text-center max-w-2xl w-full bg-white dark:bg-neutral-800 rounded-lg shadow-lg p-8'>
-          <div className='mb-6'>
-            <AlertTriangle className='h-16 w-16 text-red-500 mx-auto mb-4' />
-            <h1 className='text-3xl font-bold text-neutral-900 dark:text-neutral-100 mb-2'>
-              {isChunkError
-                ? 'Uygulama Güncellendi'
-                : isNetworkError
-                  ? 'Bağlantı Hatası'
-                  : isRepeatedError
-                    ? 'Tekrarlayan Hata'
-                    : 'Bir Hata Oluştu'}
-            </h1>
-            <p className='text-lg text-neutral-600 dark:text-neutral-400'>
-              {isChunkError
-                ? 'Uygulama güncellenmiş görünüyor. Sayfayı yenileyerek devam edebilirsiniz.'
-                : isNetworkError
-                  ? 'İnternet bağlantınızı kontrol edin ve tekrar deneyin.'
-                  : isRepeatedError
-                    ? `Bu hata ${errorState.errorCount} kez oluştu. Lütfen sayfayı yenileyin veya destek ekibiyle iletişime geçin.`
-                    : 'Beklenmeyen bir hata meydana geldi. Bu durumu bildirdiğiniz için teşekkürler.'}
-            </p>
-
-            {isRepeatedError && (
-              <div className='mt-4 p-3 bg-yellow-50 dark:bg-yellow-900/20 border border-yellow-200 dark:border-yellow-800 rounded-md'>
-                <p className='text-sm text-yellow-700 dark:text-yellow-300'>
-                  Sürekli hata alıyorsanız, tarayıcı önbelleğinizi temizlemeyi deneyin.
-                </p>
-              </div>
-            )}
-          </div>
-
-          {/* Auto Recovery Countdown */}
-          {recoveryCountdown > 0 && !isChunkError && (
-            <div className='mb-6 p-4 bg-blue-50 dark:bg-blue-900/20 border border-blue-200 dark:border-blue-800 rounded-md'>
-              <div className='flex items-center justify-center space-x-2 text-blue-700 dark:text-blue-300'>
-                <Clock className='h-4 w-4' />
-                <span className='text-sm font-medium'>
-                  {recoveryCountdown} saniye sonra otomatik olarak düzelmeye çalışılacak
-                </span>
-              </div>
-
-              <Button
-                onClick={handleStopRecovery}
-                className='mt-2 text-xs text-blue-600 hover:text-blue-700 dark:text-blue-400 dark:hover:text-blue-300 underline'
-              >
-                Otomatik düzeltmeyi durdur
-              </Button>
-            </div>
-          )}
-
-          {/* Error Details - Development Only */}
-          {process.env.NODE_ENV === 'development' && errorState.error && (
-            <div className='mb-6 text-left'>
-              <details className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 rounded p-4'>
-                <summary className='font-medium text-red-700 dark:text-red-300 cursor-pointer'>
-                  Hata Detayları (Development)
-                </summary>
-                <div className='mt-4 space-y-2'>
-                  <div>
-                    <strong className='text-red-700 dark:text-red-300'>Error:</strong>
-                    <pre className='text-xs text-red-600 dark:text-red-400 mt-1 overflow-auto bg-red-100 dark:bg-red-900/30 p-2 rounded'>
-                      {errorState.error.message}
-                    </pre>
-                  </div>
-                  {errorState.error.stack && (
-                    <div>
-                      <strong className='text-red-700 dark:text-red-300'>Stack:</strong>
-                      <pre className='text-xs text-red-600 dark:text-red-400 mt-1 overflow-auto bg-red-100 dark:bg-red-900/30 p-2 rounded max-h-40'>
-                        {errorState.error.stack}
-                      </pre>
-                    </div>
-                  )}
-                  {errorState.errorInfo?.componentStack && (
-                    <div>
-                      <strong className='text-red-700 dark:text-red-300'>Component Stack:</strong>
-                      <pre className='text-xs text-red-600 dark:text-red-400 mt-1 overflow-auto bg-red-100 dark:bg-red-900/30 p-2 rounded max-h-40'>
-                        {errorState.errorInfo.componentStack}
-                      </pre>
-                    </div>
-                  )}
-                  <div className='text-xs text-red-600 dark:text-red-400'>
-                    <strong>Error Count:</strong> {errorState.errorCount}
-                  </div>
-                </div>
-              </details>
-            </div>
-          )}
-
-          {/* Action Buttons */}
-          <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-            <Button onClick={resetError} className='flex items-center gap-2' variant='default'>
-              <RefreshCw className='h-4 w-4' />
-              Tekrar Dene
-            </Button>
-
-            <Button onClick={handleReload} className='flex items-center gap-2' variant='outline'>
-              <RefreshCw className='h-4 w-4' />
-              Sayfayı Yenile
-            </Button>
-
-            <Button onClick={handleGoHome} className='flex items-center gap-2' variant='ghost'>
-              <Home className='h-4 w-4' />
-              Ana Sayfaya Dön
-            </Button>
-
-            {!isChunkError && (
-              <Button onClick={handleReportBug} className='flex items-center gap-2' variant='ghost'>
-                <Bug className='h-4 w-4' />
-                Hatayı Bildir
-              </Button>
-            )}
-          </div>
-        </div>
-      </div>
-    )
   }
 
-  return <>{children}</>
+  static getDerivedStateFromError(error: Error): Partial<State> {
+    const errorId = `error_${Date.now()}_${Math.random().toString(36).substr(2, 9)}`
+
+    return {
+      hasError: true,
+      error,
+      errorId,
+    }
+  }
+
+  componentDidCatch(error: Error, errorInfo: ErrorInfo) {
+    this.setState({ errorInfo })
+
+    // Error reporting
+    if (this.props.onError) {
+      this.props.onError(error, errorInfo)
+    }
+
+    // Auto-recovery mechanism
+    if (this.props.enableAutoRecovery && this.state.retryCount < this.maxRetries) {
+      this.startAutoRecovery()
+    }
+
+    // Development logging
+    if (process.env.NODE_ENV === 'development') {
+      console.group('🚨 Global Error Boundary - Error Caught')
+      console.error('Error:', error)
+      console.error('Error Info:', errorInfo)
+      console.error('Component Stack:', errorInfo.componentStack)
+      console.groupEnd()
+    }
+
+    // Production error reporting
+    if (process.env.NODE_ENV === 'production' && this.props.enableReporting) {
+      this.reportError(error, errorInfo)
+    }
+  }
+
+  componentWillUnmount() {
+    if (this.autoRecoveryTimer) {
+      clearTimeout(this.autoRecoveryTimer)
+    }
+  }
+
+  private startAutoRecovery = () => {
+    if (this.autoRecoveryTimer) {
+      clearTimeout(this.autoRecoveryTimer)
+    }
+
+    this.setState({ isAutoRecovering: true })
+
+    this.autoRecoveryTimer = setTimeout(() => {
+      this.setState((prevState) => ({
+        hasError: false,
+        error: null,
+        errorInfo: null,
+        errorId: null,
+        retryCount: prevState.retryCount + 1,
+        isAutoRecovering: false,
+      }))
+    }, this.props.recoveryTimeout || 3000)
+  }
+
+  private reportError = async (error: Error, errorInfo: ErrorInfo) => {
+    try {
+      // Gerçek projede burada error tracking servisi kullanılır
+      // Örnek: Sentry, LogRocket, Bugsnag, vb.
+      const errorReport = {
+        message: error.message,
+        stack: error.stack,
+        componentStack: errorInfo.componentStack,
+        errorId: this.state.errorId,
+        timestamp: new Date().toISOString(),
+        userAgent: navigator.userAgent,
+        url: window.location.href,
+        userId: localStorage.getItem('userId') || 'anonymous',
+      }
+
+      // Mock error reporting
+      console.log('Error reported:', errorReport)
+
+      // Gerçek kullanımda:
+      // await fetch('/api/errors', {
+      //   method: 'POST',
+      //   headers: { 'Content-Type': 'application/json' },
+      //   body: JSON.stringify(errorReport)
+      // })
+    } catch (reportingError) {
+      console.error('Failed to report error:', reportingError)
+    }
+  }
+
+  private handleRetry = () => {
+    this.setState({
+      hasError: false,
+      error: null,
+      errorInfo: null,
+      errorId: null,
+      retryCount: 0,
+      isAutoRecovering: false,
+    })
+  }
+
+  private handleGoHome = () => {
+    window.location.href = '/'
+  }
+
+  private handleReportIssue = () => {
+    const errorDetails = {
+      message: this.state.error?.message || 'Unknown error',
+      stack: this.state.error?.stack || '',
+      errorId: this.state.errorId,
+      timestamp: new Date().toISOString(),
+    }
+
+    const githubUrl = `https://github.com/zzafergok/sea-ui-kit/issues/new?title=Error Report: ${encodeURIComponent(errorDetails.message)}&body=${encodeURIComponent(`**Error ID:** ${errorDetails.errorId}\n**Timestamp:** ${errorDetails.timestamp}\n**Message:** ${errorDetails.message}\n\n**Steps to reproduce:**\n1. \n2. \n3. \n\n**Additional context:**\n`)}`
+
+    window.open(githubUrl, '_blank')
+  }
+
+  private getErrorSeverity = (error: Error): 'low' | 'medium' | 'high' | 'critical' => {
+    const message = error.message.toLowerCase()
+
+    if (message.includes('chunk') || message.includes('loading')) return 'low'
+    if (message.includes('network') || message.includes('fetch')) return 'medium'
+    if (message.includes('syntax') || message.includes('reference')) return 'high'
+
+    return 'critical'
+  }
+
+  private getSeverityColor = (severity: string) => {
+    switch (severity) {
+      case 'low':
+        return 'text-yellow-600 dark:text-yellow-400'
+      case 'medium':
+        return 'text-orange-600 dark:text-orange-400'
+      case 'high':
+        return 'text-red-600 dark:text-red-400'
+      case 'critical':
+        return 'text-red-700 dark:text-red-300'
+      default:
+        return 'text-neutral-600 dark:text-neutral-400'
+    }
+  }
+
+  render() {
+    if (this.state.hasError) {
+      // Custom fallback UI varsa onu göster
+      if (this.props.fallback) {
+        return this.props.fallback
+      }
+
+      const severity = this.state.error ? this.getErrorSeverity(this.state.error) : 'medium'
+      const canRetry = this.state.retryCount < this.maxRetries
+
+      return (
+        <div className='min-h-screen bg-neutral-50 dark:bg-neutral-900 flex items-center justify-center p-4'>
+          <Card className='w-full max-w-2xl'>
+            <CardHeader className='text-center'>
+              <div className='flex justify-center mb-4'>
+                <div className='p-3 bg-red-100 dark:bg-red-900/20 rounded-full'>
+                  <AlertTriangle className='h-8 w-8 text-red-600 dark:text-red-400' />
+                </div>
+              </div>
+              <CardTitle className='text-2xl font-bold text-neutral-900 dark:text-neutral-100'>
+                Beklenmeyen Bir Hata Oluştu
+              </CardTitle>
+              <p className='text-neutral-600 dark:text-neutral-400 mt-2'>
+                Uygulama beklenmeyen bir hatayla karşılaştı. Aşağıdaki seçenekleri deneyebilirsiniz.
+              </p>
+            </CardHeader>
+
+            <CardContent className='space-y-6'>
+              {/* Error Details */}
+              <div className='bg-neutral-100 dark:bg-neutral-800 rounded-lg p-4'>
+                <div className='flex items-center justify-between mb-2'>
+                  <h4 className='font-medium text-neutral-900 dark:text-neutral-100'>Hata Detayları</h4>
+                  <span
+                    className={`text-xs font-medium px-2 py-1 rounded ${this.getSeverityColor(severity)} bg-current bg-opacity-10`}
+                  >
+                    {severity.toUpperCase()}
+                  </span>
+                </div>
+
+                {this.state.error && (
+                  <div className='space-y-2'>
+                    <p className='text-sm text-neutral-700 dark:text-neutral-300 font-mono'>
+                      {this.state.error.message}
+                    </p>
+                    {this.state.errorId && (
+                      <p className='text-xs text-neutral-500 dark:text-neutral-400'>Hata ID: {this.state.errorId}</p>
+                    )}
+                  </div>
+                )}
+              </div>
+
+              {/* Auto Recovery Info */}
+              {this.state.isAutoRecovering && (
+                <div className='flex items-center justify-center space-x-2 text-sm text-blue-600 dark:text-blue-400'>
+                  <RefreshCw className='h-4 w-4 animate-spin' />
+                  <span>Otomatik düzeltme deneniyor...</span>
+                </div>
+              )}
+
+              {/* Retry Count */}
+              {this.state.retryCount > 0 && (
+                <p className='text-center text-sm text-neutral-500 dark:text-neutral-400'>
+                  Deneme sayısı: {this.state.retryCount}/{this.maxRetries}
+                </p>
+              )}
+
+              {/* Action Buttons */}
+              <div className='flex flex-col sm:flex-row gap-3 justify-center'>
+                {canRetry && (
+                  <Button
+                    onClick={this.handleRetry}
+                    className='flex items-center gap-2'
+                    disabled={this.state.isAutoRecovering}
+                  >
+                    <RefreshCw className={`h-4 w-4 ${this.state.isAutoRecovering ? 'animate-spin' : ''}`} />
+                    Tekrar Dene
+                  </Button>
+                )}
+
+                <Button variant='outline' onClick={this.handleGoHome} className='flex items-center gap-2'>
+                  <Home className='h-4 w-4' />
+                  Ana Sayfaya Dön
+                </Button>
+
+                <Button variant='ghost' onClick={this.handleReportIssue} className='flex items-center gap-2'>
+                  <Bug className='h-4 w-4' />
+                  Sorunu Bildir
+                </Button>
+              </div>
+
+              {/* Development Info */}
+              {process.env.NODE_ENV === 'development' && this.state.error && (
+                <details className='mt-6'>
+                  <summary className='cursor-pointer text-sm font-medium text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100'>
+                    Geliştirici Bilgileri (Sadece Development)
+                  </summary>
+                  <div className='mt-3 p-4 bg-neutral-900 dark:bg-neutral-800 rounded-lg text-xs font-mono text-green-400 overflow-auto max-h-64'>
+                    <div className='space-y-2'>
+                      <div>
+                        <strong>Error Stack:</strong>
+                        <pre className='mt-1 whitespace-pre-wrap'>{this.state.error.stack}</pre>
+                      </div>
+                      {this.state.errorInfo?.componentStack && (
+                        <div>
+                          <strong>Component Stack:</strong>
+                          <pre className='mt-1 whitespace-pre-wrap'>{this.state.errorInfo.componentStack}</pre>
+                        </div>
+                      )}
+                    </div>
+                  </div>
+                </details>
+              )}
+            </CardContent>
+          </Card>
+        </div>
+      )
+    }
+
+    return this.props.children
+  }
 }
 
-/**
- * Hook version for error handling
- */
-export function useErrorHandler() {
-  const [error, setError] = useState<Error | null>(null)
+// Hook versiyonu (fonksiyonel bileşenler için)
+export function useErrorBoundary() {
+  const [error, setError] = React.useState<Error | null>(null)
 
-  useEffect(() => {
+  const resetError = React.useCallback(() => {
+    setError(null)
+  }, [])
+
+  const captureError = React.useCallback((error: Error) => {
+    setError(error)
+  }, [])
+
+  React.useEffect(() => {
     if (error) {
       throw error
     }
   }, [error])
 
-  const captureError = useCallback((error: Error) => {
-    setError(error)
-  }, [])
-
-  const resetError = useCallback(() => {
-    setError(null)
-  }, [])
-
   return { captureError, resetError }
-}
-
-/**
- * Higher Order Component for error boundaries
- */
-export function withErrorBoundary<P extends object>(
-  Component: React.ComponentType<P>,
-  errorBoundaryProps?: Partial<ErrorBoundaryProps>,
-) {
-  const WrappedComponent = (props: P) => {
-    return (
-      <GlobalErrorBoundary {...errorBoundaryProps}>
-        <Component {...props} />
-      </GlobalErrorBoundary>
-    )
-  }
-
-  WrappedComponent.displayName = `withErrorBoundary(${Component.displayName || Component.name})`
-  return WrappedComponent
-}
-
-/**
- * Error boundary provider for multiple error boundaries
- */
-export function ErrorBoundaryProvider({
-  children,
-  boundaries = [],
-}: {
-  children: ReactNode
-  boundaries?: Array<Partial<ErrorBoundaryProps>>
-}) {
-  return boundaries.reduce(
-    (wrapped, boundaryProps) => <GlobalErrorBoundary {...boundaryProps}>{wrapped}</GlobalErrorBoundary>,
-    children as ReactNode,
-  )
 }

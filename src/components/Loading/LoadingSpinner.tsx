@@ -4,34 +4,38 @@ import React from 'react'
 import { cva, type VariantProps } from 'class-variance-authority'
 import { cn } from '@/lib/utils'
 
-const spinnerVariants = cva('animate-spin', {
+const spinnerVariants = cva('animate-spin rounded-full border-solid border-current', {
   variants: {
     size: {
-      sm: 'h-4 w-4',
-      md: 'h-6 w-6',
-      lg: 'h-8 w-8',
-      xl: 'h-12 w-12',
+      xs: 'h-3 w-3 border-[1.5px]',
+      sm: 'h-4 w-4 border-2',
+      md: 'h-6 w-6 border-2',
+      lg: 'h-8 w-8 border-[3px]',
+      xl: 'h-12 w-12 border-4',
+      '2xl': 'h-16 w-16 border-4',
     },
-    color: {
+    variant: {
       default: 'text-primary-600 dark:text-primary-400',
-      neutral: 'text-neutral-600 dark:text-neutral-400',
+      secondary: 'text-neutral-600 dark:text-neutral-400',
       white: 'text-white',
-      current: 'text-current',
+      accent: 'text-accent-600 dark:text-accent-400',
     },
   },
   defaultVariants: {
     size: 'md',
-    color: 'default',
+    variant: 'default',
   },
 })
 
-const dotsVariants = cva('inline-flex items-center gap-1', {
+const dotsVariants = cva('flex items-center space-x-1', {
   variants: {
     size: {
-      sm: 'gap-1',
-      md: 'gap-1.5',
-      lg: 'gap-2',
-      xl: 'gap-3',
+      xs: 'space-x-0.5',
+      sm: 'space-x-1',
+      md: 'space-x-1.5',
+      lg: 'space-x-2',
+      xl: 'space-x-2.5',
+      '2xl': 'space-x-3',
     },
   },
   defaultVariants: {
@@ -39,261 +43,162 @@ const dotsVariants = cva('inline-flex items-center gap-1', {
   },
 })
 
-const dotVariants = cva('rounded-full animate-bounce bg-current', {
+const dotVariants = cva('rounded-full animate-pulse', {
   variants: {
     size: {
-      sm: 'h-1 w-1',
-      md: 'h-1.5 w-1.5',
-      lg: 'h-2 w-2',
+      xs: 'h-1 w-1',
+      sm: 'h-1.5 w-1.5',
+      md: 'h-2 w-2',
+      lg: 'h-2.5 w-2.5',
       xl: 'h-3 w-3',
+      '2xl': 'h-4 w-4',
+    },
+    variant: {
+      default: 'bg-primary-600 dark:bg-primary-400',
+      secondary: 'bg-neutral-600 dark:bg-neutral-400',
+      white: 'bg-white',
+      accent: 'bg-accent-600 dark:bg-accent-400',
     },
   },
   defaultVariants: {
     size: 'md',
+    variant: 'default',
   },
 })
 
-const pulseVariants = cva('rounded-full animate-pulse bg-current', {
-  variants: {
-    size: {
-      sm: 'h-4 w-4',
-      md: 'h-6 w-6',
-      lg: 'h-8 w-8',
-      xl: 'h-12 w-12',
-    },
-  },
-  defaultVariants: {
-    size: 'md',
-  },
-})
-
-export interface LoadingSpinnerProps extends VariantProps<typeof spinnerVariants> {
-  className?: string
-  label?: string
+export interface LoadingSpinnerProps
+  extends React.HTMLAttributes<HTMLDivElement>,
+    VariantProps<typeof spinnerVariants> {
+  type?: 'spinner' | 'dots' | 'pulse' | 'bars'
+  text?: string
+  textPosition?: 'bottom' | 'right'
 }
 
-export interface LoadingDotsProps extends VariantProps<typeof dotsVariants> {
-  className?: string
-  color?: 'default' | 'neutral' | 'white' | 'current'
-  label?: string
-}
+export const LoadingSpinner = React.forwardRef<HTMLDivElement, LoadingSpinnerProps>(
+  ({ className, size, variant, type = 'spinner', text, textPosition = 'bottom', ...props }, ref) => {
+    const renderSpinner = () => {
+      switch (type) {
+        case 'dots':
+          return (
+            <div className={cn(dotsVariants({ size }))}>
+              {Array.from({ length: 3 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(dotVariants({ size, variant }))}
+                  style={{
+                    animationDelay: `${i * 0.2}s`,
+                    animationDuration: '1.4s',
+                  }}
+                />
+              ))}
+            </div>
+          )
 
-export interface LoadingPulseProps extends VariantProps<typeof pulseVariants> {
-  className?: string
-  color?: 'default' | 'neutral' | 'white' | 'current'
-  label?: string
-}
+        case 'pulse':
+          return (
+            <div
+              className={cn(
+                'rounded-full animate-pulse',
+                size === 'xs' && 'h-3 w-3',
+                size === 'sm' && 'h-4 w-4',
+                size === 'md' && 'h-6 w-6',
+                size === 'lg' && 'h-8 w-8',
+                size === 'xl' && 'h-12 w-12',
+                size === '2xl' && 'h-16 w-16',
+                variant === 'default' && 'bg-primary-600 dark:bg-primary-400',
+                variant === 'secondary' && 'bg-neutral-600 dark:bg-neutral-400',
+                variant === 'white' && 'bg-white',
+                variant === 'accent' && 'bg-accent-600 dark:bg-accent-400',
+              )}
+            />
+          )
 
-// Spinner Component
-export function LoadingSpinner({ size, color, className, label, ...props }: LoadingSpinnerProps) {
-  return (
-    <div className='inline-flex flex-col items-center gap-2' {...props}>
-      <svg
-        className={cn(spinnerVariants({ size, color }), className)}
-        xmlns='http://www.w3.org/2000/svg'
-        fill='none'
-        viewBox='0 0 24 24'
-        aria-hidden={!label}
-        role={label ? 'status' : undefined}
-      >
-        <circle className='opacity-25' cx='12' cy='12' r='10' stroke='currentColor' strokeWidth='4' />
-        <path
-          className='opacity-75'
-          fill='currentColor'
-          d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
-        />
-      </svg>
-      {label && <span className='text-sm text-neutral-600 dark:text-neutral-400 sr-only'>{label}</span>}
-    </div>
-  )
-}
+        case 'bars':
+          return (
+            <div className={cn('flex items-end space-x-1', dotsVariants({ size }))}>
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={i}
+                  className={cn(
+                    'animate-pulse',
+                    size === 'xs' && 'w-0.5 h-3',
+                    size === 'sm' && 'w-0.5 h-4',
+                    size === 'md' && 'w-1 h-6',
+                    size === 'lg' && 'w-1 h-8',
+                    size === 'xl' && 'w-1.5 h-12',
+                    size === '2xl' && 'w-2 h-16',
+                    variant === 'default' && 'bg-primary-600 dark:bg-primary-400',
+                    variant === 'secondary' && 'bg-neutral-600 dark:bg-neutral-400',
+                    variant === 'white' && 'bg-white',
+                    variant === 'accent' && 'bg-accent-600 dark:bg-accent-400',
+                  )}
+                  style={{
+                    animationDelay: `${i * 0.15}s`,
+                    animationDuration: '1s',
+                  }}
+                />
+              ))}
+            </div>
+          )
 
-// Dots Component
-export function LoadingDots({ size, className, color = 'default', label, ...props }: LoadingDotsProps) {
-  const colorClasses = {
-    default: 'text-primary-600 dark:text-primary-400',
-    neutral: 'text-neutral-600 dark:text-neutral-400',
-    white: 'text-white',
-    current: 'text-current',
-  }
+        default:
+          return <div className={cn(spinnerVariants({ size, variant }), 'border-t-transparent border-r-transparent')} />
+      }
+    }
 
-  return (
-    <div className='inline-flex flex-col items-center gap-2' {...props}>
+    const textSizeClass = {
+      xs: 'text-xs',
+      sm: 'text-sm',
+      md: 'text-sm',
+      lg: 'text-base',
+      xl: 'text-lg',
+      '2xl': 'text-xl',
+    }[size || 'md']
+
+    return (
       <div
-        className={cn(dotsVariants({ size }), colorClasses[color], className)}
-        role={label ? 'status' : undefined}
-        aria-hidden={!label}
+        ref={ref}
+        className={cn(
+          'flex items-center',
+          textPosition === 'bottom' ? 'flex-col space-y-2' : 'flex-row space-x-3',
+          className,
+        )}
+        {...props}
       >
-        <div className={cn(dotVariants({ size }))} style={{ animationDelay: '0ms' }} />
-        <div className={cn(dotVariants({ size }))} style={{ animationDelay: '150ms' }} />
-        <div className={cn(dotVariants({ size }))} style={{ animationDelay: '300ms' }} />
-      </div>
-      {label && <span className='text-sm text-neutral-600 dark:text-neutral-400 sr-only'>{label}</span>}
-    </div>
-  )
-}
-
-// Pulse Component
-export function LoadingPulse({ size, className, color = 'default', label, ...props }: LoadingPulseProps) {
-  const colorClasses = {
-    default: 'text-primary-600 dark:text-primary-400',
-    neutral: 'text-neutral-600 dark:text-neutral-400',
-    white: 'text-white',
-    current: 'text-current',
-  }
-
-  return (
-    <div className='inline-flex flex-col items-center gap-2' {...props}>
-      <div
-        className={cn(pulseVariants({ size }), colorClasses[color], className)}
-        role={label ? 'status' : undefined}
-        aria-hidden={!label}
-      />
-      {label && <span className='text-sm text-neutral-600 dark:text-neutral-400 sr-only'>{label}</span>}
-    </div>
-  )
-}
-
-// Progress Circle Component
-export interface LoadingProgressProps {
-  progress: number
-  size?: 'sm' | 'md' | 'lg' | 'xl'
-  color?: 'default' | 'neutral' | 'white' | 'current'
-  className?: string
-  showPercentage?: boolean
-  label?: string
-}
-
-export function LoadingProgress({
-  progress,
-  size = 'md',
-  color = 'default',
-  className,
-  showPercentage = false,
-  label,
-  ...props
-}: LoadingProgressProps) {
-  const sizeClasses = {
-    sm: 'h-8 w-8',
-    md: 'h-12 w-12',
-    lg: 'h-16 w-16',
-    xl: 'h-24 w-24',
-  }
-
-  const textSizeClasses = {
-    sm: 'text-xs',
-    md: 'text-sm',
-    lg: 'text-base',
-    xl: 'text-lg',
-  }
-
-  const colorClasses = {
-    default: 'text-primary-600 dark:text-primary-400',
-    neutral: 'text-neutral-600 dark:text-neutral-400',
-    white: 'text-white',
-    current: 'text-current',
-  }
-
-  const radius = 45
-  const circumference = 2 * Math.PI * radius
-  const strokeDashoffset = circumference - (progress / 100) * circumference
-
-  return (
-    <div className='inline-flex flex-col items-center gap-2' {...props}>
-      <div className={cn('relative', sizeClasses[size])}>
-        <svg
-          className={cn('transform -rotate-90', sizeClasses[size], className)}
-          viewBox='0 0 100 100'
-          role={label ? 'status' : undefined}
-          aria-hidden={!label}
-        >
-          {/* Background circle */}
-          <circle
-            cx='50'
-            cy='50'
-            r={radius}
-            stroke='currentColor'
-            strokeWidth='8'
-            fill='transparent'
-            className='opacity-20'
-          />
-          {/* Progress circle */}
-          <circle
-            cx='50'
-            cy='50'
-            r={radius}
-            stroke='currentColor'
-            strokeWidth='8'
-            fill='transparent'
-            strokeDasharray={circumference}
-            strokeDashoffset={strokeDashoffset}
-            strokeLinecap='round'
-            className={cn('transition-all duration-300 ease-in-out', colorClasses[color])}
-          />
-        </svg>
-
-        {showPercentage && (
-          <div className='absolute inset-0 flex items-center justify-center'>
-            <span className={cn('font-medium', textSizeClasses[size], colorClasses[color])}>
-              {Math.round(progress)}%
-            </span>
-          </div>
+        {renderSpinner()}
+        {text && (
+          <span
+            className={cn(
+              textSizeClass,
+              'font-medium',
+              variant === 'default' && 'text-primary-600 dark:text-primary-400',
+              variant === 'secondary' && 'text-neutral-600 dark:text-neutral-400',
+              variant === 'white' && 'text-white',
+              variant === 'accent' && 'text-accent-600 dark:text-accent-400',
+            )}
+          >
+            {text}
+          </span>
         )}
       </div>
+    )
+  },
+)
 
-      {label && <span className='text-sm text-neutral-600 dark:text-neutral-400'>{label}</span>}
-    </div>
-  )
-}
+// Alt bileşenler
+export const LoadingDots = React.forwardRef<HTMLDivElement, Omit<LoadingSpinnerProps, 'type'>>(({ ...props }, ref) => (
+  <LoadingSpinner ref={ref} type='dots' {...props} />
+))
 
-// Skeleton Loader Component
-export interface LoadingSkeletonProps {
-  className?: string
-  width?: string | number
-  height?: string | number
-  variant?: 'rectangular' | 'circular' | 'text'
-  animation?: 'pulse' | 'wave' | 'none'
-}
+export const LoadingPulse = React.forwardRef<HTMLDivElement, Omit<LoadingSpinnerProps, 'type'>>(({ ...props }, ref) => (
+  <LoadingSpinner ref={ref} type='pulse' {...props} />
+))
 
-export function LoadingSkeleton({
-  className,
-  width,
-  height,
-  variant = 'rectangular',
-  animation = 'pulse',
-  ...props
-}: LoadingSkeletonProps) {
-  const variantClasses = {
-    rectangular: 'rounded',
-    circular: 'rounded-full',
-    text: 'rounded h-4',
-  }
+export const LoadingBars = React.forwardRef<HTMLDivElement, Omit<LoadingSpinnerProps, 'type'>>(({ ...props }, ref) => (
+  <LoadingSpinner ref={ref} type='bars' {...props} />
+))
 
-  const animationClasses = {
-    pulse: 'animate-pulse',
-    wave: 'animate-pulse', // Could be enhanced with wave animation
-    none: '',
-  }
-
-  const style: React.CSSProperties = {}
-  if (width) style.width = typeof width === 'number' ? `${width}px` : width
-  if (height) style.height = typeof height === 'number' ? `${height}px` : height
-
-  return (
-    <div
-      className={cn(
-        'bg-neutral-200 dark:bg-neutral-700',
-        variantClasses[variant],
-        animationClasses[animation],
-        className,
-      )}
-      style={style}
-      role='status'
-      aria-hidden='true'
-      {...props}
-    />
-  )
-}
-
-// Export all components
-export { LoadingSpinner as default }
+LoadingSpinner.displayName = 'LoadingSpinner'
+LoadingDots.displayName = 'LoadingDots'
+LoadingPulse.displayName = 'LoadingPulse'
+LoadingBars.displayName = 'LoadingBars'

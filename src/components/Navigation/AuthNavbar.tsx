@@ -1,344 +1,251 @@
 'use client'
 
-import { useRouter } from 'next/navigation'
-
-import React, { useState, useRef, useEffect } from 'react'
-
+import React, { useState, useCallback } from 'react'
+import { useRouter, usePathname } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { Bell, Search, User, Settings, LogOut, Menu, X, ChevronDown } from 'lucide-react'
+import { Menu, X, Bell, Search, Settings, LogOut, User, ChevronDown, Home, Users, BarChart3 } from 'lucide-react'
 
-import { Button } from '../Button/Button'
-import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
-import { LanguageToggle } from '../LanguageToggle/LanguageToggle'
-
+import { Button } from '@/components/Button/Button'
+import { Input } from '@/components/Input/Input'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar/Avatar'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/Dropdown/Dropdown'
+import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
+import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
 import { useAuth } from '@/hooks/useAuth'
-
 import { cn } from '@/lib/utils'
 
-interface AuthNavbarProps {
-  className?: string
-}
+const navigationItems = [
+  { href: '/dashboard', labelKey: 'navigation.dashboard', icon: Home },
+  { href: '/users', labelKey: 'navigation.users', icon: Users },
+  { href: '/components', labelKey: 'navigation.components', icon: BarChart3 },
+] as const
 
-export function AuthNavbar({ className }: AuthNavbarProps) {
+export function AuthNavbar() {
+  const router = useRouter()
+  const pathname = usePathname()
   const { t } = useTranslation()
   const { user, logout } = useAuth()
-  const router = useRouter()
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
+  const [searchQuery, setSearchQuery] = useState('')
 
-  const [isMenuOpen, setIsMenuOpen] = useState(false)
-  const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
-  const [isNotificationOpen, setIsNotificationOpen] = useState(false)
-  const [searchValue, setSearchValue] = useState('')
-
-  const profileMenuRef = useRef<HTMLDivElement>(null)
-  const notificationRef = useRef<HTMLDivElement>(null)
-
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (profileMenuRef.current && !profileMenuRef.current.contains(event.target as Node)) {
-        setIsProfileMenuOpen(false)
-      }
-      if (notificationRef.current && !notificationRef.current.contains(event.target as Node)) {
-        setIsNotificationOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  const navigation = [{ name: t('navigation.components'), href: '/components' }]
-
-  const handleNavigate = (href: string) => {
-    router.push(href)
-    setIsMenuOpen(false)
-  }
-
-  const handleLogout = async () => {
-    await logout()
-    router.push('/')
-  }
-
-  // Dashboard'a yönlendirme fonksiyonu
-  const handleLogoDashboardNavigation = () => {
-    router.push('/dashboard')
-  }
-
-  const mockNotifications = [
-    {
-      id: 1,
-      message: 'Yeni kullanıcı kaydı alındı',
-      time: '5 dk önce',
-      unread: true,
+  const handleNavigation = useCallback(
+    (href: string) => {
+      router.push(href)
+      setIsMobileMenuOpen(false)
     },
-    {
-      id: 2,
-      message: 'Sistem güncellemesi tamamlandı',
-      time: '1 saat önce',
-      unread: false,
-    },
-  ]
+    [router],
+  )
 
-  const getInitials = (name?: string, email?: string) => {
-    if (name) {
-      return name
-        .split(' ')
-        .map((n) => n[0])
-        .join('')
-        .toUpperCase()
-        .slice(0, 2)
+  const handleLogout = useCallback(async () => {
+    try {
+      await logout()
+      router.push('/')
+    } catch (error) {
+      console.error('Logout failed:', error)
     }
-    if (email) {
-      return email[0].toUpperCase()
+  }, [logout, router])
+
+  const handleProfileClick = useCallback(() => {
+    router.push('/profile')
+  }, [router])
+
+  const handleSettingsClick = useCallback(() => {
+    router.push('/settings')
+  }, [router])
+
+  const getUserInitials = useCallback(() => {
+    if (user?.username) {
+      return user.username.substring(0, 2).toUpperCase()
     }
-    return 'U'
-  }
+    return user?.email?.substring(0, 2).toUpperCase() || 'U'
+  }, [user])
 
   return (
-    <nav
-      className={cn(
-        'sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80',
-        'dark:bg-neutral-950/95 dark:supports-[backdrop-filter]:bg-neutral-950/80 dark:border-neutral-800',
-        className,
-      )}
-    >
-      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
-        <div className='flex h-16 items-center justify-between'>
-          {/* Logo ve Navigasyon */}
+    <header className='sticky top-0 z-navbar bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shadow-sm'>
+      <nav className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='flex items-center justify-between h-16'>
+          {/* Left Side - Logo & Navigation */}
           <div className='flex items-center space-x-8'>
-            {/* Mobile Menu Button */}
-            <Button
-              variant='ghost'
-              size='icon'
-              onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className='lg:hidden text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100'
-            >
-              {isMenuOpen ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
-            </Button>
-
-            {/* Logo - Dashboard'a Yönlendiren Buton */}
+            {/* Logo */}
             <button
-              onClick={handleLogoDashboardNavigation}
-              className='flex items-center space-x-3 group transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg p-1'
-              aria-label="Dashboard'a git"
+              onClick={() => handleNavigation('/dashboard')}
+              className='text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent hover:opacity-80 transition-opacity'
             >
-              <div className='relative'>
-                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 shadow-sm group-hover:shadow-md transition-shadow duration-200'>
-                  <span className='text-sm font-bold text-white'>S</span>
-                </div>
-                <div className='absolute -right-1 -top-1 h-2 w-2 rounded-full bg-accent-400 animate-pulse' />
-              </div>
-              <div className='hidden sm:block'>
-                <span className='text-lg font-semibold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent dark:from-primary-400 dark:to-accent-400 group-hover:from-primary-600 group-hover:to-accent-500 dark:group-hover:from-primary-300 dark:group-hover:to-accent-300 transition-all duration-200'>
-                  Sea UI Kit
-                </span>
-              </div>
+              Sea UI Kit
             </button>
 
             {/* Desktop Navigation */}
-            <div className='hidden lg:flex lg:items-center lg:space-x-1'>
-              {navigation.map((item) => (
-                <Button
-                  key={item.name}
-                  variant='ghost'
-                  onClick={() => handleNavigate(item.href)}
-                  className='px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-neutral-100 dark:hover:bg-neutral-800'
-                >
-                  {item.name}
-                </Button>
-              ))}
+            <div className='hidden lg:flex items-center space-x-6'>
+              {navigationItems.map((item) => {
+                const Icon = item.icon
+                return (
+                  <button
+                    key={item.href}
+                    onClick={() => handleNavigation(item.href)}
+                    className={cn(
+                      'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
+                      pathname === item.href
+                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                        : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400',
+                    )}
+                  >
+                    <Icon className='h-4 w-4' />
+                    {t(item.labelKey)}
+                  </button>
+                )
+              })}
             </div>
           </div>
 
-          {/* Search Bar - Desktop */}
-          <div className='hidden md:flex flex-1 max-w-lg mx-8'>
+          {/* Center - Search */}
+          <div className='hidden md:flex flex-1 max-w-md mx-8'>
             <div className='relative w-full'>
-              <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500' />
-              <input
-                type='text'
+              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
+              <Input
                 placeholder={t('components.navbar.searchPlaceholder')}
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className={cn(
-                  'w-full rounded-lg border bg-white pl-10 pr-4 py-2 text-sm placeholder:text-neutral-500',
-                  'border-neutral-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500',
-                  'dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-400',
-                  'dark:focus:border-primary-400 dark:focus:ring-primary-400',
-                )}
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className='pl-10 pr-4'
               />
             </div>
           </div>
 
-          {/* Right Side Actions */}
-          <div className='flex items-center space-x-2'>
-            {/* Theme & Language Toggle */}
-            <div className='hidden sm:flex items-center space-x-1'>
+          {/* Right Side - Actions & User Menu */}
+          <div className='flex items-center space-x-4'>
+            {/* Theme & Language Toggles */}
+            <div className='hidden sm:flex items-center space-x-2'>
               <ThemeToggle />
               <LanguageToggle />
             </div>
 
             {/* Notifications */}
-            <div className='relative' ref={notificationRef}>
-              <Button
-                variant='ghost'
-                size='icon'
-                onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                className='relative text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100'
-              >
-                <Bell className='h-5 w-5' />
-                {mockNotifications.some((n) => n.unread) && (
-                  <span className='absolute -right-1 -top-1 flex h-3 w-3'>
-                    <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75'></span>
-                    <span className='relative inline-flex h-3 w-3 rounded-full bg-red-500'></span>
-                  </span>
-                )}
-              </Button>
+            <Button variant='ghost' size='sm' className='relative p-2'>
+              <Bell className='h-5 w-5' />
+              <span className='absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full'></span>
+            </Button>
 
-              {isNotificationOpen && (
-                <div className='absolute right-0 mt-2 w-80 rounded-lg border bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-900 dark:border-neutral-700 z-50'>
-                  <div className='p-4 border-b border-neutral-200 dark:border-neutral-700'>
-                    <h3 className='font-medium text-neutral-900 dark:text-neutral-100'>
-                      {t('components.navbar.notifications')}
-                    </h3>
-                  </div>
-                  <div className='max-h-96 overflow-y-auto'>
-                    {mockNotifications.length > 0 ? (
-                      mockNotifications.map((notification) => (
-                        <div
-                          key={notification.id}
-                          className={cn(
-                            'p-4 border-b border-neutral-100 dark:border-neutral-700 last:border-b-0',
-                            'hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors',
-                            notification.unread && 'bg-blue-50/50 dark:bg-blue-900/10',
-                          )}
-                        >
-                          <p className='text-sm text-neutral-900 dark:text-neutral-100'>{notification.message}</p>
-                          <p className='text-xs text-neutral-500 dark:text-neutral-400 mt-1'>{notification.time}</p>
-                        </div>
-                      ))
-                    ) : (
-                      <div className='p-4 text-center text-neutral-500 dark:text-neutral-400'>
-                        {t('components.navbar.noNotifications')}
-                      </div>
-                    )}
-                  </div>
-                </div>
-              )}
-            </div>
-
-            {/* Profile Menu */}
-            <div className='relative' ref={profileMenuRef}>
-              <Button
-                variant='ghost'
-                onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className='flex items-center space-x-2 px-3 py-2 text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100'
-              >
-                <div className='flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-accent-500 text-sm font-medium text-white shadow-sm'>
-                  {getInitials(user?.username, user?.email)}
-                </div>
-                <div className='hidden sm:block text-left'>
-                  <p className='text-sm font-medium'>{user?.username || 'Kullanıcı'}</p>
-                </div>
-                <ChevronDown className='h-4 w-4' />
-              </Button>
-
-              {isProfileMenuOpen && (
-                <div className='absolute right-0 mt-2 w-56 rounded-lg border bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-900 dark:border-neutral-700 z-50'>
-                  <div className='p-4 border-b border-neutral-200 dark:border-neutral-700'>
+            {/* User Menu */}
+            <DropdownMenu>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  variant='ghost'
+                  className='flex items-center space-x-2 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                >
+                  <Avatar className='h-8 w-8'>
+                    <AvatarImage src={user?.avatar} />
+                    <AvatarFallback className='text-xs font-medium'>{getUserInitials()}</AvatarFallback>
+                  </Avatar>
+                  <div className='hidden sm:block text-left'>
                     <p className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
-                      {user?.username || 'Kullanıcı'}
+                      {user?.username || user?.email}
                     </p>
-                    <p className='text-xs text-neutral-500 dark:text-neutral-400 truncate'>{user?.email}</p>
+                    <p className='text-xs text-neutral-500 dark:text-neutral-400'>{user?.role}</p>
                   </div>
+                  <ChevronDown className='h-4 w-4 text-neutral-400' />
+                </Button>
+              </DropdownMenuTrigger>
 
-                  <div className='p-2'>
-                    <Button
-                      onClick={() => {
-                        handleNavigate('/profile')
-                        setIsProfileMenuOpen(false)
-                      }}
-                      variant='ghost'
-                      className='flex w-full items-center space-x-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-                    >
-                      <User className='h-4 w-4' />
-                      <span>{t('navigation.profile')}</span>
-                    </Button>
-
-                    <Button
-                      onClick={() => {
-                        handleNavigate('/settings')
-                        setIsProfileMenuOpen(false)
-                      }}
-                      variant='ghost'
-                      className='flex w-full items-center space-x-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
-                    >
-                      <Settings className='h-4 w-4' />
-                      <span>{t('navigation.settings')}</span>
-                    </Button>
-
-                    <div className='my-2 h-px bg-neutral-200 dark:bg-neutral-700' />
-
-                    <Button
-                      onClick={() => {
-                        handleLogout()
-                        setIsProfileMenuOpen(false)
-                      }}
-                      variant='ghost'
-                      className='flex w-full items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
-                    >
-                      <LogOut className='h-4 w-4' />
-                      <span>{t('auth.logout')}</span>
-                    </Button>
+              <DropdownMenuContent align='end' className='w-56'>
+                <DropdownMenuLabel className='font-normal'>
+                  <div className='flex flex-col space-y-1'>
+                    <p className='text-sm font-medium'>{user?.username || user?.email}</p>
+                    <p className='text-xs text-neutral-500 dark:text-neutral-400'>{user?.email}</p>
                   </div>
-                </div>
-              )}
+                </DropdownMenuLabel>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleProfileClick}>
+                  <User className='mr-2 h-4 w-4' />
+                  {t('navigation.profile')}
+                </DropdownMenuItem>
+
+                <DropdownMenuItem onClick={handleSettingsClick}>
+                  <Settings className='mr-2 h-4 w-4' />
+                  {t('navigation.settings')}
+                </DropdownMenuItem>
+
+                <DropdownMenuSeparator />
+
+                <DropdownMenuItem onClick={handleLogout} className='text-red-600 dark:text-red-400'>
+                  <LogOut className='mr-2 h-4 w-4' />
+                  {t('auth.logout')}
+                </DropdownMenuItem>
+              </DropdownMenuContent>
+            </DropdownMenu>
+
+            {/* Mobile Menu Button */}
+            <div className='lg:hidden'>
+              <Button variant='ghost' size='sm' onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className='p-2'>
+                {isMobileMenuOpen ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
+              </Button>
             </div>
           </div>
         </div>
-      </div>
 
-      {/* Mobile Menu */}
-      {isMenuOpen && (
-        <div className='lg:hidden border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950'>
-          <div className='space-y-1 px-4 pb-3 pt-2'>
-            {/* Mobile Search */}
-            <div className='relative mb-4'>
-              <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500' />
-              <input
-                type='text'
-                placeholder={t('components.navbar.searchPlaceholder')}
-                value={searchValue}
-                onChange={(e) => setSearchValue(e.target.value)}
-                className={cn(
-                  'w-full rounded-lg border bg-white pl-10 pr-4 py-2 text-sm placeholder:text-neutral-500',
-                  'border-neutral-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500',
-                  'dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-400',
-                )}
-              />
-            </div>
+        {/* Mobile Menu */}
+        {isMobileMenuOpen && (
+          <div className='lg:hidden border-t border-neutral-200 dark:border-neutral-800'>
+            <div className='px-4 py-6 space-y-6'>
+              {/* Mobile Search */}
+              <div className='md:hidden'>
+                <div className='relative'>
+                  <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
+                  <Input
+                    placeholder={t('components.navbar.searchPlaceholder')}
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    className='pl-10 pr-4 w-full'
+                  />
+                </div>
+              </div>
 
-            {/* Mobile Navigation Links */}
-            {navigation.map((item) => (
-              <Button
-                key={item.name}
-                onClick={() => handleNavigate(item.href)}
-                variant='ghost'
-                className='w-full justify-start px-3 py-2 text-base font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-neutral-100 dark:hover:bg-neutral-800'
-              >
-                {item.name}
-              </Button>
-            ))}
+              {/* Mobile Navigation */}
+              <div className='space-y-2'>
+                {navigationItems.map((item) => {
+                  const Icon = item.icon
+                  return (
+                    <button
+                      key={item.href}
+                      onClick={() => handleNavigation(item.href)}
+                      className={cn(
+                        'flex items-center gap-3 w-full px-3 py-3 text-base font-medium rounded-md transition-all duration-200',
+                        pathname === item.href
+                          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
+                          : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800',
+                      )}
+                    >
+                      <Icon className='h-5 w-5' />
+                      {t(item.labelKey)}
+                    </button>
+                  )
+                })}
+              </div>
 
-            {/* Mobile Theme & Language */}
-            <div className='flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-neutral-800 sm:hidden'>
-              <span className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>Tema & Dil</span>
-              <div className='flex items-center space-x-2'>
-                <ThemeToggle />
-                <LanguageToggle />
+              {/* Mobile Theme & Language */}
+              <div className='sm:hidden space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800'>
+                <div className='flex items-center justify-between'>
+                  <span className='text-sm font-medium'>
+                    {t('theme.light')}/{t('theme.dark')}
+                  </span>
+                  <ThemeToggle />
+                </div>
+                <div className='flex items-center justify-between'>
+                  <span className='text-sm font-medium'>Dil / Language</span>
+                  <LanguageToggle />
+                </div>
               </div>
             </div>
           </div>
-        </div>
-      )}
-    </nav>
+        )}
+      </nav>
+    </header>
   )
 }

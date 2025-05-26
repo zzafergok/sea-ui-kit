@@ -1,137 +1,155 @@
 'use client'
 
 import React from 'react'
-import Link from 'next/link'
 import { useTranslation } from 'react-i18next'
 import { Github, Twitter, Linkedin, Mail, Heart } from 'lucide-react'
+
+import { Button } from '@/components/Button/Button'
+
+const footerLinks = {
+  quickLinks: [
+    { href: '/', labelKey: 'navigation.home' },
+    { href: '/about', labelKey: 'navigation.about' },
+    { href: '/contact', labelKey: 'navigation.contact' },
+    { href: '/pricing', labelKey: 'navigation.pricing' },
+  ],
+  legal: [
+    { href: '/privacy', labelKey: 'navigation.privacy' },
+    { href: '/terms', labelKey: 'navigation.terms' },
+    { href: '/cookies', labelKey: 'navigation.cookies' },
+  ],
+  support: [
+    { href: '/help', labelKey: 'navigation.help', external: false },
+    { href: '/support', labelKey: 'navigation.support', external: false },
+    { href: 'https://github.com/zzafergok/sea-ui-kit/issues', labelKey: 'GitHub Issues', external: true },
+  ],
+} as const
+
+const socialLinks = [
+  { href: 'https://github.com/zzafergok/sea-ui-kit', icon: Github, label: 'GitHub' },
+  { href: 'https://twitter.com/zzafergok', icon: Twitter, label: 'Twitter' },
+  { href: 'https://linkedin.com/in/zzafergok', icon: Linkedin, label: 'LinkedIn' },
+  { href: 'mailto:contact@seauikit.com', icon: Mail, label: 'Email' },
+] as const
 
 export function PublicFooter() {
   const { t } = useTranslation()
   const currentYear = new Date().getFullYear()
 
-  const footerLinks = {
-    quickLinks: [
-      { name: t('navigation.home'), href: '/' },
-      { name: t('navigation.about'), href: '/about' },
-      { name: t('navigation.contact'), href: '/contact' },
-      { name: t('navigation.pricing'), href: '/pricing' },
-    ],
-    legal: [
-      { name: t('navigation.privacy'), href: '/privacy' },
-      { name: t('navigation.terms'), href: '/terms' },
-      { name: t('navigation.cookies'), href: '/cookies' },
-    ],
-    social: [
-      { name: 'GitHub', href: 'https://github.com/zzafergok/sea-ui-kit', icon: Github },
-      { name: 'Twitter', href: 'https://twitter.com/zzafergok', icon: Twitter },
-      { name: 'LinkedIn', href: 'https://linkedin.com/in/zzafergok', icon: Linkedin },
-      { name: 'Email', href: 'mailto:contact@seauikit.com', icon: Mail },
-    ],
+  const handleLinkClick = (href: string, external?: boolean) => {
+    if (external) {
+      window.open(href, '_blank', 'noopener,noreferrer')
+    } else {
+      window.location.href = href
+    }
   }
 
   return (
-    <footer className='bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-700'>
-      <div className='max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8'>
-        <div className='grid grid-cols-1 md:grid-cols-4 gap-8'>
-          {/* Brand Section */}
-          <div className='space-y-4'>
-            <div>
-              <h3 className='text-lg font-bold text-primary-600 dark:text-primary-400'>Sea UI Kit</h3>
-              <p className='mt-2 text-sm text-neutral-600 dark:text-neutral-400'>
-                Modern React uygulamaları için tasarlanmış kapsamlı component kütüphanesi.
+    <footer className='bg-neutral-50 dark:bg-neutral-900 border-t border-neutral-200 dark:border-neutral-800'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        {/* Main Footer Content */}
+        <div className='py-12'>
+          <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-8'>
+            {/* Brand Section */}
+            <div className='lg:col-span-1'>
+              <div className='flex items-center space-x-2 mb-4'>
+                <div className='text-2xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent'>
+                  Sea UI Kit
+                </div>
+              </div>
+              <p className='text-sm text-neutral-600 dark:text-neutral-400 mb-6 max-w-sm'>
+                Modern React uygulamaları için tasarlanmış kapsamlı bileşen kütüphanesi. Radix UI tabanlı, erişilebilir
+                ve özelleştirilebilir komponentler.
               </p>
+              <div className='flex space-x-3'>
+                {socialLinks.map((social) => {
+                  const Icon = social.icon
+                  return (
+                    <Button
+                      key={social.href}
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => handleLinkClick(social.href, true)}
+                      className='p-2 h-auto hover:text-primary-600 dark:hover:text-primary-400'
+                      aria-label={social.label}
+                    >
+                      <Icon className='h-4 w-4' />
+                    </Button>
+                  )
+                })}
+              </div>
             </div>
-            <div className='flex space-x-4'>
-              {footerLinks.social.map((item) => {
-                const Icon = item.icon
-                return (
-                  <Link
-                    key={item.name}
-                    href={item.href}
-                    target='_blank'
-                    rel='noopener noreferrer'
-                    className='text-neutral-400 hover:text-neutral-500 dark:hover:text-neutral-300 transition-colors'
-                  >
-                    <span className='sr-only'>{item.name}</span>
-                    <Icon className='h-5 w-5' />
-                  </Link>
-                )
-              })}
+
+            {/* Quick Links */}
+            <div>
+              <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider mb-4'>
+                {t('navigation.quickLinks')}
+              </h3>
+              <ul className='space-y-3'>
+                {footerLinks.quickLinks.map((link) => (
+                  <li key={link.href}>
+                    <button
+                      onClick={() => handleLinkClick(link.href)}
+                      className='text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200'
+                    >
+                      {t(link.labelKey)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
-          </div>
 
-          {/* Quick Links */}
-          <div>
-            <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider mb-4'>
-              {t('navigation.quickLinks')}
-            </h3>
-            <ul className='space-y-3'>
-              {footerLinks.quickLinks.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className='text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors'
-                  >
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
+            {/* Support */}
+            <div>
+              <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider mb-4'>
+                {t('navigation.support')}
+              </h3>
+              <ul className='space-y-3'>
+                {footerLinks.support.map((link) => (
+                  <li key={link.href}>
+                    <button
+                      onClick={() => handleLinkClick(link.href, link.external)}
+                      className='text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200'
+                    >
+                      {link.external ? link.labelKey : t(link.labelKey)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
+            </div>
 
-          {/* Legal Links */}
-          <div>
-            <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider mb-4'>
-              {t('navigation.legal')}
-            </h3>
-            <ul className='space-y-3'>
-              {footerLinks.legal.map((item) => (
-                <li key={item.name}>
-                  <Link
-                    href={item.href}
-                    className='text-sm text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 transition-colors'
-                  >
-                    {item.name}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          {/* Newsletter */}
-          <div>
-            <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider mb-4'>
-              Newsletter
-            </h3>
-            <p className='text-sm text-neutral-600 dark:text-neutral-400 mb-4'>
-              Yeni bileşenler ve güncellemelerden haberdar olun.
-            </p>
-            <div className='flex space-x-2'>
-              <input
-                type='email'
-                placeholder='E-posta adresiniz'
-                className='flex-1 min-w-0 px-3 py-2 text-sm border border-neutral-300 dark:border-neutral-600 rounded-md bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 focus:outline-none focus:ring-2 focus:ring-primary-500'
-              />
-              <button
-                type='submit'
-                className='inline-flex items-center px-3 py-2 text-sm font-medium text-white bg-primary-600 border border-transparent rounded-md hover:bg-primary-700 focus:outline-none focus:ring-2 focus:ring-primary-500 transition-colors'
-              >
-                Abone Ol
-              </button>
+            {/* Legal */}
+            <div>
+              <h3 className='text-sm font-semibold text-neutral-900 dark:text-neutral-100 uppercase tracking-wider mb-4'>
+                {t('navigation.legal')}
+              </h3>
+              <ul className='space-y-3'>
+                {footerLinks.legal.map((link) => (
+                  <li key={link.href}>
+                    <button
+                      onClick={() => handleLinkClick(link.href)}
+                      className='text-sm text-neutral-600 dark:text-neutral-400 hover:text-primary-600 dark:hover:text-primary-400 transition-colors duration-200'
+                    >
+                      {t(link.labelKey)}
+                    </button>
+                  </li>
+                ))}
+              </ul>
             </div>
           </div>
         </div>
 
-        {/* Bottom Section */}
-        <div className='mt-8 pt-8 border-t border-neutral-200 dark:border-neutral-700'>
-          <div className='flex flex-col md:flex-row justify-between items-center space-y-4 md:space-y-0'>
-            <div className='text-sm text-neutral-500 dark:text-neutral-400'>
-              © {currentYear} Sea UI Kit. Tüm hakları saklıdır.
+        {/* Footer Bottom */}
+        <div className='border-t border-neutral-200 dark:border-neutral-800 py-6'>
+          <div className='flex flex-col sm:flex-row items-center justify-between space-y-4 sm:space-y-0'>
+            <div className='flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-400'>
+              <span>© {currentYear} Sea UI Kit.</span>
+              <span>{t('pages.home.footer.copyright')}</span>
             </div>
-            <div className='flex items-center text-sm text-neutral-500 dark:text-neutral-400'>
+
+            <div className='flex items-center space-x-2 text-sm text-neutral-600 dark:text-neutral-400'>
               <span>{t('navigation.madeWith')}</span>
-              <Heart className='h-4 w-4 mx-1 text-red-500' fill='currentColor' />
-              <span>Türkiye&apos;de</span>
+              <Heart className='h-4 w-4 text-red-500 fill-current' />
             </div>
           </div>
         </div>

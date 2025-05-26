@@ -3,67 +3,48 @@
 import React, { useState, useCallback } from 'react'
 import { useRouter } from 'next/navigation'
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Mail, Lock, ArrowRight, UserCheck } from 'lucide-react'
+import { Eye, EyeOff, LogIn, Github, Mail, Lock, User, ArrowRight } from 'lucide-react'
 
 import { Button } from '@/components/Button/Button'
 import { Input } from '@/components/Input/Input'
 import { Checkbox } from '@/components/Checkbox/Checkbox'
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/Card/Card'
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from '@/components/Card/Card'
+import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/Form/Form'
 import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
-import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
-import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
 
-import { useFormValidation } from '@/hooks/useFormValidation'
+import { useForm } from '@/hooks/useForm'
+import { useAuth } from '@/hooks/useAuth'
 import { loginSchema, type LoginFormValues } from '@/lib/validations/auth'
 import { cn } from '@/lib/utils'
 
-interface LoginFormProps {
-  onSubmit: (data: LoginFormValues) => Promise<void>
+export interface LoginFormProps {
+  onSubmit?: (data: LoginFormValues) => void | Promise<void>
   redirectOnSuccess?: string
-  variant?: 'default' | 'modal'
+  variant?: 'default' | 'minimal' | 'card'
   showRememberMe?: boolean
   showForgotPassword?: boolean
   showRegisterLink?: boolean
+  showSocialLogin?: boolean
   className?: string
 }
 
-const DEMO_ACCOUNTS = [
-  {
-    type: 'Admin Kullanıcı',
-    email: 'admin@example.com',
-    password: 'Admin123!',
-    description: 'Tam yetki',
-  },
-  {
-    type: 'Standart Kullanıcı',
-    email: 'user@example.com',
-    password: 'User123!',
-    description: 'Sınırlı yetki',
-  },
-  {
-    type: 'Demo Kullanıcı',
-    email: 'demo@example.com',
-    password: 'Demo123!',
-    description: 'Test hesabı',
-  },
-]
-
 export function LoginForm({
-  onSubmit,
+  onSubmit: onSubmitProp,
   redirectOnSuccess = '/dashboard',
+  variant = 'card',
   showRememberMe = true,
   showForgotPassword = true,
   showRegisterLink = true,
+  showSocialLogin = false,
   className,
 }: LoginFormProps) {
   const router = useRouter()
   const { t } = useTranslation()
+  const { login, isLoading } = useAuth()
   const [showPassword, setShowPassword] = useState(false)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { register, handleSubmit, formState, setValue, getFieldError, hasFieldError } = useFormValidation(loginSchema, {
-    mode: 'onBlur',
-    reValidateMode: 'onChange',
+  const form = useForm(loginSchema, {
     defaultValues: {
       email: '',
       password: '',
@@ -71,238 +52,311 @@ export function LoginForm({
     },
   })
 
-  const handleFormSubmit = useCallback(
+  const onSubmit = useCallback(
     async (data: LoginFormValues) => {
-      if (isSubmitting) return
-
       setIsSubmitting(true)
+
       try {
-        console.log('Form submission started with data:', {
-          email: data.email,
-          rememberMe: data.rememberMe,
-          hasPassword: !!data.password,
-        })
+        console.log('[LoginForm] Form submitted with data:', data)
 
-        await onSubmit(data)
-
-        console.log('Form submission successful, redirecting to:', redirectOnSuccess)
-        router.push(redirectOnSuccess)
+        if (onSubmitProp) {
+          await onSubmitProp(data)
+        } else {
+          await login(data)
+          console.log('[LoginForm] Login successful, redirecting to:', redirectOnSuccess)
+          router.push(redirectOnSuccess)
+        }
       } catch (error) {
-        console.error('Form submission failed:', error)
+        console.error('[LoginForm] Submit error:', error)
+        // Error handling is done in useAuth hook
       } finally {
         setIsSubmitting(false)
       }
     },
-    [onSubmit, redirectOnSuccess, router, isSubmitting],
+    [onSubmitProp, login, router, redirectOnSuccess],
   )
 
-  const fillDemoAccount = useCallback(
-    (account: (typeof DEMO_ACCOUNTS)[0]) => {
-      console.log('Filling demo account:', account.email)
+  const handleForgotPassword = useCallback(() => {
+    router.push('/auth/forgot-password')
+  }, [router])
 
-      // setValue kullanarak değerleri set et ve validasyonu tetikle
-      setValue('email', account.email, {
-        shouldValidate: true,
-        shouldTouch: true,
-        shouldDirty: true,
-      })
-      setValue('password', account.password, {
-        shouldValidate: true,
-        shouldTouch: true,
-        shouldDirty: true,
-      })
-    },
-    [setValue],
-  )
+  const handleRegister = useCallback(() => {
+    router.push('/auth/register')
+  }, [router])
 
-  const emailError = getFieldError('email')
-  const passwordError = getFieldError('password')
+  const handleSocialLogin = useCallback((provider: string) => {
+    console.log(`Social login with ${provider}`)
+    // Implement social login logic
+  }, [])
 
-  return (
-    <div className={cn('min-h-screen flex items-center justify-center p-4', className)}>
-      <div className='w-full max-w-md space-y-6'>
-        {/* Demo Hesaplar */}
-        <Card className='bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800'>
-          <CardHeader className='pb-3'>
-            <CardTitle className='text-lg text-blue-800 dark:text-blue-200'>Demo Hesapları (Development)</CardTitle>
-            <CardDescription className='text-blue-600 dark:text-blue-300'>
-              Devam etmek için lütfen giriş yapın
-            </CardDescription>
-          </CardHeader>
-          <CardContent className='space-y-3'>
-            {DEMO_ACCOUNTS.map((account) => (
-              <div
-                key={account.email}
-                className={cn(
-                  'p-3 rounded-lg border cursor-pointer transition-all duration-200',
-                  'hover:bg-blue-100 dark:hover:bg-blue-900/30',
-                  'border-blue-200 dark:border-blue-700',
-                  'bg-blue-25 dark:bg-blue-950/10',
-                )}
-                onClick={() => fillDemoAccount(account)}
-              >
-                <div className='flex justify-between items-start'>
-                  <div>
-                    <p className='font-medium text-blue-900 dark:text-blue-100'>{account.type}</p>
-                    <p className='text-sm text-blue-700 dark:text-blue-300'>{account.email}</p>
-                    <p className='text-xs text-blue-600 dark:text-blue-400 mt-1'>Şifre: {account.password}</p>
-                  </div>
-                </div>
-              </div>
-            ))}
-          </CardContent>
-        </Card>
+  const togglePasswordVisibility = useCallback(() => {
+    setShowPassword((prev) => !prev)
+  }, [])
 
-        {/* Ana Giriş Formu */}
-        <Card className='shadow-lg'>
-          <CardHeader className='space-y-1 text-center'>
-            <div className='flex justify-between items-center'>
-              <div className='flex-1'>
-                <CardTitle className='text-2xl font-bold text-neutral-900 dark:text-neutral-100'>
-                  {t('auth.login')}
-                </CardTitle>
-                <CardDescription className='text-neutral-600 dark:text-neutral-400'>
-                  {t('auth.welcomeBack')}
-                </CardDescription>
-              </div>
-              <div className='flex items-center gap-2'>
-                <ThemeToggle />
-                <LanguageToggle />
-              </div>
+  const formContent = (
+    <Form form={form} onSubmit={onSubmit} className='space-y-6'>
+      {/* Email Field */}
+      <FormField
+        control={form.control}
+        name='email'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel required>{t('auth.email')}</FormLabel>
+            <div className='relative'>
+              <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
+              <Input
+                {...field}
+                type='email'
+                placeholder='ornek@email.com'
+                autoComplete='email'
+                className='pl-10'
+                disabled={isSubmitting || isLoading}
+              />
             </div>
-          </CardHeader>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-          <CardContent>
-            <form onSubmit={handleSubmit(handleFormSubmit)} className='space-y-4'>
-              {/* Email Field */}
-              <div className='space-y-2'>
-                <label htmlFor='email' className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
-                  {t('auth.email')} <span className='text-red-500'>*</span>
-                </label>
-                <div className='relative'>
-                  <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
-                  <Input
-                    {...register('email')}
-                    id='email'
-                    type='email'
-                    placeholder='user@example.com'
-                    className={cn(
-                      'pl-10',
-                      hasFieldError('email') && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-                    )}
-                    disabled={isSubmitting}
-                    autoComplete='email'
-                  />
-                </div>
-                {emailError && <p className='text-sm text-red-600 dark:text-red-400'>{emailError.message}</p>}
-              </div>
-
-              {/* Password Field */}
-              <div className='space-y-2'>
-                <label htmlFor='password' className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
-                  {t('auth.password')} <span className='text-red-500'>*</span>
-                </label>
-                <div className='relative'>
-                  <Lock className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
-                  <Input
-                    {...register('password')}
-                    id='password'
-                    type={showPassword ? 'text' : 'password'}
-                    placeholder='••••••••'
-                    className={cn(
-                      'pl-10 pr-10',
-                      hasFieldError('password') && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-                    )}
-                    disabled={isSubmitting}
-                    autoComplete='current-password'
-                  />
-                  <button
-                    type='button'
-                    onClick={() => setShowPassword(!showPassword)}
-                    className='absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
-                    disabled={isSubmitting}
-                  >
-                    {showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
-                  </button>
-                </div>
-                {passwordError && <p className='text-sm text-red-600 dark:text-red-400'>{passwordError.message}</p>}
-              </div>
-
-              {/* Remember Me & Forgot Password */}
-              <div className='flex items-center justify-between'>
-                {showRememberMe && (
-                  <div className='flex items-center space-x-2'>
-                    <Checkbox {...register('rememberMe')} id='rememberMe' disabled={isSubmitting} />
-                    <label
-                      htmlFor='rememberMe'
-                      className='text-sm text-neutral-600 dark:text-neutral-400 cursor-pointer'
-                    >
-                      {t('auth.rememberMe')}
-                    </label>
-                  </div>
-                )}
-
-                {showForgotPassword && (
-                  <button
-                    type='button'
-                    onClick={() => router.push('/auth/forgot-password')}
-                    className='text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300'
-                    disabled={isSubmitting}
-                  >
-                    {t('auth.forgotPassword')}
-                  </button>
-                )}
-              </div>
-
-              {/* Submit Button */}
-              <Button type='submit' className='w-full' disabled={isSubmitting || !formState.isValid} size='lg'>
-                {isSubmitting ? (
-                  <div className='flex items-center gap-2'>
-                    <LoadingSpinner size='sm' />
-                    <span>Giriş yapılıyor...</span>
-                  </div>
+      {/* Password Field */}
+      <FormField
+        control={form.control}
+        name='password'
+        render={({ field }) => (
+          <FormItem>
+            <FormLabel required>{t('auth.password')}</FormLabel>
+            <div className='relative'>
+              <Lock className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
+              <Input
+                {...field}
+                type={showPassword ? 'text' : 'password'}
+                placeholder='••••••••'
+                autoComplete='current-password'
+                className='pl-10 pr-10'
+                disabled={isSubmitting || isLoading}
+              />
+              <Button
+                type='button'
+                variant='ghost'
+                size='sm'
+                onClick={togglePasswordVisibility}
+                className='absolute right-1 top-1/2 transform -translate-y-1/2 h-8 w-8 p-0 hover:bg-transparent'
+                disabled={isSubmitting || isLoading}
+              >
+                {showPassword ? (
+                  <EyeOff className='h-4 w-4 text-neutral-400' />
                 ) : (
-                  <div className='flex items-center gap-2'>
-                    <UserCheck className='h-4 w-4' />
-                    <span>{t('auth.login')}</span>
-                    <ArrowRight className='h-4 w-4' />
-                  </div>
+                  <Eye className='h-4 w-4 text-neutral-400' />
                 )}
               </Button>
+            </div>
+            <FormMessage />
+          </FormItem>
+        )}
+      />
 
-              {/* Register Link */}
-              {showRegisterLink && (
-                <div className='text-center pt-4 border-t border-neutral-200 dark:border-neutral-700'>
-                  <p className='text-sm text-neutral-600 dark:text-neutral-400'>
-                    {t('auth.dontHaveAccount')}{' '}
-                    <button
-                      type='button'
-                      onClick={() => router.push('/auth/register')}
-                      className='text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 font-medium'
-                      disabled={isSubmitting}
-                    >
-                      {t('auth.signUpHere')}
-                    </button>
-                  </p>
-                </div>
-              )}
-            </form>
-          </CardContent>
-        </Card>
+      {/* Remember Me & Forgot Password */}
+      <div className='flex items-center justify-between'>
+        {showRememberMe && (
+          <FormField
+            control={form.control}
+            name='rememberMe'
+            render={({ field }) => (
+              <FormItem className='flex items-center space-x-2 space-y-0'>
+                <Checkbox
+                  id='rememberMe'
+                  checked={field.value}
+                  onCheckedChange={field.onChange}
+                  disabled={isSubmitting || isLoading}
+                />
+                <FormLabel className='text-sm font-normal cursor-pointer'>{t('auth.rememberMe')}</FormLabel>
+              </FormItem>
+            )}
+          />
+        )}
 
-        {/* Footer Note */}
-        <div className='text-center'>
-          <p className='text-xs text-neutral-500 dark:text-neutral-400'>
-            Hesabınız yok mu?{' '}
-            <button
-              onClick={() => router.push('/auth/register')}
-              className='text-primary-600 hover:text-primary-500 dark:text-primary-400'
-            >
-              Kayıt olun
-            </button>
-          </p>
-        </div>
+        {showForgotPassword && (
+          <Button
+            type='button'
+            variant='ghost'
+            size='sm'
+            onClick={handleForgotPassword}
+            className='text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 p-0 h-auto'
+            disabled={isSubmitting || isLoading}
+          >
+            {t('auth.forgotPassword')}
+          </Button>
+        )}
       </div>
+
+      {/* Submit Button */}
+      <Button
+        type='submit'
+        className='w-full flex items-center justify-center gap-2'
+        disabled={isSubmitting || isLoading}
+      >
+        {isSubmitting || isLoading ? (
+          <>
+            <LoadingSpinner size='sm' variant='white' />
+            <span>Giriş yapılıyor...</span>
+          </>
+        ) : (
+          <>
+            <LogIn className='h-4 w-4' />
+            <span>{t('auth.login')}</span>
+          </>
+        )}
+      </Button>
+
+      {/* Social Login */}
+      {showSocialLogin && (
+        <>
+          <div className='relative'>
+            <div className='absolute inset-0 flex items-center'>
+              <span className='w-full border-t border-neutral-200 dark:border-neutral-800' />
+            </div>
+            <div className='relative flex justify-center text-xs uppercase'>
+              <span className='bg-white dark:bg-neutral-900 px-2 text-neutral-500 dark:text-neutral-400'>Ya da</span>
+            </div>
+          </div>
+
+          <div className='grid grid-cols-2 gap-4'>
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => handleSocialLogin('github')}
+              disabled={isSubmitting || isLoading}
+              className='flex items-center gap-2'
+            >
+              <Github className='h-4 w-4' />
+              GitHub
+            </Button>
+
+            <Button
+              type='button'
+              variant='outline'
+              onClick={() => handleSocialLogin('google')}
+              disabled={isSubmitting || isLoading}
+              className='flex items-center gap-2'
+            >
+              <Mail className='h-4 w-4' />
+              Google
+            </Button>
+          </div>
+        </>
+      )}
+
+      {/* Register Link */}
+      {showRegisterLink && (
+        <div className='text-center'>
+          <span className='text-sm text-neutral-600 dark:text-neutral-400'>{t('auth.dontHaveAccount')} </span>
+          <Button
+            type='button'
+            variant='ghost'
+            size='sm'
+            onClick={handleRegister}
+            className='text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300 p-0 h-auto'
+            disabled={isSubmitting || isLoading}
+          >
+            {t('auth.signUpHere')}
+            <ArrowRight className='h-3 w-3 ml-1' />
+          </Button>
+        </div>
+      )}
+    </Form>
+  )
+
+  if (variant === 'minimal') {
+    return <div className={cn('w-full max-w-sm', className)}>{formContent}</div>
+  }
+
+  if (variant === 'card') {
+    return (
+      <div className={cn('min-h-screen flex items-center justify-center p-4', className)}>
+        <Card className='w-full max-w-md'>
+          <CardHeader className='text-center space-y-4'>
+            <div className='mx-auto w-12 h-12 bg-primary-100 dark:bg-primary-900 rounded-full flex items-center justify-center'>
+              <User className='h-6 w-6 text-primary-600 dark:text-primary-400' />
+            </div>
+            <div>
+              <CardTitle className='text-2xl font-bold'>{t('auth.welcomeBack')}</CardTitle>
+              <CardDescription className='mt-2'>{t('auth.pleaseLogin')}</CardDescription>
+            </div>
+          </CardHeader>
+          <CardContent>{formContent}</CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  // Default variant
+  return (
+    <div className={cn('w-full max-w-md mx-auto', className)}>
+      <div className='text-center mb-8'>
+        <h2 className='text-3xl font-bold text-neutral-900 dark:text-neutral-100'>{t('auth.welcomeBack')}</h2>
+        <p className='text-neutral-600 dark:text-neutral-400 mt-2'>{t('auth.pleaseLogin')}</p>
+      </div>
+      {formContent}
     </div>
+  )
+}
+
+// Demo credentials component
+export function DemoCredentials() {
+  const { t: _t } = useTranslation()
+
+  const demoAccounts = [
+    { email: 'admin@example.com', password: 'Admin123!', role: 'Admin' },
+    { email: 'user@example.com', password: 'User123!', role: 'User' },
+    { email: 'demo@example.com', password: 'Demo123!', role: 'Demo' },
+  ]
+
+  const copyToClipboard = async (text: string) => {
+    try {
+      await navigator.clipboard.writeText(text)
+    } catch (error) {
+      console.error('Copy failed:', error)
+    }
+  }
+
+  return (
+    <Card className='mt-6'>
+      <CardHeader>
+        <CardTitle className='text-lg'>Demo Hesapları</CardTitle>
+        <CardDescription>Test için kullanabileceğiniz demo hesaplar</CardDescription>
+      </CardHeader>
+      <CardContent>
+        <div className='space-y-3'>
+          {demoAccounts.map((account, index) => (
+            <div key={index} className='p-3 bg-neutral-50 dark:bg-neutral-800 rounded-lg'>
+              <div className='flex items-center justify-between mb-2'>
+                <span className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>{account.role}</span>
+              </div>
+              <div className='space-y-1 text-xs font-mono'>
+                <div className='flex items-center gap-2'>
+                  <span className='text-neutral-500 dark:text-neutral-400'>Email:</span>
+                  <button
+                    onClick={() => copyToClipboard(account.email)}
+                    className='text-primary-600 dark:text-primary-400 hover:underline'
+                  >
+                    {account.email}
+                  </button>
+                </div>
+                <div className='flex items-center gap-2'>
+                  <span className='text-neutral-500 dark:text-neutral-400'>Şifre:</span>
+                  <button
+                    onClick={() => copyToClipboard(account.password)}
+                    className='text-primary-600 dark:text-primary-400 hover:underline'
+                  >
+                    {account.password}
+                  </button>
+                </div>
+              </div>
+            </div>
+          ))}
+        </div>
+        <p className='text-xs text-neutral-500 dark:text-neutral-400 mt-3'>Bilgileri kopyalamak için tıklayın</p>
+      </CardContent>
+    </Card>
   )
 }

@@ -1,144 +1,138 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
+import React, { useState, useEffect } from 'react'
+import { Sun, Moon, Monitor, Check } from 'lucide-react'
 
-import { motion } from 'framer-motion'
-import { Sun, Moon } from 'lucide-react'
-import { useTranslation } from 'react-i18next'
-
+import { Button } from '@/components/Button/Button'
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from '@/components/Dropdown/Dropdown'
 import { useTheme } from '@/hooks/useTheme'
-
-import { toggleButtonStyles, dropdownStyles, menuItemStyles, iconContainerStyles } from '../ToggleUtils/ToggleStyles'
-
+import { useTranslation } from 'react-i18next'
 import { cn } from '@/lib/utils'
 
-interface ThemeToggleProps {
-  className?: string
-  size?: 'sm' | 'md' | 'lg'
-}
+const themes = [
+  {
+    key: 'light',
+    icon: Sun,
+    labelKey: 'theme.light',
+  },
+  {
+    key: 'dark',
+    icon: Moon,
+    labelKey: 'theme.dark',
+  },
+  {
+    key: 'system',
+    icon: Monitor,
+    labelKey: 'theme.system',
+  },
+] as const
 
-export function ThemeToggle({ className, size = 'md' }: ThemeToggleProps) {
-  const { t } = useTranslation()
+type _ThemeKey = (typeof themes)[number]['key']
+
+export function ThemeToggle() {
   const { theme, setTheme } = useTheme()
+  const { t } = useTranslation()
   const [mounted, setMounted] = useState(false)
-  const [isOpen, setIsOpen] = useState(false)
-  const dropdownRef = React.useRef<HTMLDivElement>(null)
 
-  // Hidrasyonu önlemek için montajı bekleyin
+  // Hydration mismatch'i önlemek için
   useEffect(() => {
     setMounted(true)
   }, [])
 
-  // Dropdown dışında tıklandığında kapatma
-  useEffect(() => {
-    const handleClickOutside = (event: MouseEvent) => {
-      if (dropdownRef.current && !dropdownRef.current.contains(event.target as Node)) {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('mousedown', handleClickOutside)
-    return () => document.removeEventListener('mousedown', handleClickOutside)
-  }, [])
-
-  // ESC tuşu ile kapatma
-  useEffect(() => {
-    const handleEsc = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        setIsOpen(false)
-      }
-    }
-
-    document.addEventListener('keydown', handleEsc)
-    return () => document.removeEventListener('keydown', handleEsc)
-  }, [])
-
-  // Tema değiştirme işlevi
-  const handleThemeChange = (newTheme: 'light' | 'dark') => {
-    setTheme(newTheme as any)
-    setIsOpen(false)
-  }
-
-  // Tema ikonlarını belirleme
-  const getThemeIcon = (themeType: 'light' | 'dark') => {
-    switch (themeType) {
-      case 'light':
-        return <Sun className='h-4 w-4 text-amber-500' />
-      case 'dark':
-        return <Moon className='h-4 w-4 text-blue-400' />
-    }
-  }
-
-  // Boyut sınıfları
-  const sizeMapping = {
-    sm: {
-      button: 'text-xs py-1 px-3',
-      icon: 'h-3.5 w-3.5 mr-1',
-    },
-    md: {
-      button: 'text-sm py-2 px-3',
-      icon: 'h-4 w-4 mr-2',
-    },
-    lg: {
-      button: 'text-base py-2.5 px-4',
-      icon: 'h-5 w-5 mr-2',
-    },
-  }
-
-  // SSR sırasında veya montaj öncesinde bir yükleme arayüzü göster
   if (!mounted) {
-    return <div className={cn(toggleButtonStyles({ size }), className, 'flex items-center justify-center')} />
+    return (
+      <Button variant='ghost' size='sm' className='w-9 h-9 p-0'>
+        <Monitor className='h-4 w-4' />
+        <span className='sr-only'>Toggle theme</span>
+      </Button>
+    )
+  }
+
+  const currentTheme = themes.find((t) => t.key === theme) || themes[2]
+  const CurrentIcon = currentTheme.icon
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button
+          variant='ghost'
+          size='sm'
+          className='w-9 h-9 p-0 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+          aria-label={`Current theme: ${t(currentTheme.labelKey)}`}
+        >
+          <CurrentIcon className='h-4 w-4 transition-transform duration-200 hover:scale-110' />
+          <span className='sr-only'>Tema değiştir</span>
+        </Button>
+      </DropdownMenuTrigger>
+
+      <DropdownMenuContent align='end' className='w-48'>
+        {themes.map((themeOption) => {
+          const Icon = themeOption.icon
+          const isActive = theme === themeOption.key
+
+          return (
+            <DropdownMenuItem
+              key={themeOption.key}
+              onClick={() => setTheme(themeOption.key)}
+              className={cn(
+                'flex items-center justify-between cursor-pointer',
+                isActive && 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400',
+              )}
+            >
+              <div className='flex items-center space-x-2'>
+                <Icon className='h-4 w-4' />
+                <span>{t(themeOption.labelKey)}</span>
+              </div>
+              {isActive && <Check className='h-4 w-4 text-primary-600 dark:text-primary-400' />}
+            </DropdownMenuItem>
+          )
+        })}
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}
+
+// Basit toggle versiyonu (sadece light/dark)
+export function SimpleThemeToggle() {
+  const { theme, setTheme } = useTheme()
+  const [mounted, setMounted] = useState(false)
+
+  useEffect(() => {
+    setMounted(true)
+  }, [])
+
+  if (!mounted) {
+    return (
+      <Button variant='ghost' size='sm' className='w-9 h-9 p-0'>
+        <Sun className='h-4 w-4' />
+      </Button>
+    )
+  }
+
+  const isDark = theme === 'dark'
+
+  const toggleTheme = () => {
+    setTheme(isDark ? 'light' : 'dark')
   }
 
   return (
-    <div className='relative' ref={dropdownRef}>
-      <button
-        type='button'
-        aria-label={t('theme.toggle')}
-        aria-expanded={isOpen}
-        aria-haspopup='true'
-        className={cn(
-          toggleButtonStyles({ size, isActive: isOpen }),
-          sizeMapping[size].button,
-          'flex items-center',
-          className,
-        )}
-        onClick={() => setIsOpen(!isOpen)}
-      >
-        <span className={iconContainerStyles}>{getThemeIcon(theme)}</span>
-        <span>{t(`theme.${theme}`)}</span>
-      </button>
-
-      {isOpen && (
-        <motion.div
-          initial={{ opacity: 0, y: -10 }}
-          animate={{ opacity: 1, y: 0 }}
-          exit={{ opacity: 0, y: -10 }}
-          transition={{ duration: 0.2 }}
-          className={dropdownStyles({ align: 'left' })}
-          role='menu'
-          aria-orientation='vertical'
-          aria-labelledby='theme-options'
-        >
-          <button
-            className={cn(menuItemStyles({ isActive: theme === 'light' }))}
-            role='menuitem'
-            onClick={() => handleThemeChange('light')}
-          >
-            <span className={iconContainerStyles}>{getThemeIcon('light')}</span>
-            <span>{t('theme.light')}</span>
-          </button>
-
-          <button
-            className={cn(menuItemStyles({ isActive: theme === 'dark' }))}
-            role='menuitem'
-            onClick={() => handleThemeChange('dark')}
-          >
-            <span className={iconContainerStyles}>{getThemeIcon('dark')}</span>
-            <span>{t('theme.dark')}</span>
-          </button>
-        </motion.div>
+    <Button
+      variant='ghost'
+      size='sm'
+      onClick={toggleTheme}
+      className='w-9 h-9 p-0 hover:bg-neutral-100 dark:hover:bg-neutral-800'
+      aria-label={isDark ? 'Switch to light mode' : 'Switch to dark mode'}
+    >
+      {isDark ? (
+        <Sun className='h-4 w-4 transition-transform duration-200 hover:scale-110' />
+      ) : (
+        <Moon className='h-4 w-4 transition-transform duration-200 hover:scale-110' />
       )}
-    </div>
+    </Button>
   )
 }
