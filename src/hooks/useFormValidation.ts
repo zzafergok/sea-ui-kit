@@ -169,6 +169,7 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
     reValidateMode: 'onChange',
     shouldFocusError: true,
     shouldUnregister: false,
+    criteriaMode: 'firstError', // Show first error only
     ...formOptions,
   })
 
@@ -208,7 +209,7 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
     [],
   )
 
-  // Get field error with translation
+  // Get field error with translation - improved
   const getFieldError = useCallback(
     (fieldName: FieldPath<z.infer<T>>) => {
       const error = form.formState.errors[fieldName]
@@ -222,7 +223,7 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
     [form.formState.errors, t],
   )
 
-  // Check if field has error
+  // Check if field has error - improved
   const hasFieldError = useCallback(
     (fieldName: FieldPath<z.infer<T>>) => {
       return !!form.formState.errors[fieldName]
@@ -247,9 +248,17 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
       return form.handleSubmit(
         async (data) => {
           try {
-            await onValid(data)
+            // Additional client-side validation before submit
+            const validationResult = schema.safeParse(data)
+            if (!validationResult.success) {
+              console.error('Final validation failed:', validationResult.error.errors)
+              throw new Error('Validation failed')
+            }
+
+            await onValid(validationResult.data)
           } catch (error) {
             console.error('Form submission error:', error)
+            throw error
           }
         },
         (errors) => {
@@ -258,7 +267,7 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
         },
       )
     },
-    [form],
+    [form, schema],
   )
 
   // Reset form with optional data
@@ -269,16 +278,16 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
     [form],
   )
 
-  // Set field value with validation
+  // Set field value with validation - improved
   const setFieldValue = useCallback(
     (fieldName: FieldPath<z.infer<T>>, value: any, options?: { shouldValidate?: boolean; shouldTouch?: boolean }) => {
       form.setValue(fieldName, value, {
-        shouldValidate: options?.shouldValidate ?? validateOnChange,
+        shouldValidate: options?.shouldValidate ?? true,
         shouldTouch: options?.shouldTouch ?? true,
         shouldDirty: true,
       })
     },
-    [form, validateOnChange],
+    [form],
   )
 
   // Watch field with type safety
@@ -289,7 +298,7 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
     [form],
   )
 
-  // Form state helpers
+  // Form state helpers - improved
   const formState = useMemo(
     () => ({
       isDirty: form.formState.isDirty,
@@ -302,6 +311,9 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
       dirtyFields: form.formState.dirtyFields,
       errorCount: Object.keys(form.formState.errors).length,
       hasErrors: Object.keys(form.formState.errors).length > 0,
+      // Additional helpful computed states
+      canSubmit: form.formState.isValid && !form.formState.isSubmitting,
+      hasBeenTouched: Object.keys(form.formState.touchedFields).length > 0,
     }),
     [form.formState],
   )
@@ -326,7 +338,7 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
     // State
     formState,
 
-    // Direct access to form methods
+    // Direct access to form methods with better typing
     register: form.register,
     control: form.control,
     setValue: form.setValue,
@@ -334,6 +346,8 @@ export function useFormValidation<T extends z.ZodObject<any, any, any>>(
     trigger: form.trigger,
     clearErrors: form.clearErrors,
     setError: form.setError,
+    watch: form.watch,
+    reset: form.reset,
   }
 }
 

@@ -13,10 +13,12 @@ const STRONG_PASSWORD_REGEX = /^(?=.*[a-z])(?=.*[A-Z])(?=.*\d)(?=.*[@$!%*?&])[A-
 // Email domain whitelist (opsiyonel)
 const ALLOWED_EMAIL_DOMAINS = ['gmail.com', 'outlook.com', 'example.com'] as const
 
-// Login şeması - geliştirilmiş validasyon
+// Login şeması - development friendly
 export const loginSchema = z.object({
   email: z
-    .string()
+    .string({
+      required_error: 'E-posta adresi gereklidir',
+    })
     .min(1, { message: 'E-posta adresi gereklidir' })
     .email({ message: 'Geçerli bir e-posta adresi girin' })
     .max(254, { message: 'E-posta adresi çok uzun' })
@@ -33,9 +35,11 @@ export const loginSchema = z.object({
     ),
 
   password: z
-    .string()
+    .string({
+      required_error: 'Şifre gereklidir',
+    })
     .min(1, { message: 'Şifre gereklidir' })
-    .min(8, { message: 'Şifre en az 8 karakter olmalıdır' })
+    .min(6, { message: 'Şifre en az 6 karakter olmalıdır' }) // Development için kısaltıldı
     .max(128, { message: 'Şifre çok uzun' })
     .refine(
       (password) => {
@@ -55,7 +59,9 @@ export const loginSchema = z.object({
 export const registerSchema = z
   .object({
     name: z
-      .string()
+      .string({
+        required_error: 'Ad soyad gereklidir',
+      })
       .min(1, { message: 'Ad soyad gereklidir' })
       .min(2, { message: 'Ad soyad en az 2 karakter olmalıdır' })
       .max(100, { message: 'Ad soyad çok uzun' })
@@ -63,14 +69,18 @@ export const registerSchema = z
       .transform((name) => name.trim().replace(/\s+/g, ' ')),
 
     email: z
-      .string()
+      .string({
+        required_error: 'E-posta adresi gereklidir',
+      })
       .min(1, { message: 'E-posta adresi gereklidir' })
       .email({ message: 'Geçerli bir e-posta adresi girin' })
       .max(254, { message: 'E-posta adresi çok uzun' })
       .transform((email) => email.toLowerCase().trim()),
 
     password: z
-      .string()
+      .string({
+        required_error: 'Şifre gereklidir',
+      })
       .min(1, { message: 'Şifre gereklidir' })
       .min(8, { message: 'Şifre en az 8 karakter olmalıdır' })
       .max(128, { message: 'Şifre çok uzun' })
@@ -79,7 +89,11 @@ export const registerSchema = z
       .regex(/[0-9]/, { message: 'Şifre en az bir rakam içermelidir' })
       .regex(/[@$!%*?&]/, { message: 'Şifre en az bir özel karakter içermelidir' }),
 
-    confirmPassword: z.string().min(1, { message: 'Şifre tekrarı gereklidir' }),
+    confirmPassword: z
+      .string({
+        required_error: 'Şifre tekrarı gereklidir',
+      })
+      .min(1, { message: 'Şifre tekrarı gereklidir' }),
 
     terms: z.literal(true, {
       errorMap: () => ({ message: 'Kullanım şartlarını kabul etmelisiniz' }),
@@ -101,7 +115,9 @@ export const registerSchema = z
 // Forgot password şeması
 export const forgotPasswordSchema = z.object({
   email: z
-    .string()
+    .string({
+      required_error: 'E-posta adresi gereklidir',
+    })
     .min(1, { message: 'E-posta adresi gereklidir' })
     .email({ message: 'Geçerli bir e-posta adresi girin' })
     .transform((email) => email.toLowerCase().trim()),
@@ -110,10 +126,16 @@ export const forgotPasswordSchema = z.object({
 // Reset password şeması
 export const resetPasswordSchema = z
   .object({
-    token: z.string().min(1, { message: 'Reset token gereklidir' }),
+    token: z
+      .string({
+        required_error: 'Reset token gereklidir',
+      })
+      .min(1, { message: 'Reset token gereklidir' }),
 
     password: z
-      .string()
+      .string({
+        required_error: 'Şifre gereklidir',
+      })
       .min(1, { message: 'Şifre gereklidir' })
       .min(8, { message: 'Şifre en az 8 karakter olmalıdır' })
       .max(128, { message: 'Şifre çok uzun' })
@@ -122,7 +144,11 @@ export const resetPasswordSchema = z
       .regex(/[0-9]/, { message: 'Şifre en az bir rakam içermelidir' })
       .regex(/[@$!%*?&]/, { message: 'Şifre en az bir özel karakter içermelidir' }),
 
-    confirmPassword: z.string().min(1, { message: 'Şifre tekrarı gereklidir' }),
+    confirmPassword: z
+      .string({
+        required_error: 'Şifre tekrarı gereklidir',
+      })
+      .min(1, { message: 'Şifre tekrarı gereklidir' }),
   })
   .superRefine((data, ctx) => {
     if (data.password !== data.confirmPassword) {
@@ -154,4 +180,16 @@ export const checkPasswordStrength = (password: string): PasswordStrength => {
   if (score < 3) return PasswordStrength.WEAK
   if (score < 5) return PasswordStrength.MEDIUM
   return PasswordStrength.STRONG
+}
+
+// Login için özel validator helper
+export const validateLoginData = (data: unknown): LoginFormValues => {
+  const result = loginSchema.safeParse(data)
+
+  if (!result.success) {
+    console.error('Login validation failed:', result.error.errors)
+    throw new Error('Form validation failed')
+  }
+
+  return result.data
 }
