@@ -158,6 +158,17 @@ export function PublicNavbar({ className }: PublicNavbarProps) {
     return window.innerWidth - document.documentElement.clientWidth
   }
 
+  // Logo click handler - authentication'a göre yönlendirme
+  const handleLogoClick = useCallback(() => {
+    if (isAuthenticated) {
+      router.push('/dashboard')
+    } else {
+      router.push('/')
+    }
+    setIsMenuOpen(false)
+    setActiveDropdown(null)
+  }, [isAuthenticated, router])
+
   // Navigation handlers
   const handleNavigate = useCallback(
     (href: string) => {
@@ -244,13 +255,13 @@ export function PublicNavbar({ className }: PublicNavbarProps) {
     >
       <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
         <div className='flex justify-between items-center h-16 lg:h-20'>
-          {/* Logo */}
+          {/* Logo - Authentication durumuna göre yönlendirme */}
           <div
             className='flex-shrink-0 cursor-pointer group'
-            onClick={() => handleNavigate('/')}
+            onClick={handleLogoClick}
             role='button'
             tabIndex={0}
-            onKeyDown={(e) => e.key === 'Enter' && handleNavigate('/')}
+            onKeyDown={(e) => e.key === 'Enter' && handleLogoClick()}
           >
             <div className='flex items-center space-x-3'>
               <div className='relative'>

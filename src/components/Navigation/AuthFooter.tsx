@@ -1,25 +1,28 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
-import { useTranslation } from 'react-i18next'
 import { useRouter } from 'next/navigation'
+
+import React, { useState, useCallback } from 'react'
+
+import { useTranslation } from 'react-i18next'
 import {
-  HelpCircle,
-  MessageSquare,
-  Shield,
+  Bug,
+  Zap,
   Heart,
-  ExternalLink,
   Clock,
   Users,
-  Zap,
-  ChevronUp,
+  Shield,
+  Coffee,
   BookOpen,
   FileText,
-  Bug,
-  Coffee,
+  ChevronUp,
+  HelpCircle,
+  ExternalLink,
+  MessageSquare,
 } from 'lucide-react'
 
 import { Button } from '../Button/Button'
+
 import { cn } from '@/lib/utils'
 
 interface AuthFooterProps {
@@ -42,8 +45,9 @@ interface QuickStat {
 }
 
 export function AuthFooter({ className }: AuthFooterProps) {
-  const { t } = useTranslation()
   const router = useRouter()
+  const { t } = useTranslation()
+
   const [isExpanded, setIsExpanded] = useState(false)
 
   // Footer links configuration

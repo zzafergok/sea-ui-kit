@@ -61,6 +61,11 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
     router.push('/')
   }
 
+  // Dashboard'a yönlendirme fonksiyonu
+  const handleLogoDashboardNavigation = () => {
+    router.push('/dashboard')
+  }
+
   const mockNotifications = [
     {
       id: 1,
@@ -113,20 +118,24 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
               {isMenuOpen ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
             </Button>
 
-            {/* Logo */}
-            <div className='flex items-center space-x-3'>
+            {/* Logo - Dashboard'a Yönlendiren Buton */}
+            <button
+              onClick={handleLogoDashboardNavigation}
+              className='flex items-center space-x-3 group transition-transform duration-200 hover:scale-105 focus:outline-none focus:ring-2 focus:ring-primary-500 focus:ring-offset-2 rounded-lg p-1'
+              aria-label="Dashboard'a git"
+            >
               <div className='relative'>
-                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 shadow-sm'>
+                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 shadow-sm group-hover:shadow-md transition-shadow duration-200'>
                   <span className='text-sm font-bold text-white'>S</span>
                 </div>
                 <div className='absolute -right-1 -top-1 h-2 w-2 rounded-full bg-accent-400 animate-pulse' />
               </div>
               <div className='hidden sm:block'>
-                <span className='text-lg font-semibold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent dark:from-primary-400 dark:to-accent-400'>
+                <span className='text-lg font-semibold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent dark:from-primary-400 dark:to-accent-400 group-hover:from-primary-600 group-hover:to-accent-500 dark:group-hover:from-primary-300 dark:group-hover:to-accent-300 transition-all duration-200'>
                   Sea UI Kit
                 </span>
               </div>
-            </div>
+            </button>
 
             {/* Desktop Navigation */}
             <div className='hidden lg:flex lg:items-center lg:space-x-1'>
