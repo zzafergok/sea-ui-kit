@@ -483,3 +483,161 @@ button {
     page-break-after: avoid;
   }
 }
+
+/* src/app/globals.css - Z-Index yönetimi için güncellenmiş kısım */
+
+/* Mevcut CSS içeriğinin sonuna eklenecek */
+
+/* Z-Index yönetimi - Layer sistemi */
+.z-navbar {
+  z-index: 1000;
+}
+
+.z-dropdown {
+  z-index: 1100;
+}
+
+.z-modal {
+  z-index: 1200;
+}
+
+.z-popover {
+  z-index: 1300;
+}
+
+.z-tooltip {
+  z-index: 1400;
+}
+
+.z-toast {
+  z-index: 9999;
+}
+
+/* Toast Container için özel stiller */
+.toast-container {
+  z-index: 9999 !important;
+  position: fixed;
+  pointer-events: none;
+}
+
+.toast-container > * {
+  pointer-events: auto;
+}
+
+/* Toast animasyonları için improved transitions */
+.toast-enter {
+  opacity: 0;
+  transform: translateX(100%);
+}
+
+.toast-enter-active {
+  opacity: 1;
+  transform: translateX(0);
+  transition:
+    opacity 300ms ease-in-out,
+    transform 300ms ease-in-out;
+}
+
+.toast-exit {
+  opacity: 1;
+  transform: translateX(0);
+}
+
+.toast-exit-active {
+  opacity: 0;
+  transform: translateX(100%);
+  transition:
+    opacity 300ms ease-in-out,
+    transform 300ms ease-in-out;
+}
+
+/* Toast progress bar */
+.toast-progress {
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  height: 3px;
+  background: currentColor;
+  opacity: 0.6;
+  animation: toast-progress-shrink linear;
+}
+
+@keyframes toast-progress-shrink {
+  from {
+    width: 100%;
+  }
+  to {
+    width: 0%;
+  }
+}
+
+/* Navbar için sabit z-index */
+nav {
+  z-index: 1000 !important;
+}
+
+/* Dialog ve Modal overlay'ler için */
+[data-radix-portal] {
+  z-index: 1200 !important;
+}
+
+/* Dropdown menu için */
+[data-radix-dropdown-menu-content] {
+  z-index: 1100 !important;
+}
+
+/* Select dropdown için */
+[data-radix-select-content] {
+  z-index: 1100 !important;
+}
+
+/* Popover için */
+[data-radix-popover-content] {
+  z-index: 1300 !important;
+}
+
+/* Tooltip için */
+[data-radix-tooltip-content] {
+  z-index: 1400 !important;
+}
+
+/* Alert Dialog için */
+[data-radix-alert-dialog-overlay] {
+  z-index: 1200 !important;
+}
+
+[data-radix-alert-dialog-content] {
+  z-index: 1201 !important;
+}
+
+/* Toast için backdrop blur support */
+@supports (backdrop-filter: blur(8px)) {
+  .toast-backdrop-blur {
+    backdrop-filter: blur(8px);
+  }
+}
+
+@supports not (backdrop-filter: blur(8px)) {
+  .toast-backdrop-blur {
+    background-color: rgba(255, 255, 255, 0.95);
+  }
+
+  .dark .toast-backdrop-blur {
+    background-color: rgba(0, 0, 0, 0.85);
+  }
+}
+
+/* Mobile için toast pozisyonu ayarlaması */
+@media (max-width: 640px) {
+  .toast-container {
+    top: 80px !important; /* Mobile'da navbar yüksekliği daha fazla olabilir */
+    left: 1rem !important;
+    right: 1rem !important;
+    transform: none !important;
+  }
+
+  .toast-container > * {
+    width: 100%;
+    max-width: none;
+  }
+}

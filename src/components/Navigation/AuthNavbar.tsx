@@ -46,10 +46,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
     return () => document.removeEventListener('mousedown', handleClickOutside)
   }, [])
 
-  const navigation = [
-    { name: t('navigation.users'), href: '/users' },
-    { name: t('navigation.settings'), href: '/settings' },
-  ]
+  const navigation = [{ name: t('navigation.components'), href: '/components' }]
 
   const handleNavigate = (href: string) => {
     router.push(href)
