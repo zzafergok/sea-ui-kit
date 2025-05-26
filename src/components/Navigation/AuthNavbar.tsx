@@ -1,13 +1,19 @@
 'use client'
 
+import { useRouter } from 'next/navigation'
+
 import React, { useState, useRef, useEffect } from 'react'
+
 import { useTranslation } from 'react-i18next'
-import { Bell, Search, User, Settings, LogOut, Menu, X } from 'lucide-react'
+import { Bell, Search, User, Settings, LogOut, Menu, X, ChevronDown } from 'lucide-react'
+
 import { Button } from '../Button/Button'
 import { ThemeToggle } from '../ThemeToggle/ThemeToggle'
 import { LanguageToggle } from '../LanguageToggle/LanguageToggle'
+
 import { useAuth } from '@/hooks/useAuth'
-import { useRouter } from 'next/navigation'
+
+import { cn } from '@/lib/utils'
 
 interface AuthNavbarProps {
   className?: string
@@ -17,9 +23,12 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
   const { t } = useTranslation()
   const { user, logout } = useAuth()
   const router = useRouter()
+
   const [isMenuOpen, setIsMenuOpen] = useState(false)
   const [isProfileMenuOpen, setIsProfileMenuOpen] = useState(false)
   const [isNotificationOpen, setIsNotificationOpen] = useState(false)
+  const [searchValue, setSearchValue] = useState('')
+
   const profileMenuRef = useRef<HTMLDivElement>(null)
   const notificationRef = useRef<HTMLDivElement>(null)
 
@@ -38,9 +47,8 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
   }, [])
 
   const navigation = [
-    { name: t('navigation.dashboard'), href: '/dashboard', current: true },
-    { name: t('navigation.users'), href: '/users', current: false },
-    { name: t('navigation.settings'), href: '/settings', current: false },
+    { name: t('navigation.users'), href: '/users' },
+    { name: t('navigation.settings'), href: '/settings' },
   ]
 
   const handleNavigate = (href: string) => {
@@ -56,7 +64,7 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
   const mockNotifications = [
     {
       id: 1,
-      message: t('components.navbar.notifications'),
+      message: 'Yeni kullanıcı kaydı alındı',
       time: '5 dk önce',
       unread: true,
     },
@@ -68,80 +76,121 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
     },
   ]
 
+  const getInitials = (name?: string, email?: string) => {
+    if (name) {
+      return name
+        .split(' ')
+        .map((n) => n[0])
+        .join('')
+        .toUpperCase()
+        .slice(0, 2)
+    }
+    if (email) {
+      return email[0].toUpperCase()
+    }
+    return 'U'
+  }
+
   return (
-    <nav className={`bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 ${className}`}>
-      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex justify-between items-center h-16'>
-          <div className='flex items-center space-x-4'>
+    <nav
+      className={cn(
+        'sticky top-0 z-50 w-full border-b bg-white/95 backdrop-blur supports-[backdrop-filter]:bg-white/80',
+        'dark:bg-neutral-950/95 dark:supports-[backdrop-filter]:bg-neutral-950/80 dark:border-neutral-800',
+        className,
+      )}
+    >
+      <div className='mx-auto max-w-7xl px-4 sm:px-6 lg:px-8'>
+        <div className='flex h-16 items-center justify-between'>
+          {/* Logo ve Navigasyon */}
+          <div className='flex items-center space-x-8'>
+            {/* Mobile Menu Button */}
             <Button
               variant='ghost'
               size='icon'
               onClick={() => setIsMenuOpen(!isMenuOpen)}
-              className='lg:hidden text-neutral-700 dark:text-neutral-300'
+              className='lg:hidden text-neutral-700 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100'
             >
-              {isMenuOpen ? <X className='h-6 w-6' /> : <Menu className='h-6 w-6' />}
+              {isMenuOpen ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
             </Button>
 
-            <div className='flex items-center space-x-2 cursor-pointer' onClick={() => handleNavigate('/dashboard')}>
-              <div className='w-8 h-8 bg-gradient-to-br from-primary-500 to-accent-500 rounded-lg flex items-center justify-center'>
-                <span className='text-white font-bold text-sm'>S</span>
+            {/* Logo */}
+            <div className='flex items-center space-x-3'>
+              <div className='relative'>
+                <div className='flex h-8 w-8 items-center justify-center rounded-lg bg-gradient-to-br from-primary-500 to-accent-500 shadow-sm'>
+                  <span className='text-sm font-bold text-white'>S</span>
+                </div>
+                <div className='absolute -right-1 -top-1 h-2 w-2 rounded-full bg-accent-400 animate-pulse' />
               </div>
-              <span className='text-xl font-bold text-primary-700 dark:text-primary-400 hidden sm:block'>
-                Sea UI Kit
-              </span>
+              <div className='hidden sm:block'>
+                <span className='text-lg font-semibold bg-gradient-to-r from-primary-700 to-accent-600 bg-clip-text text-transparent dark:from-primary-400 dark:to-accent-400'>
+                  Sea UI Kit
+                </span>
+              </div>
+            </div>
+
+            {/* Desktop Navigation */}
+            <div className='hidden lg:flex lg:items-center lg:space-x-1'>
+              {navigation.map((item) => (
+                <Button
+                  key={item.name}
+                  variant='ghost'
+                  onClick={() => handleNavigate(item.href)}
+                  className='px-3 py-2 text-sm font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-neutral-100 dark:hover:bg-neutral-800'
+                >
+                  {item.name}
+                </Button>
+              ))}
             </div>
           </div>
 
-          <div className='hidden lg:flex lg:items-center lg:space-x-6'>
-            {navigation.map((item) => (
-              <Button
-                key={item.name}
-                onClick={() => handleNavigate(item.href)}
-                className={`px-3 py-2 rounded-md text-sm font-medium transition-colors duration-200 ${
-                  item.current
-                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
-                    : 'text-neutral-700 dark:text-neutral-300 hover:text-primary-600 dark:hover:text-primary-400'
-                }`}
-              >
-                {item.name}
-              </Button>
-            ))}
-          </div>
-
+          {/* Search Bar - Desktop */}
           <div className='hidden md:flex flex-1 max-w-lg mx-8'>
             <div className='relative w-full'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
+              <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500' />
               <input
                 type='text'
                 placeholder={t('components.navbar.searchPlaceholder')}
-                className='w-full pl-10 pr-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800 text-neutral-900 dark:text-neutral-100 placeholder-neutral-500 dark:placeholder-neutral-400 focus:ring-2 focus:ring-primary-500 focus:border-transparent'
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className={cn(
+                  'w-full rounded-lg border bg-white pl-10 pr-4 py-2 text-sm placeholder:text-neutral-500',
+                  'border-neutral-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500',
+                  'dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-400',
+                  'dark:focus:border-primary-400 dark:focus:ring-primary-400',
+                )}
               />
             </div>
           </div>
 
-          <div className='flex items-center space-x-3'>
-            <div className='hidden sm:flex items-center space-x-2'>
+          {/* Right Side Actions */}
+          <div className='flex items-center space-x-2'>
+            {/* Theme & Language Toggle */}
+            <div className='hidden sm:flex items-center space-x-1'>
               <ThemeToggle />
               <LanguageToggle />
             </div>
 
+            {/* Notifications */}
             <div className='relative' ref={notificationRef}>
               <Button
                 variant='ghost'
                 size='icon'
                 onClick={() => setIsNotificationOpen(!isNotificationOpen)}
-                className='relative'
+                className='relative text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100'
               >
                 <Bell className='h-5 w-5' />
                 {mockNotifications.some((n) => n.unread) && (
-                  <span className='absolute -top-1 -right-1 h-3 w-3 bg-red-500 rounded-full'></span>
+                  <span className='absolute -right-1 -top-1 flex h-3 w-3'>
+                    <span className='absolute inline-flex h-full w-full animate-ping rounded-full bg-red-400 opacity-75'></span>
+                    <span className='relative inline-flex h-3 w-3 rounded-full bg-red-500'></span>
+                  </span>
                 )}
               </Button>
 
               {isNotificationOpen && (
-                <div className='absolute right-0 mt-2 w-80 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 z-50'>
+                <div className='absolute right-0 mt-2 w-80 rounded-lg border bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-900 dark:border-neutral-700 z-50'>
                   <div className='p-4 border-b border-neutral-200 dark:border-neutral-700'>
-                    <h3 className='font-semibold text-neutral-900 dark:text-neutral-100'>
+                    <h3 className='font-medium text-neutral-900 dark:text-neutral-100'>
                       {t('components.navbar.notifications')}
                     </h3>
                   </div>
@@ -150,9 +199,11 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                       mockNotifications.map((notification) => (
                         <div
                           key={notification.id}
-                          className={`p-4 border-b border-neutral-100 dark:border-neutral-700 last:border-b-0 hover:bg-neutral-50 dark:hover:bg-neutral-700 ${
-                            notification.unread ? 'bg-blue-50 dark:bg-blue-900/10' : ''
-                          }`}
+                          className={cn(
+                            'p-4 border-b border-neutral-100 dark:border-neutral-700 last:border-b-0',
+                            'hover:bg-neutral-50 dark:hover:bg-neutral-800 transition-colors',
+                            notification.unread && 'bg-blue-50/50 dark:bg-blue-900/10',
+                          )}
                         >
                           <p className='text-sm text-neutral-900 dark:text-neutral-100'>{notification.message}</p>
                           <p className='text-xs text-neutral-500 dark:text-neutral-400 mt-1'>{notification.time}</p>
@@ -164,40 +215,43 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                       </div>
                     )}
                   </div>
-                  {mockNotifications.length > 0 && (
-                    <div className='p-3 border-t border-neutral-200 dark:border-neutral-700'>
-                      <Button className='text-sm text-primary-600 dark:text-primary-400 hover:text-primary-700 dark:hover:text-primary-300'>
-                        {t('components.navbar.viewAllNotifications')}
-                      </Button>
-                    </div>
-                  )}
                 </div>
               )}
             </div>
 
+            {/* Profile Menu */}
             <div className='relative' ref={profileMenuRef}>
               <Button
                 variant='ghost'
                 onClick={() => setIsProfileMenuOpen(!isProfileMenuOpen)}
-                className='flex items-center space-x-2 px-3'
+                className='flex items-center space-x-2 px-3 py-2 text-neutral-700 hover:text-neutral-900 dark:text-neutral-300 dark:hover:text-neutral-100'
               >
-                <div className='w-8 h-8 bg-primary-500 rounded-full flex items-center justify-center'>
-                  <span className='text-white text-sm font-medium'>{user?.name?.charAt(0).toUpperCase() || 'U'}</span>
+                <div className='flex h-8 w-8 items-center justify-center rounded-full bg-gradient-to-br from-primary-500 to-accent-500 text-sm font-medium text-white shadow-sm'>
+                  {getInitials(user?.username, user?.email)}
                 </div>
-                <span className='hidden sm:block text-sm font-medium text-neutral-700 dark:text-neutral-300'>
-                  {user?.name}
-                </span>
+                <div className='hidden sm:block text-left'>
+                  <p className='text-sm font-medium'>{user?.username || 'Kullanıcı'}</p>
+                </div>
+                <ChevronDown className='h-4 w-4' />
               </Button>
 
               {isProfileMenuOpen && (
-                <div className='absolute right-0 mt-2 w-48 bg-white dark:bg-neutral-800 rounded-lg shadow-lg border border-neutral-200 dark:border-neutral-700 z-50'>
+                <div className='absolute right-0 mt-2 w-56 rounded-lg border bg-white shadow-lg ring-1 ring-black ring-opacity-5 dark:bg-neutral-900 dark:border-neutral-700 z-50'>
+                  <div className='p-4 border-b border-neutral-200 dark:border-neutral-700'>
+                    <p className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
+                      {user?.username || 'Kullanıcı'}
+                    </p>
+                    <p className='text-xs text-neutral-500 dark:text-neutral-400 truncate'>{user?.email}</p>
+                  </div>
+
                   <div className='p-2'>
                     <Button
                       onClick={() => {
                         handleNavigate('/profile')
                         setIsProfileMenuOpen(false)
                       }}
-                      className='flex items-center space-x-2 w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-md'
+                      variant='ghost'
+                      className='flex w-full items-center space-x-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
                     >
                       <User className='h-4 w-4' />
                       <span>{t('navigation.profile')}</span>
@@ -208,20 +262,22 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
                         handleNavigate('/settings')
                         setIsProfileMenuOpen(false)
                       }}
-                      className='flex items-center space-x-2 w-full px-3 py-2 text-sm text-neutral-700 dark:text-neutral-300 hover:bg-neutral-100 dark:hover:bg-neutral-700 rounded-md'
+                      variant='ghost'
+                      className='flex w-full items-center space-x-2 px-3 py-2 text-sm text-neutral-700 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:bg-neutral-800'
                     >
                       <Settings className='h-4 w-4' />
                       <span>{t('navigation.settings')}</span>
                     </Button>
 
-                    <hr className='my-2 border-neutral-200 dark:border-neutral-700' />
+                    <div className='my-2 h-px bg-neutral-200 dark:bg-neutral-700' />
 
                     <Button
                       onClick={() => {
                         handleLogout()
                         setIsProfileMenuOpen(false)
                       }}
-                      className='flex items-center space-x-2 w-full px-3 py-2 text-sm text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 rounded-md'
+                      variant='ghost'
+                      className='flex w-full items-center space-x-2 px-3 py-2 text-sm text-red-600 hover:bg-red-50 dark:text-red-400 dark:hover:bg-red-900/20'
                     >
                       <LogOut className='h-4 w-4' />
                       <span>{t('auth.logout')}</span>
@@ -234,35 +290,45 @@ export function AuthNavbar({ className }: AuthNavbarProps) {
         </div>
       </div>
 
+      {/* Mobile Menu */}
       {isMenuOpen && (
-        <div className='lg:hidden border-t border-neutral-200 dark:border-neutral-800'>
-          <div className='px-4 py-4 space-y-2'>
+        <div className='lg:hidden border-t border-neutral-200 dark:border-neutral-800 bg-white dark:bg-neutral-950'>
+          <div className='space-y-1 px-4 pb-3 pt-2'>
+            {/* Mobile Search */}
             <div className='relative mb-4'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
+              <Search className='absolute left-3 top-1/2 h-4 w-4 -translate-y-1/2 text-neutral-400 dark:text-neutral-500' />
               <input
                 type='text'
                 placeholder={t('components.navbar.searchPlaceholder')}
-                className='w-full pl-10 pr-4 py-2 border border-neutral-300 dark:border-neutral-600 rounded-lg bg-white dark:bg-neutral-800'
+                value={searchValue}
+                onChange={(e) => setSearchValue(e.target.value)}
+                className={cn(
+                  'w-full rounded-lg border bg-white pl-10 pr-4 py-2 text-sm placeholder:text-neutral-500',
+                  'border-neutral-300 focus:border-primary-500 focus:ring-1 focus:ring-primary-500',
+                  'dark:bg-neutral-900 dark:border-neutral-700 dark:text-neutral-100 dark:placeholder:text-neutral-400',
+                )}
               />
             </div>
 
+            {/* Mobile Navigation Links */}
             {navigation.map((item) => (
               <Button
                 key={item.name}
                 onClick={() => handleNavigate(item.href)}
-                className={`block w-full text-left px-3 py-2 rounded-md text-base font-medium ${
-                  item.current
-                    ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-400'
-                    : 'text-neutral-700 dark:text-neutral-300'
-                }`}
+                variant='ghost'
+                className='w-full justify-start px-3 py-2 text-base font-medium text-neutral-700 hover:text-neutral-900 hover:bg-neutral-100 dark:text-neutral-300 dark:hover:text-neutral-100 dark:hover:bg-neutral-800'
               >
                 {item.name}
               </Button>
             ))}
 
+            {/* Mobile Theme & Language */}
             <div className='flex items-center justify-between pt-4 border-t border-neutral-200 dark:border-neutral-800 sm:hidden'>
-              <ThemeToggle />
-              <LanguageToggle />
+              <span className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>Tema & Dil</span>
+              <div className='flex items-center space-x-2'>
+                <ThemeToggle />
+                <LanguageToggle />
+              </div>
             </div>
           </div>
         </div>
