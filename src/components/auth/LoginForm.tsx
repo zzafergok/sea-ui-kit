@@ -24,7 +24,7 @@ interface LoginFormProps {
   variant?: 'default' | 'modal' | 'minimal'
 }
 
-// Mock kullanıcı verileri - production'da API'dan gelecek
+// Mock kullanıcı verileri
 const MOCK_USERS = [
   {
     email: 'admin@example.com',
@@ -60,6 +60,7 @@ export function LoginForm({
   const router = useRouter()
   const [mounted, setMounted] = useState(false)
   const [selectedMockUser, setSelectedMockUser] = useState<(typeof MOCK_USERS)[number] | null>(null)
+  const [loginSuccess, setLoginSuccess] = useState(false) // Login başarısını takip et
 
   const { login, isLoading: authLoading, isAuthenticated, user } = useAuth()
 
@@ -68,30 +69,27 @@ export function LoginForm({
     setMounted(true)
   }, [])
 
-  // Form konfigürasyonunu güncelle
+  // Form konfigürasyonu
   const form = useForm(loginSchema, {
     defaultValues: {
       email: '',
       password: '',
       rememberMe: false,
     },
-    mode: 'onBlur', // onChange yerine onBlur kullan
+    mode: 'onBlur',
     reValidateMode: 'onChange',
   })
 
-  // Loading durumu - harici veya dahili loading
+  // Loading durumu
   const isFormLoading = useMemo(() => externalLoading || authLoading, [externalLoading, authLoading])
 
   // Form alanlarını izle
   const emailValue = form.watch('email')
   const passwordValue = form.watch('password')
 
-  // Button disable koşulunu güncelle
+  // Button disable koşulu
   const isButtonDisabled = useMemo(() => {
-    // Sadece temel alanlar dolu mu kontrol et
     const hasRequiredFields = emailValue.trim().length > 0 && passwordValue.length > 0
-
-    // Loading durumu veya temel alanlar boşsa disable et
     return isFormLoading || !hasRequiredFields
   }, [isFormLoading, emailValue, passwordValue])
 
@@ -126,11 +124,15 @@ export function LoginForm({
         if (onSubmit) {
           await onSubmit(data)
         } else {
-          await login(data)
+          const user = await login(data)
+          if (user) {
+            console.log('Login successful, setting success state')
+            setLoginSuccess(true)
+          }
         }
       } catch (error) {
         console.error('Login failed:', error)
-        // Hata durumunda form alanlarını temizle
+        setLoginSuccess(false)
         if (error instanceof Error && error.message.includes('Invalid credentials')) {
           form.setError('password', {
             type: 'manual',
@@ -142,18 +144,20 @@ export function LoginForm({
     [onSubmit, login, form, t],
   )
 
-  // Başarılı giriş sonrası yönlendirme
+  // Login başarısı sonrası yönlendirme - SADECE login başarılı olduğunda
   useEffect(() => {
-    if (isAuthenticated && user && mounted) {
+    if (loginSuccess && isAuthenticated && user && mounted) {
+      console.log('Login success detected, redirecting after delay...')
       const timer = setTimeout(() => {
         if (redirectOnSuccess && typeof window !== 'undefined') {
+          console.log('Redirecting to:', redirectOnSuccess)
           router.push(redirectOnSuccess)
         }
-      }, 1000)
+      }, 1500) // Biraz daha uzun delay
 
       return () => clearTimeout(timer)
     }
-  }, [isAuthenticated, user, mounted, redirectOnSuccess, router])
+  }, [loginSuccess, isAuthenticated, user, mounted, redirectOnSuccess, router])
 
   // SSR hydration kontrolü
   if (!mounted) {
@@ -180,8 +184,8 @@ export function LoginForm({
     )
   }
 
-  // Zaten giriş yapılmış durumu
-  if (isAuthenticated && user) {
+  // Login başarılı ve authenticated durumunda göster
+  if (loginSuccess && isAuthenticated && user) {
     return (
       <div
         className={cn(
@@ -200,11 +204,9 @@ export function LoginForm({
               {t('auth.welcomeBack')}
             </h2>
             <p className='text-neutral-600 dark:text-neutral-400 mb-4'>
-              {t('auth.alreadyLoggedIn', { name: user.email })}
+              Hoş geldiniz, {user.username}! Yönlendiriliyorsunuz...
             </p>
-            <Button onClick={() => router.push(redirectOnSuccess)} className='w-full' disabled={isFormLoading}>
-              {t('common.continue')}
-            </Button>
+            <LoadingSpinner size='sm' />
           </div>
         </div>
       </div>

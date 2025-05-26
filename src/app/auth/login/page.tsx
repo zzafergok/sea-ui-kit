@@ -20,28 +20,21 @@ function LoginPageContent() {
   // Login işlemi
   const handleLogin = async (data: LoginFormValues) => {
     try {
-      console.log('Login form submitted')
-      const user = await login(data)
-
-      if (user) {
-        console.log('Login successful, redirecting to:', redirectTo)
-        // Router.push ile yönlendirme
-        setTimeout(() => {
-          router.push(redirectTo)
-        }, 1000)
-      }
+      console.log('Login form submitted from page')
+      await login(data)
+      // LoginForm kendi yönlendirmesini yapacak
     } catch (error) {
       console.error('Login failed:', error)
     }
   }
 
-  // Zaten giriş yapılmışsa yönlendir
+  // Zaten giriş yapılmışsa yönlendir - SADECE ilk yüklemede
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      console.log('Already authenticated, redirecting to:', redirectTo)
-      router.push(redirectTo)
+      console.log('Already authenticated on page load, redirecting to:', redirectTo)
+      router.replace(redirectTo) // replace kullan push yerine
     }
-  }, [isAuthenticated, isLoading, router, redirectTo])
+  }, []) // Boş dependency array - sadece mount'ta çalışır
 
   // Loading durumunda spinner göster
   if (isLoading) {
@@ -49,9 +42,7 @@ function LoginPageContent() {
       <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>
         <div className='text-center space-y-4'>
           <LoadingSpinner size='lg' />
-          <p className='text-sm text-neutral-600 dark:text-neutral-400'>
-            {isAuthenticated ? 'Yönlendiriliyor...' : 'Kimlik doğrulanıyor...'}
-          </p>
+          <p className='text-sm text-neutral-600 dark:text-neutral-400'>Kimlik doğrulanıyor...</p>
         </div>
       </div>
     )

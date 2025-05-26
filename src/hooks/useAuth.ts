@@ -72,8 +72,15 @@ interface AuthActions {
 export function useAuth(): AuthState & AuthActions {
   const dispatch = useAppDispatch()
   const tokenManager = useTokenManagerContext()
-  const initializationRef = useRef<boolean>(false)
-  const isInitializing = useRef<boolean>(false)
+
+  // Initialization state'lerini daha güvenli yönetim
+  const initializationRef = useRef<{
+    hasInitialized: boolean
+    isInitializing: boolean
+  }>({
+    hasInitialized: false,
+    isInitializing: false,
+  })
 
   const user = useAppSelector(selectUser)
   const isAuthenticated = useAppSelector(selectIsAuthenticated)
@@ -82,23 +89,59 @@ export function useAuth(): AuthState & AuthActions {
 
   // Cookie'lerde token'ları ayarlama
   const setTokensInCookies = useCallback((accessToken: string, refreshToken: string) => {
-    document.cookie = `accessToken=${accessToken}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`
-    document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`
+    if (typeof window !== 'undefined') {
+      document.cookie = `accessToken=${accessToken}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`
+      document.cookie = `refreshToken=${refreshToken}; path=/; max-age=${7 * 24 * 60 * 60}; samesite=lax`
+    }
   }, [])
 
   // Cookie'lerden token'ları temizleme
   const clearTokensFromCookies = useCallback(() => {
-    document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
-    document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    if (typeof window !== 'undefined') {
+      document.cookie = 'accessToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+      document.cookie = 'refreshToken=; path=/; expires=Thu, 01 Jan 1970 00:00:01 GMT'
+    }
   }, [])
 
-  // Auth durumu kontrolü
+  // Kullanıcı bilgilerini yenileme
+  const refreshUser = useCallback(async (): Promise<void> => {
+    try {
+      const token = tokenManager.getAccessToken()
+      if (!token) {
+        throw new Error('No access token available')
+      }
+
+      // Mock user fetch
+      await new Promise((resolve) => setTimeout(resolve, 300))
+
+      const userId = '1' // Gerçek projede JWT'den parse edilecek
+      const mockUser = MOCK_USERS_DB.find((u) => u.id === userId)
+
+      if (mockUser) {
+        const { password: _password, ...userWithoutPassword } = mockUser
+        dispatch(
+          setUser({
+            ...userWithoutPassword,
+            avatar: userWithoutPassword.avatar || undefined,
+          }),
+        )
+      } else {
+        throw new Error('User not found')
+      }
+    } catch (error) {
+      console.error('User refresh failed:', error)
+      throw error
+    }
+  }, [dispatch, tokenManager])
+
+  // Auth durumu kontrolü - STABLE referansla
   const checkAuth = useCallback(async (): Promise<void> => {
-    if (initializationRef.current || isInitializing.current) {
+    // Zaten initialize edilmişse veya initialization devam ediyorsa çık
+    if (initializationRef.current.hasInitialized || initializationRef.current.isInitializing) {
       return
     }
 
-    isInitializing.current = true
+    initializationRef.current.isInitializing = true
     dispatch(setLoading(true))
     dispatch(setError(null))
 
@@ -131,9 +174,6 @@ export function useAuth(): AuthState & AuthActions {
           await logout()
           return
         }
-      } else {
-        console.log('Token valid, refreshing user')
-        await refreshUser()
       }
     } catch (error) {
       console.error('Auth check failed:', error)
@@ -141,43 +181,10 @@ export function useAuth(): AuthState & AuthActions {
       await logout()
     } finally {
       dispatch(setLoading(false))
-      initializationRef.current = true
-      isInitializing.current = false
+      initializationRef.current.hasInitialized = true
+      initializationRef.current.isInitializing = false
     }
-  }, [dispatch, tokenManager, setTokensInCookies])
-
-  // Kullanıcı bilgilerini yenileme
-  const refreshUser = useCallback(async (): Promise<void> => {
-    try {
-      const token = tokenManager.getAccessToken()
-      if (!token) {
-        throw new Error('No access token available')
-      }
-
-      // Mock user fetch
-      await new Promise((resolve) => setTimeout(resolve, 300))
-
-      // Token'dan user ID'yi decode et (mock)
-      const userId = '1' // Gerçek projede JWT'den parse edilecek
-      const mockUser = MOCK_USERS_DB.find((u) => u.id === userId)
-
-      if (mockUser) {
-        const { password: _password, ...userWithoutPassword } = mockUser
-        dispatch(
-          setUser({
-            ...userWithoutPassword,
-            avatar: userWithoutPassword.avatar || undefined,
-          }),
-        )
-        console.log('User refreshed successfully')
-      } else {
-        throw new Error('User not found')
-      }
-    } catch (error) {
-      console.error('User refresh failed:', error)
-      throw error
-    }
-  }, [dispatch, tokenManager])
+  }, [dispatch, tokenManager, setTokensInCookies, refreshUser]) // Stable dependencies
 
   // Giriş işlemi
   const login = useCallback(
@@ -230,6 +237,10 @@ export function useAuth(): AuthState & AuthActions {
             duration: 3000,
           }),
         )
+
+        // Initialization state'ini reset et ki sonraki checkAuth çalışabilsin
+        initializationRef.current.hasInitialized = true
+        initializationRef.current.isInitializing = false
 
         console.log('Login process completed')
         return loginUser
@@ -290,8 +301,9 @@ export function useAuth(): AuthState & AuthActions {
       dispatch(logoutUser())
     } finally {
       dispatch(setLoading(false))
-      initializationRef.current = false
-      isInitializing.current = false
+      // Initialization state'ini reset et
+      initializationRef.current.hasInitialized = false
+      initializationRef.current.isInitializing = false
     }
   }, [dispatch, tokenManager, clearTokensFromCookies, user])
 
@@ -300,13 +312,13 @@ export function useAuth(): AuthState & AuthActions {
     dispatch(setError(null))
   }, [dispatch])
 
-  // Component mount olduğunda auth durumunu kontrol et
+  // Component mount olduğunda auth durumunu kontrol et - SADECE BİR KEZ
   useEffect(() => {
-    if (!initializationRef.current && !isInitializing.current) {
+    if (!initializationRef.current.hasInitialized && !initializationRef.current.isInitializing) {
       console.log('Initializing auth check')
       checkAuth()
     }
-  }, [checkAuth])
+  }, []) // BOŞ dependency array - sadece mount'ta çalışır
 
   return {
     user,
