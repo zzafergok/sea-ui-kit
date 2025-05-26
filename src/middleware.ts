@@ -30,7 +30,7 @@ function detectUserLocale(request: NextRequest): SupportedLocale {
       .map((lang) => {
         const [locale, quality = '1'] = lang.trim().split(';q=')
         return {
-          locale: locale.split('-')[0],
+          locale: locale.split('-')[0].toLowerCase(),
           quality: parseFloat(quality),
         }
       })
@@ -50,16 +50,22 @@ function detectUserLocale(request: NextRequest): SupportedLocale {
  * Korumalı rotaları kontrol eder
  */
 function isProtectedRoute(pathname: string): boolean {
-  const protectedPaths = ['/dashboard', '/profile', '/settings', '/users']
+  const protectedPaths = [
+    '/dashboard',
+    '/profile',
+    '/settings',
+    '/users',
+    '/components', // Components sayfası da korumalı
+  ]
   return protectedPaths.some((path) => pathname.startsWith(path))
 }
 
 /**
- * Authentication gerektirmeyen rotaları kontrol eder
+ * Authentication gerektirmeyen genel rotaları kontrol eder
  */
 function isPublicRoute(pathname: string): boolean {
   const publicPaths = ['/', '/about', '/contact', '/pricing']
-  return publicPaths.some((path) => pathname === path || pathname.startsWith(path))
+  return publicPaths.includes(pathname)
 }
 
 /**
@@ -78,36 +84,76 @@ function isStaticFile(pathname: string): boolean {
     pathname.startsWith('/api/') ||
     pathname.startsWith('/static/') ||
     pathname.includes('.') ||
-    pathname.startsWith('/favicon')
+    pathname.startsWith('/favicon') ||
+    pathname.startsWith('/site.webmanifest') ||
+    pathname.startsWith('/robots.txt')
   )
 }
 
 /**
- * Authentication token'ını kontrol eder
+ * Authentication token'ını kontrol eder - Geliştirilmiş
  */
 function hasValidAuthToken(request: NextRequest): boolean {
-  const accessToken = request.cookies.get('accessToken')?.value
-  const refreshToken = request.cookies.get('refreshToken')?.value
-
-  // Token'ların varlığını kontrol et
-  if (!accessToken || !refreshToken) {
-    return false
-  }
-
-  // Token'ın geçerliliğini kontrol et (basit kontrol)
   try {
-    // Token format kontrolü (mock token için)
-    return accessToken.startsWith('mock-access-token-') && refreshToken.startsWith('mock-refresh-token-')
-  } catch {
+    // Önce localStorage simülasyonu için cookie'leri kontrol et
+    const accessToken = request.cookies.get('accessToken')?.value
+    const refreshToken = request.cookies.get('refreshToken')?.value
+
+    // Token'ların varlığını kontrol et
+    if (!accessToken || !refreshToken) {
+      return false
+    }
+
+    // Mock token format kontrolü - gerçek projede JWT doğrulama yapılacak
+    const isValidFormat = accessToken.startsWith('mock-access-token-') && refreshToken.startsWith('mock-refresh-token-')
+
+    if (!isValidFormat) {
+      return false
+    }
+
+    // Token expiry kontrolü (eğer cookie'de mevcutsa)
+    const tokenExpiry = request.cookies.get('tokenExpiry')?.value
+    if (tokenExpiry) {
+      const expiryTime = parseInt(tokenExpiry)
+      const currentTime = Date.now()
+      const bufferTime = 60000 // 1 dakika buffer
+
+      if (currentTime > expiryTime - bufferTime) {
+        return false // Token süresi dolmuş
+      }
+    }
+
+    return true
+  } catch (error) {
+    console.error('Token validation error:', error)
     return false
   }
+}
+
+/**
+ * Response headers'ını güvenli şekilde ayarlar
+ */
+function setSecureHeaders(response: NextResponse): NextResponse {
+  // Güvenlik headers'ları ekle
+  response.headers.set('X-Frame-Options', 'DENY')
+  response.headers.set('X-Content-Type-Options', 'nosniff')
+  response.headers.set('Referrer-Policy', 'strict-origin-when-cross-origin')
+
+  // Development ortamında ek debug headers
+  if (process.env.NODE_ENV === 'development') {
+    response.headers.set('X-Middleware-Version', '1.0.0')
+  }
+
+  return response
 }
 
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl
 
-  // Console'da debug bilgisi
-  console.log(`Middleware: ${request.method} ${pathname}`)
+  // Development logging
+  if (process.env.NODE_ENV === 'development') {
+    console.log(`[Middleware] ${request.method} ${pathname}`)
+  }
 
   // Statik dosyalar için middleware'i atla
   if (isStaticFile(pathname)) {
@@ -121,14 +167,14 @@ export function middleware(request: NextRequest) {
   // Response objesi oluştur
   const response = NextResponse.next()
 
-  // Dil cookie'sini ayarla
+  // Dil cookie'sini güncelle (sadece gerekirse)
   const currentLanguageCookie = request.cookies.get('language')?.value
   if (currentLanguageCookie !== detectedLocale) {
     response.cookies.set('language', detectedLocale, {
       httpOnly: false,
       secure: process.env.NODE_ENV === 'production',
       sameSite: 'lax',
-      maxAge: 365 * 24 * 60 * 60,
+      maxAge: 365 * 24 * 60 * 60, // 1 yıl
       path: '/',
     })
   }
@@ -140,19 +186,23 @@ export function middleware(request: NextRequest) {
   if (isAuthRoute(pathname)) {
     // Auth sayfalarında zaten giriş yapmış kullanıcıyı dashboard'a yönlendir
     if (hasAuth) {
-      console.log('Already authenticated, redirecting to dashboard')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Middleware] Already authenticated, redirecting to dashboard')
+      }
       const dashboardUrl = new URL('/dashboard', request.url)
       dashboardUrl.searchParams.set('lang', detectedLocale)
       return NextResponse.redirect(dashboardUrl)
     }
-    // Auth sayfalarında değilse, normal devam et
-    return response
+    // Auth sayfalarında değilse, güvenlik headers'ı ile devam et
+    return setSecureHeaders(response)
   }
 
   if (isProtectedRoute(pathname)) {
     // Korumalı rotada authentication kontrolü
     if (!hasAuth) {
-      console.log('Not authenticated, redirecting to login')
+      if (process.env.NODE_ENV === 'development') {
+        console.log('[Middleware] Not authenticated, redirecting to login')
+      }
       const loginUrl = new URL('/auth/login', request.url)
       loginUrl.searchParams.set('lang', detectedLocale)
 
@@ -163,16 +213,16 @@ export function middleware(request: NextRequest) {
 
       return NextResponse.redirect(loginUrl)
     }
-    // Authentication varsa normal devam et
-    return response
+    // Authentication varsa güvenlik headers'ı ile devam et
+    return setSecureHeaders(response)
   }
 
   // Public routes için normal devam et
   if (isPublicRoute(pathname)) {
-    return response
+    return setSecureHeaders(response)
   }
 
-  // Dil parametresi varsa ve geçerliyse, temizle
+  // Dil parametresi varsa ve geçerliyse, temizle ve cookie'ye kaydet
   const langParam = request.nextUrl.searchParams.get('lang')
   if (langParam && supportedLocales.includes(langParam as SupportedLocale)) {
     const newUrl = new URL(request.url)
@@ -187,7 +237,7 @@ export function middleware(request: NextRequest) {
       path: '/',
     })
 
-    return redirectResponse
+    return setSecureHeaders(redirectResponse)
   }
 
   // Development modunda debug bilgileri ekle
@@ -195,9 +245,19 @@ export function middleware(request: NextRequest) {
     response.headers.set('X-Debug-Locale', detectedLocale)
     response.headers.set('X-Debug-Path', pathname)
     response.headers.set('X-Debug-Auth', hasAuth ? 'true' : 'false')
+    response.headers.set(
+      'X-Debug-Route-Type',
+      isPublicRoute(pathname)
+        ? 'public'
+        : isProtectedRoute(pathname)
+          ? 'protected'
+          : isAuthRoute(pathname)
+            ? 'auth'
+            : 'unknown',
+    )
   }
 
-  return response
+  return setSecureHeaders(response)
 }
 
 export const config = {
@@ -208,7 +268,8 @@ export const config = {
      * - _next/static (static files)
      * - _next/image (image optimization files)
      * - favicon.ico ve diğer static dosyalar
+     * - public klasöründeki dosyalar
      */
-    '/((?!api|_next/static|_next/image|favicon|.*\\.|manifest).*)',
+    '/((?!api|_next/static|_next/image|favicon|.*\\.|manifest|robots|sw\\.js).*)',
   ],
 }
