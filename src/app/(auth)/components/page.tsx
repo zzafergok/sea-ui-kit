@@ -1,6 +1,6 @@
 'use client'
 
-import React, { useState } from 'react'
+import React, { useState, useCallback } from 'react'
 import {
   Card,
   CardHeader,
@@ -34,7 +34,6 @@ import {
   Mail,
   Search,
   Download,
-  MessageCircle,
   Clock,
   AlertCircle,
   CheckCircle,
@@ -47,13 +46,7 @@ import {
   MousePointer,
   Bell,
   Sparkles,
-  Monitor,
-  Smartphone,
-  Tablet,
-  Layers,
-  Box,
   Package,
-  Grid,
   ExternalLink,
   Copy,
   Github,
@@ -65,22 +58,15 @@ import { showToast } from '@/store/slices/toastSlice'
 import { ComponentShowcase } from '@/components/ComponentShowcase/ComponentShowcase'
 import { ComponentSearch } from '@/components/ComponentSearch/ComponentSearch'
 import { CodePreview } from '@/components/CodePreview/CodePreview'
+import { mockComponents, categoryColors, statusColors } from '@/data/mockComponents'
+import { ComponentItem } from '@/hooks/useComponentSearch'
+import { cn } from '@/lib/utils'
 
 export default function ComponentsPage() {
   const dispatch = useAppDispatch()
-  const [selectedCategory, setSelectedCategory] = useState('all')
-  const [searchQuery, setSearchQuery] = useState('')
+  const [filteredComponents, setFilteredComponents] = useState<ComponentItem[]>(mockComponents)
   const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
   const [isDialogOpen, setIsDialogOpen] = useState(false)
-
-  const componentCategories = [
-    { id: 'all', label: 'Tüm Bileşenler', icon: Grid, count: 25 },
-    { id: 'inputs', label: 'Form & Input', icon: Package, count: 8 },
-    { id: 'navigation', label: 'Navigasyon', icon: Layout, count: 5 },
-    { id: 'feedback', label: 'Geri Bildirim', icon: MessageCircle, count: 6 },
-    { id: 'data', label: 'Veri Gösterimi', icon: Box, count: 4 },
-    { id: 'layout', label: 'Layout', icon: Layers, count: 2 },
-  ]
 
   const showSampleToast = (type: 'success' | 'error' | 'warning' | 'info') => {
     const messages = {
@@ -100,10 +86,97 @@ export default function ComponentsPage() {
     )
   }
 
-  const handleCopyCode = (code: string) => {
+  const handleCopyCode = useCallback((code: string) => {
     navigator.clipboard.writeText(code)
     showSampleToast('success')
-  }
+  }, [])
+
+  const handleFilteredComponentsChange = useCallback((components: ComponentItem[]) => {
+    setFilteredComponents(components)
+  }, [])
+
+  const handleViewModeChange = useCallback((mode: 'grid' | 'list') => {
+    setViewMode(mode)
+  }, [])
+
+  // Bileşen kartı render fonksiyonu
+  const renderComponentCard = useCallback(
+    (component: ComponentItem) => {
+      const statusVariant = {
+        stable: 'success' as const,
+        beta: 'warning' as const,
+        alpha: 'destructive' as const,
+        deprecated: 'destructive' as const,
+      }
+
+      return (
+        <Card
+          key={component.id}
+          className={cn(
+            'group hover:shadow-lg transition-all duration-300',
+            viewMode === 'list' && 'flex flex-row items-center',
+          )}
+        >
+          <CardHeader className={cn(viewMode === 'list' && 'flex-1')}>
+            <div className='flex items-start justify-between'>
+              <div className={cn('space-y-1', viewMode === 'list' && 'flex-1')}>
+                <CardTitle className='flex items-center gap-2 text-lg'>
+                  <Code className='h-5 w-5 text-primary-600 dark:text-primary-400' />
+                  {component.name}
+                </CardTitle>
+                <CardDescription>{component.description}</CardDescription>
+                <div className='flex items-center gap-2 text-xs'>
+                  <span
+                    className={cn(
+                      'px-2 py-1 rounded text-xs',
+                      categoryColors[component.category] || 'bg-neutral-100 dark:bg-neutral-800',
+                    )}
+                  >
+                    {component.category}
+                  </span>
+                  <span className='text-neutral-400'>•</span>
+                  <span className='text-neutral-500'>Popülerlik: {component.popularity}</span>
+                </div>
+              </div>
+              <CardBadge variant={statusVariant[component.status]}>
+                {component.status.charAt(0).toUpperCase() + component.status.slice(1)}
+              </CardBadge>
+            </div>
+          </CardHeader>
+
+          {viewMode === 'grid' && (
+            <CardContent className='space-y-4'>
+              <div className='flex flex-wrap gap-1'>
+                {component.tags.slice(0, 3).map((tag) => (
+                  <span
+                    key={tag}
+                    className='text-xs bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400 px-2 py-1 rounded'
+                  >
+                    {tag}
+                  </span>
+                ))}
+                {component.tags.length > 3 && (
+                  <span className='text-xs text-neutral-400'>+{component.tags.length - 3}</span>
+                )}
+              </div>
+            </CardContent>
+          )}
+
+          <CardFooter className={cn('flex justify-between', viewMode === 'list' && 'flex-col gap-2')}>
+            <Button variant='ghost' size='sm' onClick={() => handleCopyCode(`<${component.name} />`)}>
+              <Copy className='h-4 w-4 mr-2' />
+              Kodu Kopyala
+            </Button>
+            <Button variant='outline' size='sm'>
+              <ExternalLink className='h-4 w-4 mr-2' />
+              Docs
+            </Button>
+          </CardFooter>
+        </Card>
+      )
+    },
+    [viewMode, handleCopyCode],
+  )
 
   return (
     <div className='min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950'>
@@ -114,7 +187,9 @@ export default function ComponentsPage() {
           <div className='text-center space-y-8'>
             <div className='inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-950/50 rounded-full border border-primary-200 dark:border-primary-800'>
               <Sparkles className='h-4 w-4 text-primary-600 dark:text-primary-400' />
-              <span className='text-sm font-medium text-primary-700 dark:text-primary-300'>25+ UI Bileşeni</span>
+              <span className='text-sm font-medium text-primary-700 dark:text-primary-300'>
+                {mockComponents.length}+ UI Bileşeni
+              </span>
             </div>
 
             <div className='space-y-4'>
@@ -148,7 +223,9 @@ export default function ComponentsPage() {
             {/* Stats */}
             <div className='grid grid-cols-2 md:grid-cols-4 gap-6 max-w-2xl mx-auto mt-12'>
               <div className='text-center'>
-                <div className='text-2xl md:text-3xl font-bold text-primary-600 dark:text-primary-400'>25+</div>
+                <div className='text-2xl md:text-3xl font-bold text-primary-600 dark:text-primary-400'>
+                  {mockComponents.length}+
+                </div>
                 <div className='text-sm text-neutral-500 dark:text-neutral-400'>Bileşenler</div>
               </div>
               <div className='text-center'>
@@ -170,75 +247,23 @@ export default function ComponentsPage() {
 
       {/* Search and Filter Section */}
       <section className='max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8'>
-        <Card className='mb-8 bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm border-neutral-200/50 dark:border-neutral-700/50'>
-          <CardContent className='p-6'>
-            <div className='flex flex-col lg:flex-row gap-6 items-center justify-between'>
-              <div className='flex-1 w-full'>
-                <div className='relative'>
-                  <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
-                  <Input
-                    placeholder='Bileşen ara... (Button, Input, Card...)'
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className='pl-10 pr-4 py-3 text-base bg-white dark:bg-neutral-800'
-                  />
-                </div>
-              </div>
-
-              <div className='flex items-center gap-4'>
-                <div className='flex items-center gap-2 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg'>
-                  <Button
-                    variant={viewMode === 'grid' ? 'default' : 'ghost'}
-                    size='sm'
-                    onClick={() => setViewMode('grid')}
-                  >
-                    <Grid className='h-4 w-4' />
-                  </Button>
-                  <Button
-                    variant={viewMode === 'list' ? 'default' : 'ghost'}
-                    size='sm'
-                    onClick={() => setViewMode('list')}
-                  >
-                    <Layout className='h-4 w-4' />
-                  </Button>
-                </div>
-
-                <ThemeToggle />
-                <LanguageToggle />
-              </div>
-            </div>
-          </CardContent>
-        </Card>
-
-        {/* Category Filter */}
-        <div className='mb-8'>
-          <div className='flex flex-wrap gap-3'>
-            {componentCategories.map((category) => {
-              const Icon = category.icon
-              return (
-                <Button
-                  key={category.id}
-                  variant={selectedCategory === category.id ? 'default' : 'outline'}
-                  size='sm'
-                  onClick={() => setSelectedCategory(category.id)}
-                  className='flex items-center gap-2'
-                >
-                  <Icon className='h-4 w-4' />
-                  {category.label}
-                  <span className='bg-neutral-200 dark:bg-neutral-700 text-neutral-600 dark:text-neutral-300 text-xs px-2 py-0.5 rounded-full'>
-                    {category.count}
-                  </span>
-                </Button>
-              )
-            })}
-          </div>
-        </div>
+        <ComponentSearch
+          components={mockComponents}
+          onFilteredComponentsChange={handleFilteredComponentsChange}
+          onViewModeChange={handleViewModeChange}
+          viewMode={viewMode}
+          className='mb-8'
+        />
       </section>
 
-      {/* Components Grid */}
+      {/* Components Grid/List */}
       <section className='max-w-7xl mx-auto px-4 pb-16 sm:px-6 lg:px-8'>
-        <Tabs defaultValue='interactive' className='space-y-8'>
+        <Tabs defaultValue='all' className='space-y-8'>
           <TabsList className='grid w-full grid-cols-1 sm:grid-cols-4 bg-white dark:bg-neutral-900 p-1'>
+            <TabsTrigger value='all' className='flex items-center gap-2'>
+              <Package className='h-4 w-4' />
+              <span className='hidden sm:inline'>Tüm Bileşenler</span>
+            </TabsTrigger>
             <TabsTrigger value='interactive' className='flex items-center gap-2'>
               <MousePointer className='h-4 w-4' />
               <span className='hidden sm:inline'>Etkileşimli</span>
@@ -251,13 +276,39 @@ export default function ComponentsPage() {
               <Bell className='h-4 w-4' />
               <span className='hidden sm:inline'>Feedback</span>
             </TabsTrigger>
-            <TabsTrigger value='layout' className='flex items-center gap-2'>
-              <Layout className='h-4 w-4' />
-              <span className='hidden sm:inline'>Layout</span>
-            </TabsTrigger>
           </TabsList>
 
-          {/* Interactive Components */}
+          {/* Tüm Bileşenler */}
+          <TabsContent value='all' className='space-y-6'>
+            <div className='flex items-center justify-between'>
+              <h2 className='text-2xl font-bold text-neutral-900 dark:text-neutral-100'>
+                Tüm Bileşenler ({filteredComponents.length})
+              </h2>
+            </div>
+
+            <div
+              className={cn(
+                'grid gap-6',
+                viewMode === 'grid' ? 'grid-cols-1 md:grid-cols-2 xl:grid-cols-3' : 'grid-cols-1',
+              )}
+            >
+              {filteredComponents.map(renderComponentCard)}
+            </div>
+
+            {filteredComponents.length === 0 && (
+              <div className='text-center py-12'>
+                <div className='text-neutral-400 mb-4'>
+                  <Search className='h-12 w-12 mx-auto' />
+                </div>
+                <h3 className='text-lg font-medium text-neutral-600 dark:text-neutral-400 mb-2'>
+                  Hiç bileşen bulunamadı
+                </h3>
+                <p className='text-neutral-500 dark:text-neutral-500'>Arama kriterlerinizi değiştirip tekrar deneyin</p>
+              </div>
+            )}
+          </TabsContent>
+
+          {/* Diğer tablar için örnek demonstrasyonlar */}
           <TabsContent value='interactive' className='space-y-8'>
             <div className='grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-6'>
               {/* Button Showcase */}
@@ -555,95 +606,6 @@ export default function ComponentsPage() {
                       </DialogFooter>
                     </DialogContent>
                   </Dialog>
-                </CardContent>
-              </Card>
-            </div>
-          </TabsContent>
-
-          {/* Layout Components */}
-          <TabsContent value='layout' className='space-y-8'>
-            {/* Card Variants */}
-            <div className='space-y-6'>
-              <div>
-                <h3 className='text-xl font-semibold mb-4'>Card Variants</h3>
-                <div className='grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4'>
-                  <Card variant='default' size='sm'>
-                    <CardHeader>
-                      <CardTitle className='text-base'>Default</CardTitle>
-                      <CardDescription className='text-xs'>Standart tasarım</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-sm'>Varsayılan kart stili</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card variant='success' size='sm'>
-                    <CardHeader>
-                      <CardTitle className='text-base'>Success</CardTitle>
-                      <CardDescription className='text-xs'>Başarılı işlem</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-sm'>Yeşil tonlarda</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card variant='warning' size='sm'>
-                    <CardHeader>
-                      <CardTitle className='text-base'>Warning</CardTitle>
-                      <CardDescription className='text-xs'>Uyarı durumu</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-sm'>Sarı tonlarda</p>
-                    </CardContent>
-                  </Card>
-
-                  <Card variant='destructive' size='sm'>
-                    <CardHeader>
-                      <CardTitle className='text-base'>Error</CardTitle>
-                      <CardDescription className='text-xs'>Hata durumu</CardDescription>
-                    </CardHeader>
-                    <CardContent>
-                      <p className='text-sm'>Kırmızı tonlarda</p>
-                    </CardContent>
-                  </Card>
-                </div>
-              </div>
-
-              {/* Responsive Grid Demo */}
-              <Card>
-                <CardHeader>
-                  <CardTitle className='flex items-center gap-2'>
-                    <Grid className='h-5 w-5' />
-                    Responsive Grid System
-                  </CardTitle>
-                  <CardDescription>Farklı ekran boyutlarında uyumlu grid yapısı</CardDescription>
-                </CardHeader>
-                <CardContent>
-                  <div className='grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-4'>
-                    {Array.from({ length: 8 }, (_, i) => (
-                      <div
-                        key={i}
-                        className='bg-gradient-to-br from-primary-50 to-accent-50 dark:from-primary-950 dark:to-accent-950 p-4 rounded-lg border border-primary-200 dark:border-primary-800 text-center'
-                      >
-                        <div className='text-sm font-medium text-primary-700 dark:text-primary-300'>Grid {i + 1}</div>
-                        <div className='text-xs text-primary-500 dark:text-primary-400 mt-1'>Responsive</div>
-                      </div>
-                    ))}
-                  </div>
-                  <div className='mt-4 text-xs text-neutral-500 dark:text-neutral-400 space-y-1'>
-                    <div className='flex items-center gap-2'>
-                      <Smartphone className='h-3 w-3' />
-                      <span>Mobile: 1 sütun</span>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <Tablet className='h-3 w-3' />
-                      <span>Tablet: 2 sütun</span>
-                    </div>
-                    <div className='flex items-center gap-2'>
-                      <Monitor className='h-3 w-3' />
-                      <span>Desktop: 3-4 sütun</span>
-                    </div>
-                  </div>
                 </CardContent>
               </Card>
             </div>

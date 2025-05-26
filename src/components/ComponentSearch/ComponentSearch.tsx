@@ -1,132 +1,67 @@
-/* eslint-disable prefer-const */
 'use client'
 
-import React, { useState, useMemo, useCallback } from 'react'
+import React, { useState, useCallback } from 'react'
 import { Input } from '@/components/Input/Input'
 import { Button } from '@/components/Button/Button'
 import { Card, CardContent } from '@/components/Card/Card'
-import { Search, Filter, X, Grid, List, SortAsc, SortDesc, Tag, Clock, Star } from 'lucide-react'
+import { Search, Filter, X, Grid, List, SortAsc, SortDesc, Tag, Star, ChevronDown } from 'lucide-react'
 import { cn } from '@/lib/utils'
-
-interface ComponentItem {
-  id: string
-  name: string
-  description: string
-  category: string
-  tags: string[]
-  status: 'stable' | 'beta' | 'alpha' | 'deprecated'
-  lastUpdated: string
-  popularity: number
-}
+import { useComponentSearch, ComponentItem } from '@/hooks/useComponentSearch'
+import { categoryColors, statusColors } from '@/data/mockComponents'
 
 interface ComponentSearchProps {
   components: ComponentItem[]
-  onFilter: (filteredComponents: ComponentItem[]) => void
+  onFilteredComponentsChange: (filteredComponents: ComponentItem[]) => void
   onViewModeChange: (mode: 'grid' | 'list') => void
+  viewMode: 'grid' | 'list'
   className?: string
 }
 
-export function ComponentSearch({ components, onFilter, onViewModeChange, className }: ComponentSearchProps) {
-  const [searchQuery, setSearchQuery] = useState('')
-  const [selectedCategories, setSelectedCategories] = useState<string[]>([])
-  const [selectedStatus, setSelectedStatus] = useState<string[]>([])
-  const [sortBy, setSortBy] = useState<'name' | 'popularity' | 'updated'>('name')
-  const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('asc')
-  const [viewMode, setViewMode] = useState<'grid' | 'list'>('grid')
+export function ComponentSearch({
+  components,
+  onFilteredComponentsChange,
+  onViewModeChange,
+  viewMode,
+  className,
+}: ComponentSearchProps) {
   const [showFilters, setShowFilters] = useState(false)
 
-  // Kategorileri ve durumları otomatik olarak çıkar
-  const categories = useMemo(() => {
-    const cats = Array.from(new Set(components.map((c) => c.category)))
-    return cats.map((cat) => ({
-      value: cat,
-      label: cat,
-      count: components.filter((c) => c.category === cat).length,
-    }))
-  }, [components])
+  const {
+    filteredComponents,
+    totalCount,
+    filteredCount,
+    filters,
+    hasActiveFilters,
+    availableCategories,
+    availableStatuses,
+    updateSearchQuery,
+    toggleCategory,
+    toggleStatus,
+    updateSort,
+    clearFilters,
+  } = useComponentSearch({
+    components,
+    initialSearchQuery: '',
+    initialCategories: [],
+    initialStatus: [],
+  })
 
-  const statusOptions = useMemo(() => {
-    const statuses = Array.from(new Set(components.map((c) => c.status)))
-    return statuses.map((status) => ({
-      value: status,
-      label: status.charAt(0).toUpperCase() + status.slice(1),
-      count: components.filter((c) => c.status === status).length,
-    }))
-  }, [components])
-
-  // Filtreleme ve sıralama
-  const filteredAndSortedComponents = useMemo(() => {
-    let filtered = components.filter((component) => {
-      // Arama sorgusu
-      const matchesSearch =
-        !searchQuery ||
-        component.name.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        component.description.toLowerCase().includes(searchQuery.toLowerCase()) ||
-        component.tags.some((tag) => tag.toLowerCase().includes(searchQuery.toLowerCase()))
-
-      // Kategori filtresi
-      const matchesCategory = selectedCategories.length === 0 || selectedCategories.includes(component.category)
-
-      // Durum filtresi
-      const matchesStatus = selectedStatus.length === 0 || selectedStatus.includes(component.status)
-
-      return matchesSearch && matchesCategory && matchesStatus
-    })
-
-    // Sıralama
-    filtered.sort((a, b) => {
-      let comparison = 0
-
-      switch (sortBy) {
-        case 'name':
-          comparison = a.name.localeCompare(b.name)
-          break
-        case 'popularity':
-          comparison = a.popularity - b.popularity
-          break
-        case 'updated':
-          comparison = new Date(a.lastUpdated).getTime() - new Date(b.lastUpdated).getTime()
-          break
-      }
-
-      return sortOrder === 'asc' ? comparison : -comparison
-    })
-
-    return filtered
-  }, [components, searchQuery, selectedCategories, selectedStatus, sortBy, sortOrder])
-
-  // Filtrelenen sonuçları üst bileşene gönder
+  // Filtrelenmiş bileşenleri parent'a ilet
   React.useEffect(() => {
-    onFilter(filteredAndSortedComponents)
-  }, [filteredAndSortedComponents, onFilter])
+    onFilteredComponentsChange(filteredComponents)
+  }, [filteredComponents, onFilteredComponentsChange])
 
-  const handleCategoryToggle = useCallback((category: string) => {
-    setSelectedCategories((prev) =>
-      prev.includes(category) ? prev.filter((c) => c !== category) : [...prev, category],
-    )
-  }, [])
+  const handleSortChange = useCallback(() => {
+    const newOrder = filters.sortOrder === 'asc' ? 'desc' : 'asc'
+    updateSort(filters.sortBy, newOrder)
+  }, [filters.sortBy, filters.sortOrder, updateSort])
 
-  const handleStatusToggle = useCallback((status: string) => {
-    setSelectedStatus((prev) => (prev.includes(status) ? prev.filter((s) => s !== status) : [...prev, status]))
-  }, [])
-
-  const handleViewModeChange = useCallback(
-    (mode: 'grid' | 'list') => {
-      setViewMode(mode)
-      onViewModeChange(mode)
+  const handleSortByChange = useCallback(
+    (sortBy: 'name' | 'popularity' | 'updated') => {
+      updateSort(sortBy, filters.sortOrder)
     },
-    [onViewModeChange],
+    [filters.sortOrder, updateSort],
   )
-
-  const clearFilters = useCallback(() => {
-    setSearchQuery('')
-    setSelectedCategories([])
-    setSelectedStatus([])
-    setSortBy('name')
-    setSortOrder('asc')
-  }, [])
-
-  const hasActiveFilters = searchQuery || selectedCategories.length > 0 || selectedStatus.length > 0
 
   return (
     <div className={cn('space-y-4', className)}>
@@ -139,15 +74,15 @@ export function ComponentSearch({ components, onFilter, onViewModeChange, classN
               <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
               <Input
                 placeholder='Bileşen ara... (Button, Input, Card...)'
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
+                value={filters.searchQuery}
+                onChange={(e) => updateSearchQuery(e.target.value)}
                 className='pl-10 pr-4 py-3 text-base'
               />
-              {searchQuery && (
+              {filters.searchQuery && (
                 <Button
                   variant='ghost'
                   size='sm'
-                  onClick={() => setSearchQuery('')}
+                  onClick={() => updateSearchQuery('')}
                   className='absolute right-2 top-1/2 transform -translate-y-1/2 p-1 h-6 w-6'
                 >
                   <X className='h-4 w-4' />
@@ -168,29 +103,36 @@ export function ComponentSearch({ components, onFilter, onViewModeChange, classN
                 <span className='hidden sm:inline'>Filtreler</span>
                 {hasActiveFilters && (
                   <span className='bg-primary-500 text-white text-xs px-1.5 py-0.5 rounded-full'>
-                    {selectedCategories.length + selectedStatus.length + (searchQuery ? 1 : 0)}
+                    {filters.selectedCategories.length + filters.selectedStatus.length + (filters.searchQuery ? 1 : 0)}
                   </span>
                 )}
               </Button>
 
-              {/* Sıralama */}
-              <div className='flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg'>
-                <Button
-                  variant='ghost'
-                  size='sm'
-                  onClick={() => setSortOrder(sortOrder === 'asc' ? 'desc' : 'asc')}
-                  className='p-2'
+              {/* Sıralama Dropdown */}
+              <div className='relative'>
+                <select
+                  value={filters.sortBy}
+                  onChange={(e) => handleSortByChange(e.target.value as 'name' | 'popularity' | 'updated')}
+                  className='appearance-none bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700 rounded-md px-3 py-2 text-sm pr-8 focus:outline-none focus:ring-2 focus:ring-primary-500'
                 >
-                  {sortOrder === 'asc' ? <SortAsc className='h-4 w-4' /> : <SortDesc className='h-4 w-4' />}
-                </Button>
+                  <option value='name'>İsim</option>
+                  <option value='popularity'>Popülerlik</option>
+                  <option value='updated'>Güncellenme</option>
+                </select>
+                <ChevronDown className='absolute right-2 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400 pointer-events-none' />
               </div>
+
+              {/* Sıralama Yönü */}
+              <Button variant='outline' size='sm' onClick={handleSortChange} className='p-2'>
+                {filters.sortOrder === 'asc' ? <SortAsc className='h-4 w-4' /> : <SortDesc className='h-4 w-4' />}
+              </Button>
 
               {/* Görünüm Modu */}
               <div className='flex items-center gap-1 p-1 bg-neutral-100 dark:bg-neutral-800 rounded-lg'>
                 <Button
                   variant={viewMode === 'grid' ? 'default' : 'ghost'}
                   size='sm'
-                  onClick={() => handleViewModeChange('grid')}
+                  onClick={() => onViewModeChange('grid')}
                   className='p-2'
                 >
                   <Grid className='h-4 w-4' />
@@ -198,7 +140,7 @@ export function ComponentSearch({ components, onFilter, onViewModeChange, classN
                 <Button
                   variant={viewMode === 'list' ? 'default' : 'ghost'}
                   size='sm'
-                  onClick={() => handleViewModeChange('list')}
+                  onClick={() => onViewModeChange('list')}
                   className='p-2'
                 >
                   <List className='h-4 w-4' />
@@ -223,24 +165,33 @@ export function ComponentSearch({ components, onFilter, onViewModeChange, classN
               )}
             </div>
 
-            <div className='grid grid-cols-1 md:grid-cols-3 gap-6'>
+            <div className='grid grid-cols-1 md:grid-cols-2 gap-6'>
               {/* Kategori Filtresi */}
               <div className='space-y-3'>
                 <h4 className='text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center gap-2'>
                   <Tag className='h-4 w-4' />
                   Kategoriler
                 </h4>
-                <div className='space-y-2'>
-                  {categories.map((category) => (
-                    <label key={category.value} className='flex items-center gap-2 cursor-pointer'>
+                <div className='space-y-2 max-h-32 overflow-y-auto'>
+                  {availableCategories.map((category) => (
+                    <label
+                      key={category.value}
+                      className='flex items-center gap-2 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 p-1 rounded'
+                    >
                       <input
                         type='checkbox'
-                        checked={selectedCategories.includes(category.value)}
-                        onChange={() => handleCategoryToggle(category.value)}
-                        className='rounded border-neutral-300 dark:border-neutral-600'
+                        checked={filters.selectedCategories.includes(category.value)}
+                        onChange={() => toggleCategory(category.value)}
+                        className='rounded border-neutral-300 dark:border-neutral-600 text-primary-600 focus:ring-primary-500'
                       />
-                      <span className='text-sm text-neutral-600 dark:text-neutral-400'>{category.label}</span>
-                      <span className='text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded'>
+                      <span className='text-sm text-neutral-600 dark:text-neutral-400 flex-1'>{category.label}</span>
+                      <span
+                        className={cn(
+                          'text-xs px-2 py-0.5 rounded text-center',
+                          categoryColors[category.value] ||
+                            'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400',
+                        )}
+                      >
                         {category.count}
                       </span>
                     </label>
@@ -255,45 +206,27 @@ export function ComponentSearch({ components, onFilter, onViewModeChange, classN
                   Durum
                 </h4>
                 <div className='space-y-2'>
-                  {statusOptions.map((status) => (
-                    <label key={status.value} className='flex items-center gap-2 cursor-pointer'>
+                  {availableStatuses.map((status) => (
+                    <label
+                      key={status.value}
+                      className='flex items-center gap-2 cursor-pointer hover:bg-neutral-50 dark:hover:bg-neutral-800 p-1 rounded'
+                    >
                       <input
                         type='checkbox'
-                        checked={selectedStatus.includes(status.value)}
-                        onChange={() => handleStatusToggle(status.value)}
-                        className='rounded border-neutral-300 dark:border-neutral-600'
+                        checked={filters.selectedStatus.includes(status.value)}
+                        onChange={() => toggleStatus(status.value)}
+                        className='rounded border-neutral-300 dark:border-neutral-600 text-primary-600 focus:ring-primary-500'
                       />
-                      <span className='text-sm text-neutral-600 dark:text-neutral-400'>{status.label}</span>
-                      <span className='text-xs text-neutral-400 bg-neutral-100 dark:bg-neutral-800 px-2 py-0.5 rounded'>
+                      <span className='text-sm text-neutral-600 dark:text-neutral-400 flex-1'>{status.label}</span>
+                      <span
+                        className={cn(
+                          'text-xs px-2 py-0.5 rounded',
+                          statusColors[status.value] ||
+                            'bg-neutral-100 dark:bg-neutral-800 text-neutral-600 dark:text-neutral-400',
+                        )}
+                      >
                         {status.count}
                       </span>
-                    </label>
-                  ))}
-                </div>
-              </div>
-
-              {/* Sıralama Seçenekleri */}
-              <div className='space-y-3'>
-                <h4 className='text-sm font-medium text-neutral-700 dark:text-neutral-300 flex items-center gap-2'>
-                  <Clock className='h-4 w-4' />
-                  Sırala
-                </h4>
-                <div className='space-y-2'>
-                  {[
-                    { value: 'name', label: 'İsim' },
-                    { value: 'popularity', label: 'Popülerlik' },
-                    { value: 'updated', label: 'Son Güncelleme' },
-                  ].map((option) => (
-                    <label key={option.value} className='flex items-center gap-2 cursor-pointer'>
-                      <input
-                        type='radio'
-                        name='sortBy'
-                        value={option.value}
-                        checked={sortBy === option.value}
-                        onChange={(e) => setSortBy(e.target.value as any)}
-                        className='rounded-full border-neutral-300 dark:border-neutral-600'
-                      />
-                      <span className='text-sm text-neutral-600 dark:text-neutral-400'>{option.label}</span>
                     </label>
                   ))}
                 </div>
@@ -306,10 +239,8 @@ export function ComponentSearch({ components, onFilter, onViewModeChange, classN
       {/* Sonuç İstatistikleri */}
       <div className='flex items-center justify-between text-sm text-neutral-500 dark:text-neutral-400'>
         <span>
-          {filteredAndSortedComponents.length} bileşen bulundu
-          {components.length !== filteredAndSortedComponents.length && (
-            <span> (toplam {components.length} içinden)</span>
-          )}
+          {filteredCount} bileşen bulundu
+          {totalCount !== filteredCount && <span> (toplam {totalCount} içinden)</span>}
         </span>
         {hasActiveFilters && (
           <Button variant='ghost' size='sm' onClick={clearFilters}>
