@@ -15,6 +15,7 @@ import {
   DropdownMenuItem,
   DropdownMenuLabel,
   DropdownMenuContent,
+  DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/Dropdown/Dropdown'
 
@@ -1738,90 +1739,167 @@ renderItem={(item, index) => (
     description: 'Radix UI tabanlı erişilebilir dropdown menü bileşeni',
     category: 'Navigasyon',
     status: 'stable',
-    demoComponent: React.createElement('div', { className: 'flex items-center space-x-4' }, [
+    demoComponent: React.createElement('div', { className: 'flex items-center justify-center p-4' }, [
       React.createElement(DropdownMenu, { key: 'dropdown' }, [
         React.createElement(
-          'button',
+          DropdownMenuTrigger,
           {
             key: 'trigger',
-            className:
-              'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 disabled:pointer-events-none disabled:opacity-50 border border-neutral-200 bg-white hover:bg-neutral-50 h-9 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800',
+            asChild: true,
+          },
+          React.createElement(
+            'button',
+            {
+              key: 'button',
+              className:
+                'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 border border-neutral-200 bg-white hover:bg-neutral-50 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800 h-10 px-4 py-2 min-w-[120px]',
+            },
+            [
+              React.createElement('span', { key: 'text', className: 'mr-2' }, 'Seçenekler'),
+              React.createElement(MoreHorizontal, { key: 'icon', className: 'h-4 w-4' }),
+            ],
+          ),
+        ),
+        React.createElement(
+          DropdownMenuContent,
+          {
+            key: 'content',
+            className: 'w-56',
+            align: 'start',
+            sideOffset: 4,
           },
           [
-            React.createElement('span', { key: 'text' }, 'Seçenekler'),
-            React.createElement(MoreHorizontal, { key: 'icon', className: 'ml-2 h-4 w-4' }),
+            React.createElement(DropdownMenuLabel, { key: 'label' }, 'Hesap İşlemleri'),
+            React.createElement(DropdownMenuSeparator, { key: 'sep1' }),
+            React.createElement(
+              DropdownMenuItem,
+              {
+                key: 'item1',
+                className: 'cursor-pointer',
+              },
+              [
+                React.createElement('span', { key: 'icon', className: 'mr-2' }, '👤'),
+                React.createElement('span', { key: 'text' }, 'Profil'),
+              ],
+            ),
+            React.createElement(
+              DropdownMenuItem,
+              {
+                key: 'item2',
+                className: 'cursor-pointer',
+              },
+              [
+                React.createElement('span', { key: 'icon', className: 'mr-2' }, '⚙️'),
+                React.createElement('span', { key: 'text' }, 'Ayarlar'),
+              ],
+            ),
+            React.createElement(
+              DropdownMenuItem,
+              {
+                key: 'item3',
+                className: 'cursor-pointer',
+              },
+              [
+                React.createElement('span', { key: 'icon', className: 'mr-2' }, '💳'),
+                React.createElement('span', { key: 'text' }, 'Faturalandırma'),
+              ],
+            ),
+            React.createElement(DropdownMenuSeparator, { key: 'sep2' }),
+            React.createElement(
+              DropdownMenuItem,
+              {
+                key: 'item4',
+                className: 'text-red-600 dark:text-red-400 cursor-pointer',
+              },
+              [
+                React.createElement('span', { key: 'icon', className: 'mr-2' }, '🚪'),
+                React.createElement('span', { key: 'text' }, 'Çıkış Yap'),
+              ],
+            ),
           ],
         ),
-        React.createElement(DropdownMenuContent, { key: 'content', className: 'w-56' }, [
-          React.createElement(DropdownMenuLabel, { key: 'label' }, 'Hesap İşlemleri'),
-          React.createElement(DropdownMenuSeparator, { key: 'sep1' }),
-          React.createElement(DropdownMenuItem, { key: 'item1' }, 'Profil'),
-          React.createElement(DropdownMenuItem, { key: 'item2' }, 'Ayarlar'),
-          React.createElement(DropdownMenuItem, { key: 'item3' }, 'Faturalandırma'),
-          React.createElement(DropdownMenuSeparator, { key: 'sep2' }),
-          React.createElement(DropdownMenuItem, { key: 'item4', className: 'text-red-600' }, 'Çıkış Yap'),
-        ]),
       ]),
     ]),
     code: `import {
-  DropdownMenu,
-  DropdownMenuContent,
-  DropdownMenuItem,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger,
-} from '@/components/Dropdown/Dropdown'
-import { Button } from '@/components/Button/Button'
-
-function Example() {
-  return (
-    <DropdownMenu>
-      <DropdownMenuTrigger asChild>
-        <Button variant="outline">Seçenekler</Button>
-      </DropdownMenuTrigger>
-      <DropdownMenuContent className="w-56">
-        <DropdownMenuLabel>Hesap İşlemleri</DropdownMenuLabel>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem>Profil</DropdownMenuItem>
-        <DropdownMenuItem>Ayarlar</DropdownMenuItem>
-        <DropdownMenuItem>Faturalandırma</DropdownMenuItem>
-        <DropdownMenuSeparator />
-        <DropdownMenuItem className="text-red-600">
-          Çıkış Yap
-        </DropdownMenuItem>
-      </DropdownMenuContent>
-    </DropdownMenu>
-  )
-}`,
+    DropdownMenu,
+    DropdownMenuContent,
+    DropdownMenuItem,
+    DropdownMenuLabel,
+    DropdownMenuSeparator,
+    DropdownMenuTrigger,
+  } from '@/components/Dropdown/Dropdown'
+  import { Button } from '@/components/Button/Button'
+  import { MoreHorizontal } from 'lucide-react'
+  
+  function Example() {
+    return (
+      <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <Button variant="outline">
+            Seçenekler
+            <MoreHorizontal className="ml-2 h-4 w-4" />
+          </Button>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent className="w-56">
+          <DropdownMenuLabel>Hesap İşlemleri</DropdownMenuLabel>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem onClick={() => console.log('Profil')}>
+            👤 Profil
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => console.log('Ayarlar')}>
+            ⚙️ Ayarlar
+          </DropdownMenuItem>
+          <DropdownMenuItem onClick={() => console.log('Faturalandırma')}>
+            💳 Faturalandırma
+          </DropdownMenuItem>
+          <DropdownMenuSeparator />
+          <DropdownMenuItem 
+            className="text-red-600" 
+            onClick={() => console.log('Çıkış')}
+          >
+            🚪 Çıkış Yap
+          </DropdownMenuItem>
+        </DropdownMenuContent>
+      </DropdownMenu>
+    )
+  }`,
     usageExamples: [
       {
         title: 'Checkbox ve Radio Öğeler',
         description: 'Seçilebilir öğeler içeren dropdown menü',
-        code: `<DropdownMenu>
-  <DropdownMenuTrigger asChild>
-    <Button>Filtreler</Button>
-  </DropdownMenuTrigger>
-  <DropdownMenuContent>
-    <DropdownMenuCheckboxItem checked={true}>
-      Aktif Öğeler
-    </DropdownMenuCheckboxItem>
-    <DropdownMenuCheckboxItem checked={false}>
-      Arşivlenmiş Öğeler
-    </DropdownMenuCheckboxItem>
-    <DropdownMenuSeparator />
-    <DropdownMenuRadioGroup value="newest">
-      <DropdownMenuRadioItem value="newest">
-        En Yeni
-      </DropdownMenuRadioItem>
-      <DropdownMenuRadioItem value="oldest">
-        En Eski
-      </DropdownMenuRadioItem>
-    </DropdownMenuRadioGroup>
-  </DropdownMenuContent>
-</DropdownMenu>`,
+        code: `import {
+    DropdownMenuCheckboxItem,
+    DropdownMenuRadioGroup,
+    DropdownMenuRadioItem
+  } from '@/components/Dropdown/Dropdown'
+  
+  <DropdownMenu>
+    <DropdownMenuTrigger asChild>
+      <Button>Filtreler</Button>
+    </DropdownMenuTrigger>
+    <DropdownMenuContent>
+      <DropdownMenuCheckboxItem checked={true}>
+        Aktif Öğeler
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuCheckboxItem checked={false}>
+        Arşivlenmiş Öğeler
+      </DropdownMenuCheckboxItem>
+      <DropdownMenuSeparator />
+      <DropdownMenuRadioGroup value="newest">
+        <DropdownMenuRadioItem value="newest">
+          En Yeni
+        </DropdownMenuRadioItem>
+        <DropdownMenuRadioItem value="oldest">
+          En Eski
+        </DropdownMenuRadioItem>
+      </DropdownMenuRadioGroup>
+    </DropdownMenuContent>
+  </DropdownMenu>`,
         component: React.createElement(
           'div',
-          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          {
+            className: 'text-sm text-neutral-600 dark:text-neutral-400',
+          },
           'Seçilebilir öğeler ile filtreleme menüsü',
         ),
       },
