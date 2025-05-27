@@ -167,86 +167,99 @@ export function ComponentDemo({
               Kodu Görüntüle
             </Button>
           </DialogTrigger>
-          <DialogContent className='max-w-4xl max-h-[80vh] overflow-hidden'>
-            <DialogHeader>
+          <DialogContent className='max-w-[95vw] max-h-[95vh] w-full h-full flex flex-col overflow-hidden sm:max-w-[90vw] sm:max-h-[90vh] lg:max-w-[85vw] lg:max-h-[85vh] xl:max-w-[80vw] xl:max-h-[80vh]'>
+            <DialogHeader className='flex-shrink-0 pb-4 border-b border-neutral-200 dark:border-neutral-700'>
               <DialogTitle className='flex items-center gap-2'>
                 <Code2 className='h-5 w-5 text-primary-500' />
                 {title} - Kod Görüntüleyici
               </DialogTitle>
             </DialogHeader>
 
-            <Tabs defaultValue='code' className='flex-1 overflow-hidden'>
-              <TabsList className='grid w-full grid-cols-2'>
-                <TabsTrigger value='code' className='flex items-center gap-2'>
-                  <Code2 className='h-4 w-4' />
-                  Kod
-                </TabsTrigger>
-                {props.length > 0 && (
-                  <TabsTrigger value='props' className='flex items-center gap-2'>
-                    <ExternalLink className='h-4 w-4' />
-                    Props
+            <div className='flex-1 overflow-hidden mt-4'>
+              <Tabs defaultValue='code' className='h-full flex flex-col'>
+                <TabsList className='grid w-full grid-cols-2 flex-shrink-0'>
+                  <TabsTrigger value='code' className='flex items-center gap-2'>
+                    <Code2 className='h-4 w-4' />
+                    Kod
                   </TabsTrigger>
-                )}
-              </TabsList>
+                  {props.length > 0 && (
+                    <TabsTrigger value='props' className='flex items-center gap-2'>
+                      <ExternalLink className='h-4 w-4' />
+                      Props
+                    </TabsTrigger>
+                  )}
+                </TabsList>
 
-              <TabsContent value='code' className='mt-4 overflow-hidden'>
-                <div className='relative'>
-                  <Button
-                    variant='ghost'
-                    size='sm'
-                    onClick={() => handleCopyCode(code)}
-                    className='absolute top-2 right-2 z-10 bg-neutral-900/80 hover:bg-neutral-900 text-white'
-                  >
-                    {copied ? <CheckCircle2 className='h-4 w-4' /> : <Copy className='h-4 w-4' />}
-                  </Button>
-                  <pre className='bg-neutral-900 text-neutral-100 p-4 rounded-lg overflow-auto max-h-96 text-sm leading-relaxed'>
-                    <code>{code}</code>
-                  </pre>
-                </div>
-              </TabsContent>
-
-              {props.length > 0 && (
-                <TabsContent value='props' className='mt-4'>
-                  <div className='overflow-auto max-h-96'>
-                    <table className='w-full text-sm'>
-                      <thead>
-                        <tr className='border-b border-neutral-200 dark:border-neutral-700'>
-                          <th className='text-left p-3 font-medium'>Prop</th>
-                          <th className='text-left p-3 font-medium'>Tip</th>
-                          <th className='text-left p-3 font-medium'>Varsayılan</th>
-                          <th className='text-left p-3 font-medium'>Açıklama</th>
-                        </tr>
-                      </thead>
-                      <tbody>
-                        {props.map((prop, index) => (
-                          <tr key={index} className='border-b border-neutral-100 dark:border-neutral-800'>
-                            <td className='p-3'>
-                              <code className='text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded'>
-                                {prop.name}
-                                {prop.required && <span className='text-red-500 ml-1'>*</span>}
-                              </code>
-                            </td>
-                            <td className='p-3'>
-                              <code className='text-xs text-neutral-600 dark:text-neutral-400'>{prop.type}</code>
-                            </td>
-                            <td className='p-3'>
-                              {prop.default ? (
-                                <code className='text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded'>
-                                  {prop.default}
-                                </code>
-                              ) : (
-                                <span className='text-neutral-400'>-</span>
-                              )}
-                            </td>
-                            <td className='p-3 text-neutral-600 dark:text-neutral-400'>{prop.description}</td>
-                          </tr>
-                        ))}
-                      </tbody>
-                    </table>
+                <TabsContent value='code' className='flex-1 overflow-hidden mt-4'>
+                  <div className='relative h-full'>
+                    <Button
+                      variant='ghost'
+                      size='sm'
+                      onClick={() => handleCopyCode(code)}
+                      className='absolute top-3 right-3 z-10 bg-neutral-900/80 hover:bg-neutral-900 text-white backdrop-blur-sm'
+                    >
+                      {copied ? <CheckCircle2 className='h-4 w-4' /> : <Copy className='h-4 w-4' />}
+                    </Button>
+                    <div className='h-full overflow-auto bg-neutral-900 rounded-lg'>
+                      <pre className='p-4 text-neutral-100 text-sm leading-relaxed whitespace-pre-wrap break-words'>
+                        <code>{code}</code>
+                      </pre>
+                    </div>
                   </div>
                 </TabsContent>
-              )}
-            </Tabs>
+
+                {props.length > 0 && (
+                  <TabsContent value='props' className='flex-1 overflow-hidden mt-4'>
+                    <div className='h-full overflow-auto bg-white dark:bg-neutral-900 border border-neutral-200 dark:border-neutral-700 rounded-lg'>
+                      <div className='overflow-x-auto'>
+                        <table className='w-full text-sm'>
+                          <thead className='border-b border-neutral-200 dark:border-neutral-700 bg-neutral-50 dark:bg-neutral-800 sticky top-0'>
+                            <tr>
+                              <th className='text-left p-4 font-medium min-w-[120px]'>Prop</th>
+                              <th className='text-left p-4 font-medium min-w-[150px]'>Tip</th>
+                              <th className='text-left p-4 font-medium min-w-[100px]'>Varsayılan</th>
+                              <th className='text-left p-4 font-medium'>Açıklama</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {props.map((prop, index) => (
+                              <tr
+                                key={index}
+                                className='border-b border-neutral-100 dark:border-neutral-800 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+                              >
+                                <td className='p-4 align-top'>
+                                  <code className='text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded whitespace-nowrap'>
+                                    {prop.name}
+                                    {prop.required && <span className='text-red-500 ml-1'>*</span>}
+                                  </code>
+                                </td>
+                                <td className='p-4 align-top'>
+                                  <code className='text-xs text-neutral-600 dark:text-neutral-400 break-words'>
+                                    {prop.type}
+                                  </code>
+                                </td>
+                                <td className='p-4 align-top'>
+                                  {prop.default ? (
+                                    <code className='text-xs bg-neutral-100 dark:bg-neutral-800 px-2 py-1 rounded whitespace-nowrap'>
+                                      {prop.default}
+                                    </code>
+                                  ) : (
+                                    <span className='text-neutral-400'>-</span>
+                                  )}
+                                </td>
+                                <td className='p-4 align-top text-neutral-600 dark:text-neutral-400 leading-relaxed'>
+                                  {prop.description}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </div>
+                  </TabsContent>
+                )}
+              </Tabs>
+            </div>
           </DialogContent>
         </Dialog>
       </CardFooter>
