@@ -7,7 +7,7 @@ import { Button } from '@/components/Button/Button'
 import { Card, CardContent } from '@/components/Card/Card'
 import { ComponentDemo } from '@/components/ComponentDemo/ComponentDemo'
 
-import { Search, Grid, List, Sparkles, BookOpen, Github, Figma } from 'lucide-react'
+import { Search, Grid, List } from 'lucide-react'
 
 import { componentDemoData } from '@/data/componentDemoData'
 
@@ -31,50 +31,7 @@ export default function ComponentsPage() {
   const categories = ['all', ...Array.from(new Set(componentDemoData.map((c) => c.category)))]
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-neutral-50 via-white to-neutral-100 dark:from-neutral-950 dark:via-neutral-900 dark:to-neutral-950'>
-      {/* Hero Section */}
-      <section className='relative overflow-hidden'>
-        <div className='absolute inset-0 bg-gradient-to-r from-primary-500/10 via-accent-500/5 to-primary-500/10' />
-        <div className='relative max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8'>
-          <div className='text-center space-y-8'>
-            <div className='inline-flex items-center gap-2 px-4 py-2 bg-primary-50 dark:bg-primary-950/50 rounded-full border border-primary-200 dark:border-primary-800'>
-              <Sparkles className='h-4 w-4 text-primary-600 dark:text-primary-400' />
-              <span className='text-sm font-medium text-primary-700 dark:text-primary-300'>
-                {componentDemoData.length}+ UI Bileşeni
-              </span>
-            </div>
-
-            <div className='space-y-4'>
-              <h1 className='text-4xl md:text-6xl font-bold bg-gradient-to-r from-neutral-900 via-primary-600 to-accent-600 dark:from-neutral-100 dark:via-primary-400 dark:to-accent-400 bg-clip-text text-transparent'>
-                Sea UI Kit
-              </h1>
-              <p className='text-xl md:text-2xl text-neutral-600 dark:text-neutral-300 max-w-3xl mx-auto'>
-                Modern React uygulamaları için tasarlanmış kapsamlı bileşen koleksiyonu
-              </p>
-              <p className='text-lg text-neutral-500 dark:text-neutral-400 max-w-2xl mx-auto'>
-                Radix UI primitifleri üzerine inşa edilmiş, erişilebilir ve özelleştirilebilir bileşenler ile
-                projelerinizi hızlandırın
-              </p>
-            </div>
-
-            <div className='flex flex-col sm:flex-row gap-4 justify-center items-center'>
-              <Button size='lg' className='flex items-center gap-2'>
-                <BookOpen className='h-5 w-5' />
-                Dokümantasyon
-              </Button>
-              <Button variant='outline' size='lg' className='flex items-center gap-2'>
-                <Github className='h-5 w-5' />
-                GitHub
-              </Button>
-              <Button variant='ghost' size='lg' className='flex items-center gap-2'>
-                <Figma className='h-5 w-5' />
-                Figma Design System
-              </Button>
-            </div>
-          </div>
-        </div>
-      </section>
-
+    <div className='min-h-screen'>
       {/* Search and Filter Section */}
       <section className='max-w-7xl mx-auto px-4 py-8 sm:px-6 lg:px-8'>
         <Card className='bg-white/80 dark:bg-neutral-900/80 backdrop-blur-sm'>

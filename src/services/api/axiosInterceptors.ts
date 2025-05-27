@@ -4,9 +4,10 @@ import { store } from '@/store'
 
 import { RequestConfig } from './types'
 import { HTTP_STATUS } from './constants'
-import { TokenManager } from './tokenManager'
 import { RequestQueue } from './requestQueue'
 import { ErrorHandler } from './errorHandler'
+
+import { tokenManagerService } from '@/services/tokenManager'
 
 import apiConfig from '@/config/api'
 
@@ -15,7 +16,6 @@ import apiConfig from '@/config/api'
  * Request ve response interceptor'ları ile authentication, error handling ve logging işlemleri yapar
  */
 export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
-  const tokenManager = TokenManager.getInstance()
   const requestQueue = RequestQueue.getInstance()
 
   // Request Interceptor
@@ -50,13 +50,13 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
           return config
         }
 
-        const token = tokenManager.getAccessToken()
+        const token = tokenManagerService.getAccessToken()
         if (token) {
           // Token süresi kontrolü
-          if (tokenManager.isTokenExpired()) {
+          if (tokenManagerService.isTokenExpired()) {
             try {
               console.log('Token expired, refreshing...')
-              const refreshResult = await tokenManager.refreshAccessToken(axiosInstance)
+              const refreshResult = await tokenManagerService.refreshAccessToken(axiosInstance)
               if (refreshResult) {
                 config.headers.Authorization = `Bearer ${refreshResult.token}`
                 console.log('Token refreshed successfully')
@@ -79,7 +79,7 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
         config.timeout = config.timeout || apiConfig.timeout
 
         // Last activity güncelle
-        tokenManager.updateLastActivity()
+        tokenManagerService.updateLastActivity()
 
         return config
       } catch (error) {
@@ -155,7 +155,7 @@ export const setupAxiosInterceptors = (axiosInstance: AxiosInstance): void => {
         console.log('Starting token refresh process...')
 
         try {
-          const refreshResult = await tokenManager.refreshAccessToken(axiosInstance)
+          const refreshResult = await tokenManagerService.refreshAccessToken(axiosInstance)
           if (refreshResult) {
             console.log('Token refresh successful, processing queue...')
             // Başarılı token yenileme

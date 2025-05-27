@@ -1,41 +1,40 @@
-// src/components/DataTable/DataTable.tsx
-
 'use client'
 
 import * as React from 'react'
+
 import {
-  ColumnDef,
-  ColumnFiltersState,
-  SortingState,
-  VisibilityState,
   flexRender,
-  getCoreRowModel,
-  getFacetedRowModel,
-  getFacetedUniqueValues,
-  getFilteredRowModel,
-  getPaginationRowModel,
-  getSortedRowModel,
+  ColumnDef,
+  SortingState,
   useReactTable,
+  VisibilityState,
+  getCoreRowModel,
+  getSortedRowModel,
+  ColumnFiltersState,
+  getFacetedRowModel,
+  getFilteredRowModel,
+  getFacetedUniqueValues,
+  getPaginationRowModel,
 } from '@tanstack/react-table'
 import {
+  SortAsc,
+  SortDesc,
   ChevronLeft,
+  ChevronDown,
   ChevronRight,
   ChevronsLeft,
   ChevronsRight,
-  ChevronDown,
   ChevronsUpDown,
-  SortAsc,
-  SortDesc,
 } from 'lucide-react'
 
-import { Button } from '@/components/Button/Button'
 import {
   DropdownMenu,
-  DropdownMenuCheckboxItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuCheckboxItem,
 } from '@/components/Dropdown/Dropdown'
 import { Input } from '@/components/Input/Input'
+import { Button } from '@/components/Button/Button'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/Select/Select'
 
 interface DataTableProps<TData, TValue> {

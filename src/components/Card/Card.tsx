@@ -1,8 +1,9 @@
-// src/components/Card/Card.tsx
+import Image from 'next/image'
 
 import React, { forwardRef } from 'react'
-import Image from 'next/image'
+
 import { cva, type VariantProps } from 'class-variance-authority'
+
 import { cn } from '@/lib/utils'
 
 const cardVariants = cva(

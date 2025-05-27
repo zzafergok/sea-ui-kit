@@ -1,6 +1,9 @@
 import type { Metadata, Viewport } from 'next'
+
 import React from 'react'
+
 import { ClientProviders } from '@/providers/ClientProviders'
+
 import './globals.css'
 
 export const metadata: Metadata = {

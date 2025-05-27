@@ -1,6 +1,7 @@
 import React from 'react'
 
 import { Check } from 'lucide-react'
+
 import * as RadixCheckbox from '@radix-ui/react-checkbox'
 
 import { cn } from '@/lib/utils'

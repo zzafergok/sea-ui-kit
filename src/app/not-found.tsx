@@ -1,13 +1,16 @@
 'use client'
 
-import React from 'react'
-import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/Button/Button'
 import { useRouter } from 'next/navigation'
 
+import React from 'react'
+
+import { useTranslation } from 'react-i18next'
+
+import { Button } from '@/components/Button/Button'
+
 export default function NotFound() {
-  const { t } = useTranslation()
   const router = useRouter()
+  const { t } = useTranslation()
 
   return (
     <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>

@@ -1,14 +1,18 @@
 'use client'
 
-import React, { useState, useEffect, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+
+import React, { useState, useEffect, useCallback } from 'react'
+
 import { useTranslation } from 'react-i18next'
 import { Menu, X, Github } from 'lucide-react'
 
 import { Button } from '@/components/Button/Button'
 import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
 import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
+
 import { useAuth } from '@/hooks/useAuth'
+
 import { cn } from '@/lib/utils'
 
 const navigationItems = [

@@ -1,5 +1,7 @@
 import axios, { AxiosInstance } from 'axios'
+
 import { setupAxiosInterceptors } from './axiosInterceptors'
+
 import apiConfig from '@/config/api'
 
 /**

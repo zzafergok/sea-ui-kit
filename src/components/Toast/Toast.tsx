@@ -1,9 +1,9 @@
-// src/components/Toast/Toast.tsx
-
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
 import { X, CheckCircle, XCircle, AlertTriangle, Info } from 'lucide-react'
+
 import { cn } from '@/lib/utils'
 
 export interface ToastProps {

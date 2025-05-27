@@ -1,13 +1,17 @@
 'use client'
 
 import { useCallback, useRef } from 'react'
+
 import { AxiosError } from 'axios'
+
 import { useAppDispatch } from '@/store'
 import { logoutUser } from '@/store/slices/userSlice'
 import { showToast } from '@/store/slices/toastSlice'
+
 import { ApiError } from '@/services/api/types'
 import { HTTP_STATUS, ERROR_CODES } from '@/services/api/constants'
-import { useTokenManagerContext } from './useTokenManager'
+
+import { useTokenManagerContext } from '@/providers/TokenManagerProvider'
 
 export function useErrorHandler() {
   const dispatch = useAppDispatch()

@@ -1,7 +1,9 @@
 'use client'
 
 import React from 'react'
+
 import { cva, type VariantProps } from 'class-variance-authority'
+
 import { cn } from '@/lib/utils'
 
 const skeletonVariants = cva('animate-pulse bg-neutral-200 dark:bg-neutral-800', {

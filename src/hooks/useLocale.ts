@@ -1,8 +1,11 @@
 'use client'
 
+import { useSearchParams } from 'next/navigation'
+
 import { useCallback, useEffect, useState } from 'react'
+
 import { useTranslation } from 'react-i18next'
-import { useRouter, useSearchParams } from 'next/navigation'
+
 import { SupportedLocale, getUserLocale, setUserLocale, isSupportedLocale } from '@/lib/locale-utils'
 
 /**
@@ -11,8 +14,8 @@ import { SupportedLocale, getUserLocale, setUserLocale, isSupportedLocale } from
  */
 export function useLocale() {
   const { i18n } = useTranslation()
-  const router = useRouter()
   const searchParams = useSearchParams()
+
   const [currentLocale, setCurrentLocale] = useState<SupportedLocale>(() => getUserLocale())
 
   // URL'deki dil parametresini kontrol et

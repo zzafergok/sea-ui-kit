@@ -1,6 +1,7 @@
 import { createApi } from '@reduxjs/toolkit/query/react'
-import { axiosBaseQuery } from './axiosBaseQuery'
+
 import { API_ENDPOINTS } from './constants'
+import { axiosBaseQuery } from './axiosBaseQuery'
 
 // Tip tanımlarını basitleştiriyoruz
 export interface LoginCredentials {

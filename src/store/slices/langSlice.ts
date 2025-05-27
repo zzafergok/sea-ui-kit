@@ -1,6 +1,8 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit'
+
 import { RootState } from '../index'
-import i18n from '../../locales'
+
+import i18n from '@/locales'
 
 // LangState tipini export edin
 export interface LangState {

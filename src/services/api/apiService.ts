@@ -1,7 +1,8 @@
 import { AxiosInstance } from 'axios'
-import { ApiResponse, RequestConfig } from './types'
+
 import { apiInstance } from './axiosInstance'
 import { REQUEST_TIMEOUT } from './constants'
+import { ApiResponse, RequestConfig } from './types'
 
 /**
  * Ana API service sınıfı

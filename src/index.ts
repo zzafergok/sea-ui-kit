@@ -1,6 +1,3 @@
-// Core Theme
-export { seaBlueTheme } from './styles/theme'
-
 // UI Components
 export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/Tabs/Tabs'
 export {

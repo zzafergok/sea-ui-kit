@@ -1,17 +1,20 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
+import { useTranslation } from 'react-i18next'
 import { Sun, Moon, Monitor, Check } from 'lucide-react'
 
-import { Button } from '@/components/Button/Button'
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
+  DropdownMenuContent,
   DropdownMenuTrigger,
 } from '@/components/Dropdown/Dropdown'
+import { Button } from '@/components/Button/Button'
+
 import { useTheme } from '@/hooks/useTheme'
-import { useTranslation } from 'react-i18next'
+
 import { cn } from '@/lib/utils'
 
 const themes = [

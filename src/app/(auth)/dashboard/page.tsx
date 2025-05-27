@@ -1,14 +1,17 @@
 'use client'
 
-import React from 'react'
-import { useAuth } from '@/hooks/useAuth'
-import { Button } from '@/components/Button/Button'
 import { useRouter } from 'next/navigation'
+
+import React from 'react'
+
+import { useAuth } from '@/hooks/useAuth'
+
+import { Button } from '@/components/Button/Button'
 import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
 
 export default function DashboardPage() {
-  const { user, logout, isLoading } = useAuth()
   const router = useRouter()
+  const { user, logout, isLoading } = useAuth()
 
   const handleLogout = async () => {
     try {

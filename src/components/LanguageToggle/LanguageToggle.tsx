@@ -1,18 +1,21 @@
 'use client'
 
 import React, { useState, useEffect } from 'react'
+
 import { Check, Globe } from 'lucide-react'
+import { useTranslation } from 'react-i18next'
 
 import { Button } from '@/components/Button/Button'
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuTrigger,
+  DropdownMenuContent,
 } from '@/components/Dropdown/Dropdown'
+
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectCurrentLanguage, setLanguage } from '@/store/slices/langSlice'
-import { useTranslation } from 'react-i18next'
+
 import { cn } from '@/lib/utils'
 
 const languages = [

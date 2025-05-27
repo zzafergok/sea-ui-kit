@@ -1,9 +1,12 @@
 'use client'
 
 import React from 'react'
+
 import { ChevronRight, HomeIcon, InfoIcon } from 'lucide-react'
-import { cn } from '@/lib/utils'
+
 import { Button } from '../Button/Button'
+
+import { cn } from '@/lib/utils'
 
 export interface Breadcrumb {
   title: string

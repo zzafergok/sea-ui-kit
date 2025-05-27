@@ -1,4 +1,5 @@
 import React from 'react'
+
 import { PublicNavbar } from '@/components/Navigation/PublicNavbar'
 import { PublicFooter } from '@/components/Navigation/PublicFooter'
 

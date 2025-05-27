@@ -1,7 +1,8 @@
 'use client'
 
-import { useTranslation } from 'react-i18next'
 import { useCallback } from 'react'
+
+import { useTranslation } from 'react-i18next'
 
 /**
  * Gelişmiş çeviri yardımcı hook'u

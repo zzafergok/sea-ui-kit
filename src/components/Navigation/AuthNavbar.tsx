@@ -1,24 +1,28 @@
 'use client'
 
-import React, { useState, useCallback } from 'react'
 import { useRouter, usePathname } from 'next/navigation'
+
+import React, { useState, useCallback } from 'react'
+
 import { useTranslation } from 'react-i18next'
 import { Menu, X, Bell, Search, Settings, LogOut, User, ChevronDown, Home, Users, BarChart3 } from 'lucide-react'
 
-import { Button } from '@/components/Button/Button'
-import { Input } from '@/components/Input/Input'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar/Avatar'
 import {
   DropdownMenu,
-  DropdownMenuContent,
   DropdownMenuItem,
   DropdownMenuLabel,
-  DropdownMenuSeparator,
+  DropdownMenuContent,
   DropdownMenuTrigger,
+  DropdownMenuSeparator,
 } from '@/components/Dropdown/Dropdown'
+import { Input } from '@/components/Input/Input'
+import { Button } from '@/components/Button/Button'
 import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
 import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar/Avatar'
+
 import { useAuth } from '@/hooks/useAuth'
+
 import { cn } from '@/lib/utils'
 
 const navigationItems = [

@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useCallback, useState } from 'react'
-import { DragDropContext, Droppable, Draggable, DropResult, DroppableStateSnapshot } from 'react-beautiful-dnd'
-import { cn } from '@/lib/utils'
+
 import { GripVertical, Trash2 } from 'lucide-react'
+import { DragDropContext, Droppable, Draggable, DropResult, DroppableStateSnapshot } from 'react-beautiful-dnd'
+
 import { Button } from '../Button/Button'
+
+import { cn } from '@/lib/utils'
 
 export interface DragDropItem {
   id: string

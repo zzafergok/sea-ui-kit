@@ -1,10 +1,13 @@
 'use client'
 
 import React, { useState, useRef, useCallback, useMemo } from 'react'
-import { cn } from '@/lib/utils'
+
 import { Upload, File, X, AlertCircle, FileText, Image, FileArchive, Film } from 'lucide-react'
-import { Button } from '../Button/Button'
+
 import { Input } from '../Input/Input'
+import { Button } from '../Button/Button'
+
+import { cn } from '@/lib/utils'
 
 export interface FileUploadProps {
   onChange: (files: File[]) => void

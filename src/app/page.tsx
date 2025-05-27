@@ -1,16 +1,21 @@
 'use client'
 
-import React, { useEffect, useState } from 'react'
-import { useTranslation } from 'react-i18next'
-import { Button } from '@/components/Button/Button'
 import { useRouter } from 'next/navigation'
+
+import React, { useEffect, useState } from 'react'
+
+import { useTranslation } from 'react-i18next'
+
 import { useAuth } from '@/hooks/useAuth'
+
+import { Button } from '@/components/Button/Button'
 import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
 
 export default function HomePage() {
-  const { t } = useTranslation()
   const router = useRouter()
+  const { t } = useTranslation()
   const { isAuthenticated, isLoading } = useAuth()
+
   const [mounted, setMounted] = useState(false)
 
   // Hydration mismatch'i önlemek için mount kontrolü
@@ -124,36 +129,6 @@ export default function HomePage() {
                 {t('pages.home.features.customizable.description')}
               </p>
             </div>
-          </div>
-        </div>
-      </section>
-
-      {/* CTA Section */}
-      <section className='bg-gradient-to-r from-primary-500 to-accent-500 dark:from-primary-600 dark:to-accent-600'>
-        <div className='max-w-7xl mx-auto px-4 py-16 sm:px-6 lg:px-8 text-center'>
-          <h2 className='text-2xl sm:text-3xl font-bold text-white mb-4'>
-            Hemen başlayın ve projelerinizi hızlandırın
-          </h2>
-          <p className='text-lg text-white/90 mb-8 max-w-2xl mx-auto'>
-            Sea UI Kit ile modern, hızlı ve erişilebilir React uygulamaları geliştirin
-          </p>
-          <div className='flex flex-col sm:flex-row gap-4 justify-center'>
-            <Button
-              size='lg'
-              variant='outline'
-              className='bg-white text-primary-600 hover:bg-white/90 border-white'
-              onClick={handleGetStarted}
-            >
-              {isAuthenticated ? "Dashboard'a Git" : 'Şimdi Başla'}
-            </Button>
-            <Button
-              size='lg'
-              variant='ghost'
-              className='text-white border-white/20 hover:bg-white/10'
-              onClick={() => router.push('/components')}
-            >
-              Bileşenleri Görüntüle
-            </Button>
           </div>
         </div>
       </section>

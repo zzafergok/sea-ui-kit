@@ -1,9 +1,11 @@
 'use client'
 
 import React, { useState, useCallback, useMemo, createContext, useContext } from 'react'
+
 import { ChevronDown } from 'lucide-react'
-import { cn } from '@/lib/utils'
 import { motion, AnimatePresence } from 'framer-motion'
+
+import { cn } from '@/lib/utils'
 
 // Context
 interface AccordionContextValue {

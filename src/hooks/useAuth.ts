@@ -1,20 +1,23 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
-import { useAppDispatch, useAppSelector } from '@/store'
+
 import {
+  User,
   setUser,
+  setError,
   logoutUser,
   setLoading,
-  setError,
   selectUser,
-  selectIsAuthenticated,
-  selectIsLoading,
   selectError,
-  User,
+  selectIsLoading,
+  selectIsAuthenticated,
 } from '@/store/slices/userSlice'
 import { showToast } from '@/store/slices/toastSlice'
-import { useTokenManagerContext } from './useTokenManager'
+import { useAppDispatch, useAppSelector } from '@/store'
+
+import { useTokenManagerContext } from '@/providers/TokenManagerProvider'
+
 import { LoginFormValues } from '@/lib/validations/auth'
 
 // Mock kullanıcı veritabanı

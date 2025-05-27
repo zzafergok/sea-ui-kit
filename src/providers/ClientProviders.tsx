@@ -1,14 +1,19 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
+
 import { Provider } from 'react-redux'
-import { PersistGate } from 'redux-persist/integration/react'
 import { I18nextProvider } from 'react-i18next'
+import { PersistGate } from 'redux-persist/integration/react'
+
 import { store, persistor } from '@/store'
-import { TokenManagerProvider } from '@/hooks/useTokenManager'
-import { GlobalErrorBoundary } from '@/components/ErrorBoundary/GlobalErrorBoundary'
-import { ToastContainer } from '@/components/ToastContainer/ToastContainer'
+
+import { TokenManagerProvider } from '@/providers/TokenManagerProvider'
+
 import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
+import { ToastContainer } from '@/components/ToastContainer/ToastContainer'
+import { GlobalErrorBoundary } from '@/components/ErrorBoundary/GlobalErrorBoundary'
+
 import i18n from '@/locales'
 
 interface ClientProvidersProps {

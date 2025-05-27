@@ -1,4 +1,5 @@
 import { Middleware } from '@reduxjs/toolkit'
+
 import { showToast } from '../slices/toastSlice'
 
 interface ErrorAction {

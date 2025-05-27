@@ -7,7 +7,7 @@ import { store } from '@/store'
 import { logoutUser } from '@/store/slices/userSlice'
 import { showToast } from '@/store/slices/toastSlice'
 
-import { TokenManager } from './tokenManager'
+import { tokenManagerService } from '@/services/tokenManager'
 
 /**
  * API hatalarını merkezi olarak yöneten sınıf
@@ -156,8 +156,7 @@ class ErrorHandler {
    * Token'ları temizler ve kullanıcıyı logout eder
    */
   static handleAuthError(): void {
-    const tokenManager = TokenManager.getInstance()
-    tokenManager.removeTokens()
+    tokenManagerService.removeTokens()
 
     // Store'dan user bilgilerini temizle
     store.dispatch(logoutUser())

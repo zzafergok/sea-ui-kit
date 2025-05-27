@@ -1,5 +1,6 @@
-import { BaseQueryFn } from '@reduxjs/toolkit/query'
 import { AxiosRequestConfig } from 'axios'
+import { BaseQueryFn } from '@reduxjs/toolkit/query'
+
 import { apiInstance } from './axiosInstance'
 import { ApiError, RequestConfig } from './types'
 
