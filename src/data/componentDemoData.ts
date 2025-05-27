@@ -1,17 +1,28 @@
-// Mevcut dosyaya aşağıdaki bileşenleri ekleyin
 import React from 'react'
 
-import { Checkbox } from '@/components/Checkbox/Checkbox'
+import { Label } from '@/components/Label/Label'
+import { Input } from '@/components/Input/Input'
 import { Switch } from '@/components/Switch/Switch'
-import { LoadingSpinner, LoadingDots, LoadingPulse } from '@/components/Loading/LoadingSpinner'
-import { Skeleton, SkeletonText, SkeletonAvatar } from '@/components/Skeleton/Skeleton'
-import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
-import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
+import { Checkbox } from '@/components/Checkbox/Checkbox'
 import { Textarea } from '@/components/Textarea/Textarea'
+import { FileUploadExample } from '@/components/FileUpload/FileUpload'
+import { PageHeaderExample } from '@/components/PageHeader/PageHeader'
+import { Skeleton, SkeletonText, SkeletonAvatar } from '@/components/Skeleton/Skeleton'
+import { LoadingSpinner, LoadingDots, LoadingPulse } from '@/components/Loading/LoadingSpinner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/Select/Select'
+import {
+  DropdownMenu,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuContent,
+  DropdownMenuSeparator,
+} from '@/components/Dropdown/Dropdown'
+
+import { Mail, Search, MoreHorizontal } from 'lucide-react'
 
 // componentDemoData array'ine eklenecek yeni bileşenler:
 export const componentDemoData = [
+  // Checkbox bileşeni
   {
     id: 'checkbox',
     title: 'Checkbox',
@@ -121,6 +132,7 @@ function Example() {
       },
     ],
   },
+  // Switch bileşeni
   {
     id: 'switch',
     title: 'Switch',
@@ -186,6 +198,7 @@ function Example() {
       },
     ],
   },
+  // Select bileşeni
   {
     id: 'select',
     title: 'Select',
@@ -245,6 +258,7 @@ function Example() {
       },
     ],
   },
+  // Loading bileşenleri
   {
     id: 'loading-spinner',
     title: 'Loading Spinner',
@@ -305,6 +319,7 @@ function Example() {
       },
     ],
   },
+  // Skeleton bileşeni
   {
     id: 'skeleton',
     title: 'Skeleton',
@@ -363,72 +378,7 @@ function Example() {
       },
     ],
   },
-  {
-    id: 'theme-toggle',
-    title: 'Theme Toggle',
-    description: 'Açık/koyu tema ve sistem tercihi değiştirici',
-    category: 'Navigasyon',
-    status: 'stable',
-    demoComponent: React.createElement('div', { className: 'flex items-center space-x-4' }, [
-      React.createElement(ThemeToggle, { key: 'toggle' }),
-      React.createElement(
-        'span',
-        { key: 'label', className: 'text-sm text-neutral-600 dark:text-neutral-400' },
-        'Tema değiştirmek için tıklayın',
-      ),
-    ]),
-    code: `import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
-
-function Example() {
-  return (
-    <div className="flex items-center space-x-4">
-      <ThemeToggle />
-      <span className="text-sm">Tema değiştir</span>
-    </div>
-  )
-}`,
-    props: [
-      {
-        name: 'variant',
-        type: "'dropdown' | 'simple'",
-        description: 'Toggle çeşidi - dropdown (3 seçenek) veya simple (açık/koyu)',
-        default: 'dropdown',
-      },
-    ],
-  },
-  {
-    id: 'language-toggle',
-    title: 'Language Toggle',
-    description: 'Dil değiştirici bileşeni',
-    category: 'Navigasyon',
-    status: 'stable',
-    demoComponent: React.createElement('div', { className: 'flex items-center space-x-4' }, [
-      React.createElement(LanguageToggle, { key: 'toggle' }),
-      React.createElement(
-        'span',
-        { key: 'label', className: 'text-sm text-neutral-600 dark:text-neutral-400' },
-        'Dil değiştirmek için tıklayın',
-      ),
-    ]),
-    code: `import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
-
-function Example() {
-  return (
-    <div className="flex items-center space-x-4">
-      <LanguageToggle />
-      <span className="text-sm">Dil değiştir</span>
-    </div>
-  )
-}`,
-    props: [
-      {
-        name: 'variant',
-        type: "'dropdown' | 'compact'",
-        description: 'Toggle çeşidi - dropdown (dil listesi) veya compact (tek tık)',
-        default: 'dropdown',
-      },
-    ],
-  },
+  // Textarea bileşeni
   {
     id: 'textarea',
     title: 'Textarea',
@@ -600,7 +550,6 @@ function Example() {
       },
     ],
   },
-
   // Alert Dialog bileşeni
   {
     id: 'alert-dialog',
@@ -679,7 +628,6 @@ function Example() {
       },
     ],
   },
-
   // Avatar bileşeni
   {
     id: 'avatar',
@@ -763,7 +711,6 @@ function Example() {
       },
     ],
   },
-
   // Button bileşeni (güncellenmiş)
   {
     id: 'button',
@@ -848,7 +795,6 @@ function Example() {
       },
     ],
   },
-
   // Card bileşeni
   {
     id: 'card',
@@ -950,7 +896,6 @@ function Example() {
       },
     ],
   },
-
   // Command Menu bileşeni
   {
     id: 'command-menu',
@@ -1061,7 +1006,6 @@ function Example() {
       },
     ],
   },
-
   // Data Table bileşeni
   {
     id: 'data-table',
@@ -1193,7 +1137,6 @@ function Example() {
       },
     ],
   },
-
   // Dialog bileşeni (güncellenmiş)
   {
     id: 'dialog',
@@ -1384,5 +1327,983 @@ renderItem={(item, index) => (
         ],
       ),
     ]),
+  },
+  // Form bileşeni (güncellenmiş)
+  {
+    id: 'form',
+    title: 'Form',
+    description: 'React Hook Form entegrasyonlu kapsamlı form yönetim sistemi',
+    category: 'Form & Input',
+    status: 'stable',
+    demoComponent: React.createElement(() => {
+      const { useState, useCallback } = React
+
+      interface MyFormState {
+        values: { email: string; name: string; message: string }
+        errors: { email?: string; name?: string; message?: string }
+        touched: { email?: boolean; name?: boolean; message?: boolean }
+      }
+
+      const [isSubmitted, setIsSubmitted] = useState(false)
+      const [formState, setFormState] = useState<MyFormState>({
+        values: { email: '', name: '', message: '' },
+        errors: {},
+        touched: {},
+      })
+
+      const validateField = useCallback((name: keyof MyFormState['values'], value: string) => {
+        switch (name) {
+          case 'email':
+            if (!value) return 'E-posta adresi gereklidir'
+            if (!/\S+@\S+\.\S+/.test(value)) return 'Geçerli bir e-posta adresi girin'
+            return ''
+          case 'name':
+            if (!value || value.length < 2) return 'Ad en az 2 karakter olmalıdır'
+            return ''
+          case 'message':
+            if (!value || value.length < 10) return 'Mesaj en az 10 karakter olmalıdır'
+            return ''
+          default:
+            return ''
+        }
+      }, [])
+
+      const handleFieldChange = useCallback(
+        (name: keyof MyFormState['values'], value: string) => {
+          const error = validateField(name, value)
+          setFormState((prev) => ({
+            values: { ...prev.values, [name]: value },
+            errors: { ...prev.errors, [name]: error },
+            touched: { ...prev.touched, [name]: true },
+          }))
+        },
+        [validateField],
+      )
+
+      interface MyFormValues {
+        email: string
+        name: string
+        message: string
+      }
+
+      interface MyFormErrors {
+        email?: string
+        name?: string
+        message?: string
+      }
+
+      interface MyFormTouched {
+        email?: boolean
+        name?: boolean
+        message?: boolean
+      }
+
+      interface MyFormState {
+        values: MyFormValues
+        errors: MyFormErrors
+        touched: MyFormTouched
+      }
+
+      const handleSubmit = useCallback(
+        (e: React.FormEvent<HTMLFormElement>) => {
+          e.preventDefault()
+          const { values } = formState
+          const newErrors: MyFormErrors = {}
+
+          ;(Object.keys(values) as Array<keyof MyFormValues>).forEach((field) => {
+            const error = validateField(field, values[field])
+            if (error) newErrors[field] = error
+          })
+
+          setFormState((prev: MyFormState) => ({
+            ...prev,
+            errors: newErrors,
+            touched: (Object.keys(values) as Array<keyof MyFormValues>).reduce(
+              (acc: MyFormTouched, key: keyof MyFormValues) => ({ ...acc, [key]: true }),
+              {},
+            ),
+          }))
+
+          if (Object.keys(newErrors).length === 0) {
+            setIsSubmitted(true)
+            setTimeout(() => {
+              setIsSubmitted(false)
+              setFormState({
+                values: { email: '', name: '', message: '' },
+                errors: {},
+                touched: {},
+              })
+            }, 3000)
+          }
+        },
+        [formState, validateField],
+      )
+
+      if (isSubmitted) {
+        return React.createElement(
+          'div',
+          {
+            className:
+              'w-full max-w-md p-6 bg-green-50 dark:bg-green-900/20 border border-green-200 dark:border-green-800 rounded-lg text-center',
+          },
+          [
+            React.createElement(
+              'div',
+              { key: 'icon', className: 'text-green-600 dark:text-green-400 text-2xl mb-2' },
+              '✅',
+            ),
+            React.createElement(
+              'h3',
+              { key: 'title', className: 'text-lg font-medium text-green-800 dark:text-green-200 mb-1' },
+              'Form Başarıyla Gönderildi',
+            ),
+            React.createElement(
+              'p',
+              { key: 'message', className: 'text-sm text-green-600 dark:text-green-400' },
+              'Verileriniz başarıyla işleme alınmıştır.',
+            ),
+          ],
+        )
+      }
+
+      // Form wrapper simülasyonu
+      return React.createElement(
+        'div',
+        {
+          className: 'w-full max-w-md',
+        },
+        [
+          React.createElement(
+            'form',
+            {
+              key: 'form',
+              onSubmit: handleSubmit,
+              className: 'space-y-6',
+            },
+            [
+              // E-posta FormField simülasyonu
+              React.createElement('div', { key: 'email-field', className: 'space-y-2' }, [
+                React.createElement(
+                  'label',
+                  {
+                    key: 'email-label',
+                    htmlFor: 'demo-email',
+                    className:
+                      'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+                  },
+                  ['E-posta', React.createElement('span', { key: 'required', className: 'text-error ml-1' }, '*')],
+                ),
+                React.createElement('input', {
+                  key: 'email-input',
+                  id: 'demo-email',
+                  type: 'email',
+                  value: formState.values.email,
+                  onChange: (e) => handleFieldChange('email', e.target.value),
+                  placeholder: 'ornek@email.com',
+                  className: `flex w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:placeholder:text-neutral-400 dark:focus-visible:ring-primary-600 ${
+                    formState.errors.email && formState.touched.email
+                      ? 'border-red-500 focus-visible:ring-red-500 dark:border-red-500 dark:focus-visible:ring-red-500'
+                      : ''
+                  }`,
+                }),
+                formState.errors.email &&
+                  formState.touched.email &&
+                  React.createElement(
+                    'p',
+                    {
+                      key: 'email-error',
+                      className: 'text-xs font-medium text-error dark:text-error',
+                    },
+                    formState.errors.email,
+                  ),
+              ]),
+
+              // Ad FormField simülasyonu
+              React.createElement('div', { key: 'name-field', className: 'space-y-2' }, [
+                React.createElement(
+                  'label',
+                  {
+                    key: 'name-label',
+                    htmlFor: 'demo-name',
+                    className:
+                      'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+                  },
+                  ['Ad Soyad', React.createElement('span', { key: 'required', className: 'text-error ml-1' }, '*')],
+                ),
+                React.createElement('input', {
+                  key: 'name-input',
+                  id: 'demo-name',
+                  type: 'text',
+                  value: formState.values.name,
+                  onChange: (e) => handleFieldChange('name', e.target.value),
+                  placeholder: 'Adınızı ve soyadınızı girin',
+                  className: `flex w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm ring-offset-white file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-800 dark:bg-neutral-950 dark:ring-offset-neutral-950 dark:placeholder:text-neutral-400 dark:focus-visible:ring-primary-600 ${
+                    formState.errors.name && formState.touched.name
+                      ? 'border-red-500 focus-visible:ring-red-500 dark:border-red-500 dark:focus-visible:ring-red-500'
+                      : ''
+                  }`,
+                }),
+                formState.errors.name &&
+                  formState.touched.name &&
+                  React.createElement(
+                    'p',
+                    {
+                      key: 'name-error',
+                      className: 'text-xs font-medium text-error dark:text-error',
+                    },
+                    formState.errors.name,
+                  ),
+              ]),
+
+              // Mesaj FormField simülasyonu
+              React.createElement('div', { key: 'message-field', className: 'space-y-2' }, [
+                React.createElement(
+                  'label',
+                  {
+                    key: 'message-label',
+                    htmlFor: 'demo-message',
+                    className:
+                      'text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70',
+                  },
+                  ['Mesaj', React.createElement('span', { key: 'required', className: 'text-error ml-1' }, '*')],
+                ),
+                React.createElement('textarea', {
+                  key: 'message-input',
+                  id: 'demo-message',
+                  value: formState.values.message,
+                  onChange: (e: React.ChangeEvent<HTMLTextAreaElement>) => handleFieldChange('message', e.target.value),
+                  placeholder: 'Mesajınızı yazın...',
+                  rows: 3,
+                  className: `flex w-full rounded-md border border-neutral-200 bg-white px-3 py-2 text-sm placeholder:text-neutral-500 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 resize-none dark:border-neutral-800 dark:bg-neutral-950 dark:placeholder:text-neutral-400 dark:focus-visible:ring-primary-600 ${
+                    formState.errors.message && formState.touched.message
+                      ? 'border-red-500 focus-visible:ring-red-500 dark:border-red-500 dark:focus-visible:ring-red-500'
+                      : ''
+                  }`,
+                }),
+                formState.errors.message &&
+                  formState.touched.message &&
+                  React.createElement(
+                    'p',
+                    {
+                      key: 'message-error',
+                      className: 'text-xs font-medium text-error dark:text-error',
+                    },
+                    formState.errors.message,
+                  ),
+              ]),
+
+              // Submit buton
+              React.createElement(
+                'button',
+                {
+                  key: 'submit-button',
+                  type: 'submit',
+                  className:
+                    'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 focus-visible:ring-offset-2 disabled:opacity-50 disabled:pointer-events-none bg-primary-500 text-white hover:bg-primary-600 active:bg-primary-700 h-10 px-4 w-full',
+                },
+                'Gönder',
+              ),
+            ],
+          ),
+        ],
+      )
+    }),
+    code: `import { useForm } from '@/hooks/useForm'
+  import { Form, FormField, FormItem, FormLabel, FormMessage } from '@/components/Form/Form'
+  import { Input } from '@/components/Input/Input'
+  import { Textarea } from '@/components/Textarea/Textarea'
+  import { Button } from '@/components/Button/Button'
+  import { z } from 'zod'
+  
+  const formSchema = z.object({
+    email: z.string().email('Geçerli bir e-posta adresi girin'),
+    name: z.string().min(2, 'Ad en az 2 karakter olmalıdır'),
+    message: z.string().min(10, 'Mesaj en az 10 karakter olmalıdır'),
+  })
+  
+  function Example() {
+    const form = useForm(formSchema, {
+      defaultValues: {
+        email: '',
+        name: '',
+        message: '',
+      },
+    })
+  
+    const onSubmit = (data: z.infer<typeof formSchema>) => {
+      console.log('Form verisi:', data)
+      // Form gönderme işlemi
+    }
+  
+    return (
+      <Form form={form} onSubmit={onSubmit} className="space-y-6 max-w-md">
+        <FormField
+          control={form.control}
+          name="email"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>E-posta</FormLabel>
+              <Input 
+                type="email" 
+                placeholder="ornek@email.com" 
+                {...field} 
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="name"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Ad Soyad</FormLabel>
+              <Input 
+                placeholder="Adınızı ve soyadınızı girin" 
+                {...field} 
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <FormField
+          control={form.control}
+          name="message"
+          render={({ field }) => (
+            <FormItem>
+              <FormLabel required>Mesaj</FormLabel>
+              <Textarea 
+                placeholder="Mesajınızı yazın..." 
+                rows={3}
+                {...field} 
+              />
+              <FormMessage />
+            </FormItem>
+          )}
+        />
+        
+        <Button type="submit" className="w-full">
+          Gönder
+        </Button>
+      </Form>
+    )
+  }`,
+    usageExamples: [
+      {
+        title: 'Gelişmiş Validation',
+        description: 'Karmaşık validation kuralları ile form yönetimi',
+        code: `const advancedSchema = z.object({
+    email: z.string().email(),
+    password: z.string().min(8),
+    confirmPassword: z.string(),
+    age: z.number().min(18, 'En az 18 yaşında olmalısınız'),
+    terms: z.boolean().refine(val => val === true, 'Kullanım şartlarını kabul etmelisiniz'),
+  }).refine((data) => data.password === data.confirmPassword, {
+    message: "Şifreler eşleşmiyor",
+    path: ["confirmPassword"],
+  })`,
+        component: React.createElement(
+          'div',
+          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          'Gelişmiş validation kuralları ile form yönetimi',
+        ),
+      },
+    ],
+    props: [
+      {
+        name: 'form',
+        type: 'UseFormReturn',
+        description: 'React Hook Form instance',
+        required: true,
+      },
+      {
+        name: 'onSubmit',
+        type: '(data: T) => void | Promise<void>',
+        description: 'Form gönderme fonksiyonu',
+        required: true,
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Form container için CSS sınıfları',
+      },
+    ],
+  },
+  // Dropdown bileşeni (güncellenmiş)
+  {
+    id: 'dropdown',
+    title: 'Dropdown Menu',
+    description: 'Radix UI tabanlı erişilebilir dropdown menü bileşeni',
+    category: 'Navigasyon',
+    status: 'stable',
+    demoComponent: React.createElement('div', { className: 'flex items-center space-x-4' }, [
+      React.createElement(DropdownMenu, { key: 'dropdown' }, [
+        React.createElement(
+          'button',
+          {
+            key: 'trigger',
+            className:
+              'inline-flex items-center justify-center rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary-400 disabled:pointer-events-none disabled:opacity-50 border border-neutral-200 bg-white hover:bg-neutral-50 h-9 px-4 py-2 dark:border-neutral-800 dark:bg-neutral-950 dark:hover:bg-neutral-800',
+          },
+          [
+            React.createElement('span', { key: 'text' }, 'Seçenekler'),
+            React.createElement(MoreHorizontal, { key: 'icon', className: 'ml-2 h-4 w-4' }),
+          ],
+        ),
+        React.createElement(DropdownMenuContent, { key: 'content', className: 'w-56' }, [
+          React.createElement(DropdownMenuLabel, { key: 'label' }, 'Hesap İşlemleri'),
+          React.createElement(DropdownMenuSeparator, { key: 'sep1' }),
+          React.createElement(DropdownMenuItem, { key: 'item1' }, 'Profil'),
+          React.createElement(DropdownMenuItem, { key: 'item2' }, 'Ayarlar'),
+          React.createElement(DropdownMenuItem, { key: 'item3' }, 'Faturalandırma'),
+          React.createElement(DropdownMenuSeparator, { key: 'sep2' }),
+          React.createElement(DropdownMenuItem, { key: 'item4', className: 'text-red-600' }, 'Çıkış Yap'),
+        ]),
+      ]),
+    ]),
+    code: `import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from '@/components/Dropdown/Dropdown'
+import { Button } from '@/components/Button/Button'
+
+function Example() {
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild>
+        <Button variant="outline">Seçenekler</Button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent className="w-56">
+        <DropdownMenuLabel>Hesap İşlemleri</DropdownMenuLabel>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem>Profil</DropdownMenuItem>
+        <DropdownMenuItem>Ayarlar</DropdownMenuItem>
+        <DropdownMenuItem>Faturalandırma</DropdownMenuItem>
+        <DropdownMenuSeparator />
+        <DropdownMenuItem className="text-red-600">
+          Çıkış Yap
+        </DropdownMenuItem>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  )
+}`,
+    usageExamples: [
+      {
+        title: 'Checkbox ve Radio Öğeler',
+        description: 'Seçilebilir öğeler içeren dropdown menü',
+        code: `<DropdownMenu>
+  <DropdownMenuTrigger asChild>
+    <Button>Filtreler</Button>
+  </DropdownMenuTrigger>
+  <DropdownMenuContent>
+    <DropdownMenuCheckboxItem checked={true}>
+      Aktif Öğeler
+    </DropdownMenuCheckboxItem>
+    <DropdownMenuCheckboxItem checked={false}>
+      Arşivlenmiş Öğeler
+    </DropdownMenuCheckboxItem>
+    <DropdownMenuSeparator />
+    <DropdownMenuRadioGroup value="newest">
+      <DropdownMenuRadioItem value="newest">
+        En Yeni
+      </DropdownMenuRadioItem>
+      <DropdownMenuRadioItem value="oldest">
+        En Eski
+      </DropdownMenuRadioItem>
+    </DropdownMenuRadioGroup>
+  </DropdownMenuContent>
+</DropdownMenu>`,
+        component: React.createElement(
+          'div',
+          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          'Seçilebilir öğeler ile filtreleme menüsü',
+        ),
+      },
+    ],
+    props: [
+      {
+        name: 'open',
+        type: 'boolean',
+        description: 'Dropdown açık durumu (controlled)',
+      },
+      {
+        name: 'onOpenChange',
+        type: '(open: boolean) => void',
+        description: 'Açık durumu değiştiğinde çağırılan fonksiyon',
+      },
+      {
+        name: 'modal',
+        type: 'boolean',
+        description: 'Modal davranışı etkinleştir',
+        default: 'true',
+      },
+    ],
+  },
+  // File Upload bileşeni
+  {
+    id: 'file-upload',
+    title: 'File Upload',
+    description: 'Sürükle-bırak desteği ile gelişmiş dosya yükleme bileşeni',
+    category: 'Form & Input',
+    status: 'stable',
+    demoComponent: React.createElement(FileUploadExample),
+    code: `import { FileUpload } from '@/components/FileUpload/FileUpload'
+  import { useState } from 'react'
+  
+  function Example() {
+    const [files, setFiles] = useState<File[]>([])
+  
+    const handleUpload = (newFiles: File[]) => {
+      setFiles(newFiles)
+      console.log('Yüklenen dosyalar:', newFiles)
+    }
+  
+    return (
+      <div className="space-y-4">
+        <FileUpload
+          onChange={handleUpload}
+          value={files}
+          multiple={true}
+          accept="image/*,.pdf,.docx"
+          maxSize={10}
+          maxFiles={5}
+          dropzoneText="Dosyaları buraya sürükleyin veya"
+          browseText="Dosya Seçin"
+          showFileList={true}
+        />
+        
+        {files.length > 0 && (
+          <div className="text-sm text-neutral-600">
+            {files.length} dosya seçildi
+          </div>
+        )}
+      </div>
+    )
+  }`,
+    usageExamples: [
+      {
+        title: 'Resim Yükleme',
+        description: 'Sadece resim dosyalarını kabul eden upload bileşeni',
+        code: `<FileUpload
+  onChange={setImageFiles}
+  accept="image/*"
+  maxSize={5}
+  maxFiles={3}
+  dropzoneText="Resimlerinizi buraya sürükleyin"
+  onError={(error) => console.error(error)}
+/>`,
+        component: React.createElement(
+          'div',
+          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          'Resim dosyaları için özelleştirilmiş upload alanı',
+        ),
+      },
+    ],
+    props: [
+      {
+        name: 'onChange',
+        type: '(files: File[]) => void',
+        description: 'Dosya seçimi değiştiğinde çağırılan fonksiyon',
+        required: true,
+      },
+      {
+        name: 'value',
+        type: 'File[]',
+        description: 'Seçili dosyalar',
+      },
+      {
+        name: 'multiple',
+        type: 'boolean',
+        description: 'Birden fazla dosya seçimine izin ver',
+        default: 'false',
+      },
+      {
+        name: 'accept',
+        type: 'string',
+        description: 'Kabul edilen dosya türleri',
+      },
+      {
+        name: 'maxSize',
+        type: 'number',
+        description: 'Maksimum dosya boyutu (MB)',
+        default: '10',
+      },
+      {
+        name: 'maxFiles',
+        type: 'number',
+        description: 'Maksimum dosya sayısı',
+        default: '5',
+      },
+    ],
+  },
+  // Input bileşeni
+  {
+    id: 'input',
+    title: 'Input',
+    description: 'Çeşitli varyant ve ikon desteği ile gelişmiş input bileşeni',
+    category: 'Form & Input',
+    status: 'stable',
+    demoComponent: React.createElement('div', { className: 'w-full max-w-md space-y-4' }, [
+      React.createElement(Input, {
+        key: 'basic',
+        placeholder: 'Temel input',
+      }),
+      React.createElement(Input, {
+        key: 'with-icon',
+        placeholder: 'Arama yapın...',
+        startIcon: React.createElement(Search, { className: 'h-4 w-4' }),
+      }),
+      React.createElement(Input, {
+        key: 'email',
+        type: 'email',
+        placeholder: 'E-posta adresiniz',
+        startIcon: React.createElement(Mail, { className: 'h-4 w-4' }),
+      }),
+      React.createElement(Input, {
+        key: 'error',
+        placeholder: 'Hatalı input',
+        variant: 'error',
+        error: 'Bu alan zorunludur',
+      }),
+    ]),
+    code: `import { Input } from '@/components/Input/Input'
+import { Search, Mail, User } from 'lucide-react'
+
+function Example() {
+  return (
+    <div className="space-y-4">
+      <Input placeholder="Temel input" />
+      
+      <Input
+        placeholder="Arama yapın..."
+        startIcon={<Search className="h-4 w-4" />}
+      />
+      
+      <Input
+        type="email"
+        placeholder="E-posta adresiniz"
+        startIcon={<Mail className="h-4 w-4" />}
+      />
+      
+      <Input
+        placeholder="Hatalı input"
+        variant="error"
+        error="Bu alan zorunludur"
+      />
+      
+      <Input
+        placeholder="Büyük input"
+        inputSize="lg"
+        startIcon={<User className="h-4 w-4" />}
+      />
+    </div>
+  )
+}`,
+    usageExamples: [
+      {
+        title: 'Form Entegrasyonu',
+        description: 'React Hook Form ile entegre input kullanımı',
+        code: `<FormField
+  control={form.control}
+  name="email"
+  render={({ field }) => (
+    <FormItem>
+      <FormLabel>E-posta</FormLabel>
+      <Input
+        placeholder="ornek@email.com"
+        startIcon={<Mail className="h-4 w-4" />}
+        {...field}
+      />
+      <FormMessage />
+    </FormItem>
+  )}
+/>`,
+        component: React.createElement(
+          'div',
+          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          'Form validation ile entegre input kullanımı',
+        ),
+      },
+    ],
+    props: [
+      {
+        name: 'variant',
+        type: "'default' | 'error' | 'success'",
+        description: 'Input görünüm varyantı',
+        default: 'default',
+      },
+      {
+        name: 'inputSize',
+        type: "'default' | 'sm' | 'lg'",
+        description: 'Input boyutu',
+        default: 'default',
+      },
+      {
+        name: 'startIcon',
+        type: 'ReactNode',
+        description: 'Input başında gösterilecek ikon',
+      },
+      {
+        name: 'endIcon',
+        type: 'ReactNode',
+        description: 'Input sonunda gösterilecek ikon',
+      },
+      {
+        name: 'error',
+        type: 'string',
+        description: 'Hata mesajı',
+      },
+    ],
+  },
+  // Label bileşeni
+  {
+    id: 'label',
+    title: 'Label',
+    description: 'Form alanları için erişilebilir etiket bileşeni',
+    category: 'Form & Input',
+    status: 'stable',
+    demoComponent: React.createElement('div', { className: 'w-full max-w-md space-y-4' }, [
+      React.createElement('div', { key: 'basic', className: 'space-y-2' }, [
+        React.createElement(Label, { key: 'label', htmlFor: 'basic-input' }, 'Temel Label'),
+        React.createElement(Input, { key: 'input', id: 'basic-input', placeholder: 'İlgili input' }),
+      ]),
+      React.createElement('div', { key: 'required', className: 'space-y-2' }, [
+        React.createElement(Label, { key: 'label', htmlFor: 'required-input', required: true }, 'Zorunlu Alan'),
+        React.createElement(Input, { key: 'input', id: 'required-input', placeholder: 'Bu alan zorunludur' }),
+      ]),
+      React.createElement('div', { key: 'disabled', className: 'space-y-2' }, [
+        React.createElement(
+          Label,
+          { key: 'label', htmlFor: 'disabled-input', className: 'text-neutral-400' },
+          'Devre Dışı',
+        ),
+        React.createElement(Input, {
+          key: 'input',
+          id: 'disabled-input',
+          disabled: true,
+          placeholder: 'Devre dışı input',
+        }),
+      ]),
+    ]),
+    code: `import { Label } from '@/components/Label/Label'
+import { Input } from '@/components/Input/Input'
+
+function Example() {
+  return (
+    <div className="space-y-4">
+      <div className="space-y-2">
+        <Label htmlFor="username">Kullanıcı Adı</Label>
+        <Input id="username" placeholder="Kullanıcı adınızı girin" />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="email" required>E-posta</Label>
+        <Input id="email" type="email" placeholder="E-posta adresiniz" />
+      </div>
+      
+      <div className="space-y-2">
+        <Label htmlFor="bio">Biyografi</Label>
+        <Textarea 
+          id="bio" 
+          placeholder="Kendiniz hakkında yazın..." 
+          rows={3}
+        />
+      </div>
+    </div>
+  )
+}`,
+    usageExamples: [
+      {
+        title: 'Checkbox ile Kullanım',
+        description: 'Checkbox ve radio buttonlar ile label kullanımı',
+        code: `<div className="flex items-center space-x-2">
+  <Checkbox id="terms" />
+  <Label htmlFor="terms">
+    Kullanım şartlarını kabul ediyorum
+  </Label>
+</div>
+
+<div className="space-y-2">
+  <Label>Cinsiyet</Label>
+  <div className="flex space-x-4">
+    <div className="flex items-center space-x-2">
+      <input type="radio" id="male" name="gender" />
+      <Label htmlFor="male">Erkek</Label>
+    </div>
+    <div className="flex items-center space-x-2">
+      <input type="radio" id="female" name="gender" />
+      <Label htmlFor="female">Kadın</Label>
+    </div>
+  </div>
+</div>`,
+        component: React.createElement(
+          'div',
+          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          'Seçim bileşenleri ile label kullanımı',
+        ),
+      },
+    ],
+    props: [
+      {
+        name: 'htmlFor',
+        type: 'string',
+        description: 'İlgili input elementinin ID değeri',
+      },
+      {
+        name: 'required',
+        type: 'boolean',
+        description: 'Zorunlu alan işareti (*) gösterir',
+        default: 'false',
+      },
+      {
+        name: 'className',
+        type: 'string',
+        description: 'Ek CSS sınıfları',
+      },
+    ],
+  },
+  // Page Header bileşeni
+  {
+    id: 'page-header',
+    title: 'Page Header',
+    description: 'Sayfa başlığı, breadcrumb, eylemler ve tab navigation içeren kapsamlı sayfa üst bileşeni',
+    category: 'Layout',
+    status: 'stable',
+    demoComponent: React.createElement(PageHeaderExample),
+    code: `import { PageHeader } from '@/components/PageHeader/PageHeader'
+import { HomeIcon, InfoIcon } from 'lucide-react'
+
+function Example() {
+  const [activeTab, setActiveTab] = useState('overview')
+
+  return (
+    <PageHeader
+      title="Proje Yönetimi"
+      subtitle="Tüm projelerinizi yönetin ve izleyin"
+      breadcrumbs={[
+        { title: 'Ana Sayfa', href: '/', icon: <HomeIcon className="h-3.5 w-3.5" /> },
+        { title: 'Projeler', href: '/projects' },
+        { title: 'Proje Detayı' },
+      ]}
+      actions={[
+        {
+          label: 'Yardım',
+          onClick: () => console.log('Yardım'),
+          icon: <InfoIcon className="h-4 w-4" />,
+          variant: 'outline',
+        },
+        {
+          label: 'Yeni Proje',
+          onClick: () => console.log('Yeni proje'),
+        },
+      ]}
+      tabs={[
+        { label: 'Genel Bakış', value: 'overview' },
+        { label: 'Görevler', value: 'tasks', count: 12 },
+        { label: 'Belgeler', value: 'documents', count: 5 },
+        { label: 'Ayarlar', value: 'settings' },
+      ]}
+      activeTab={activeTab}
+      onTabChange={setActiveTab}
+      sticky={true}
+    />
+  )
+}`,
+    usageExamples: [
+      {
+        title: 'Basit Sayfa Başlığı',
+        description: 'Sadece başlık ve açıklama içeren minimal kullanım',
+        code: `<PageHeader
+  title="Kullanıcı Profili"
+  subtitle="Profil bilgilerinizi görüntüleyin ve düzenleyin"
+  backButton={true}
+  onBackButtonClick={() => router.back()}
+ />`,
+        component: React.createElement(
+          'div',
+          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          'Geri buton ile minimal sayfa başlığı',
+        ),
+      },
+      {
+        title: 'E-ticaret Ürün Sayfası',
+        description: 'Ürün sayfası için özelleştirilmiş sayfa başlığı',
+        code: `<PageHeader
+  title="iPhone 15 Pro"
+  subtitle="En gelişmiş iPhone deneyimi"
+  breadcrumbs={[
+    { title: 'Ana Sayfa', href: '/' },
+    { title: 'Elektronik', href: '/electronics' },
+    { title: 'Telefon', href: '/electronics/phones' },
+    { title: 'iPhone 15 Pro' },
+  ]}
+  actions={[
+    { label: 'Favorilere Ekle', onClick: handleFavorite, variant: 'outline' },
+    { label: 'Sepete Ekle', onClick: handleAddToCart },
+  ]}
+ />`,
+        component: React.createElement(
+          'div',
+          { className: 'text-sm text-neutral-600 dark:text-neutral-400' },
+          'E-ticaret ürün sayfası için sayfa başlığı',
+        ),
+      },
+    ],
+    props: [
+      {
+        name: 'title',
+        type: 'string',
+        description: 'Sayfa başlığı',
+        required: true,
+      },
+      {
+        name: 'subtitle',
+        type: 'string',
+        description: 'Sayfa açıklaması',
+      },
+      {
+        name: 'breadcrumbs',
+        type: 'Breadcrumb[]',
+        description: 'Breadcrumb navigation öğeleri',
+      },
+      {
+        name: 'actions',
+        type: 'Action[]',
+        description: 'Sayfa eylem butonları',
+      },
+      {
+        name: 'tabs',
+        type: 'Tab[]',
+        description: 'Tab navigation öğeleri',
+      },
+      {
+        name: 'activeTab',
+        type: 'string',
+        description: 'Aktif tab değeri',
+      },
+      {
+        name: 'onTabChange',
+        type: '(value: string) => void',
+        description: 'Tab değişim fonksiyonu',
+      },
+      {
+        name: 'sticky',
+        type: 'boolean',
+        description: 'Sayfada scroll ederken üstte sabit kalması',
+        default: 'false',
+      },
+      {
+        name: 'backButton',
+        type: 'boolean',
+        description: 'Geri buton göster',
+        default: 'false',
+      },
+    ],
   },
 ]
