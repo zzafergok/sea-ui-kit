@@ -28,11 +28,6 @@ const themes = [
     icon: Moon,
     labelKey: 'theme.dark',
   },
-  {
-    key: 'system',
-    icon: Monitor,
-    labelKey: 'theme.system',
-  },
 ] as const
 
 type _ThemeKey = (typeof themes)[number]['key']
@@ -56,7 +51,7 @@ export function ThemeToggle() {
     )
   }
 
-  const currentTheme = themes.find((t) => t.key === theme) || themes[2]
+  const currentTheme = themes.find((t) => t.key === theme) || themes[1]
   const CurrentIcon = currentTheme.icon
 
   return (
