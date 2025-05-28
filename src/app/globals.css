@@ -93,6 +93,50 @@
   --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
 }
 
+/* Tema geçiş stilleri - mevcut CSS'in en üstüne ekleyin */
+.theme-transitioning {
+  transition:
+    background-color 150ms ease-in-out,
+    color 150ms ease-in-out;
+}
+
+.theme-transitioning *,
+.theme-transitioning *::before,
+.theme-transitioning *::after {
+  transition:
+    background-color 150ms ease-in-out,
+    color 150ms ease-in-out,
+    border-color 150ms ease-in-out !important;
+}
+
+/* Tema başlangıç durumu - FOUC önleme */
+html:not(.light):not(.dark) {
+  background-color: #ffffff;
+  color: #000000;
+}
+
+html:not(.light):not(.dark).theme-loading {
+  visibility: hidden;
+}
+
+html.light,
+html.dark {
+  visibility: visible;
+}
+
+/* Gelişmiş tema geçiş koruması */
+@media (prefers-reduced-motion: no-preference) {
+  .theme-transitioning {
+    transition-duration: 150ms;
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .theme-transitioning {
+    transition-duration: 0ms;
+  }
+}
+
 /* Base Styles */
 *,
 *::before,
@@ -939,4 +983,86 @@ nav {
   .print-break-inside-avoid {
     page-break-inside: avoid;
   }
+}
+
+/* Layout stabilization styles - add to existing globals.css */
+
+/* Smooth dropdown animations without layout shift */
+.dropdown-container {
+  position: relative;
+  isolation: isolate;
+}
+
+/* Prevent layout shift during dropdown operations */
+.layout-stable {
+  contain: layout style;
+}
+
+/* Improved dropdown positioning */
+.dropdown-content {
+  position: fixed;
+  z-index: 1000;
+  contain: layout;
+  will-change: opacity, transform;
+  backface-visibility: hidden;
+  transform: translateZ(0);
+}
+
+/* Prevent horizontal scrollbar flicker */
+.prevent-horizontal-scroll {
+  overflow-x: hidden;
+  width: 100%;
+}
+
+/* Stabilized container for dropdowns */
+.stabilized-container {
+  position: relative;
+  isolation: isolate;
+  contain: layout;
+}
+
+/* Enhanced dropdown animations */
+@keyframes dropdownFadeIn {
+  from {
+    opacity: 0;
+    transform: translateY(-4px) scale(0.95);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.dropdown-animate-in {
+  animation: dropdownFadeIn 0.15s ease-out forwards;
+}
+
+/* Scrollbar width compensation */
+.scrollbar-compensated {
+  padding-right: var(--scrollbar-width, 0px);
+}
+
+/* Fix for iOS Safari bouncing */
+@supports (-webkit-touch-callout: none) {
+  .ios-dropdown-fix {
+    position: fixed;
+    width: 100%;
+    height: 100%;
+    overflow: hidden;
+  }
+}
+
+/* GPU acceleration for smooth animations */
+.gpu-accelerated {
+  transform: translateZ(0);
+  backface-visibility: hidden;
+  perspective: 1000px;
+}
+
+/* Prevent text selection during dropdown interactions */
+.dropdown-no-select {
+  user-select: none;
+  -webkit-user-select: none;
+  -moz-user-select: none;
+  -ms-user-select: none;
 }

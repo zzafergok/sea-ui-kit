@@ -1,17 +1,10 @@
 import type { Metadata, Viewport } from 'next'
-import { Inter } from 'next/font/google'
+
 import React from 'react'
 
 import { ClientProviders } from '@/providers/ClientProviders'
 
 import './globals.css'
-
-// Next.js 14 font optimization
-const inter = Inter({
-  subsets: ['latin'],
-  display: 'swap',
-  variable: '--font-inter',
-})
 
 export const metadata: Metadata = {
   title: {
@@ -29,7 +22,7 @@ export const metadata: Metadata = {
     address: false,
     telephone: false,
   },
-  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  metadataBase: new URL('http://localhost:3000'),
   alternates: {
     canonical: '/',
     languages: {
@@ -90,27 +83,40 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang='tr' suppressHydrationWarning className={inter.variable}>
+    <html lang='tr' suppressHydrationWarning className={`theme-loading`}>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
+                  // Tema yüklenirken görünürlüğü kontrol et
+                  var html = document.documentElement;
                   var theme = localStorage.getItem('theme') || 'system';
                   var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   var effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
-                  document.documentElement.classList.add(effectiveTheme);
-                  document.documentElement.style.colorScheme = effectiveTheme;
+                  
+                  // Tema sınıflarını anında uygula
+                  html.classList.remove('light', 'dark', 'theme-loading');
+                  html.classList.add(effectiveTheme);
+                  html.style.colorScheme = effectiveTheme;
+                  
+                  // Kısa bir gecikme sonrası görünürlüğü etkinleştir
+                  requestAnimationFrame(function() {
+                    html.style.visibility = 'visible';
+                  });
                 } catch (e) {
                   console.warn('Theme initialization failed:', e);
+                  // Hata durumunda varsayılan tema uygula
+                  document.documentElement.classList.add('light');
+                  document.documentElement.style.visibility = 'visible';
                 }
               })();
             `,
           }}
         />
       </head>
-      <body suppressHydrationWarning className={`${inter.className} bg-background text-foreground antialiased`}>
+      <body suppressHydrationWarning className={`bg-background text-foreground antialiased`}>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>

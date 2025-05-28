@@ -37,21 +37,59 @@ function ThemeInitializer({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeTheme = () => {
       try {
+        // İlk yükleme kontrolü
+        const html = document.documentElement
+
+        // Eğer tema sınıfları zaten uygulanmışsa direkt mount et
+        if (html.classList.contains('light') || html.classList.contains('dark')) {
+          setMounted(true)
+          return
+        }
+
+        // Tema başlatma
         const savedTheme = localStorage.getItem('theme') || 'system'
         const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         const effectiveTheme = savedTheme === 'system' ? systemPreference : savedTheme
 
-        document.documentElement.classList.remove('light', 'dark')
-        document.documentElement.classList.add(effectiveTheme)
+        // Tema sınıflarını uygula
+        html.classList.remove('light', 'dark', 'theme-loading')
+        html.classList.add(effectiveTheme)
+        html.style.colorScheme = effectiveTheme
 
+        // Tema değişiklik listener'ını ekle
+        const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+        const handleSystemThemeChange = (e: MediaQueryListEvent) => {
+          if (localStorage.getItem('theme') === 'system') {
+            const newTheme = e.matches ? 'dark' : 'light'
+            html.classList.remove('light', 'dark')
+            html.classList.add(newTheme)
+            html.style.colorScheme = newTheme
+          }
+        }
+
+        mediaQuery.addEventListener('change', handleSystemThemeChange)
+
+        // Component'i mount et
         setMounted(true)
+
+        // Cleanup function
+        return () => {
+          mediaQuery.removeEventListener('change', handleSystemThemeChange)
+        }
       } catch (error) {
         console.warn('Theme initialization error:', error)
+        // Hata durumunda varsayılan tema ile devam et
+        document.documentElement.classList.add('light')
         setMounted(true)
       }
     }
 
-    initializeTheme()
+    // Tema başlatmayı bir sonraki frame'e ertele
+    const timeoutId = setTimeout(initializeTheme, 0)
+
+    return () => {
+      clearTimeout(timeoutId)
+    }
   }, [])
 
   if (!mounted) {

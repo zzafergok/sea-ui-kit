@@ -1,56 +1,141 @@
-import { useEffect } from 'react'
-
+import { useEffect, useCallback, useRef, useState } from 'react'
 import { useAppDispatch, useAppSelector } from '@/store'
 import { setTheme, selectEffectiveTheme, updateSystemPreference } from '@/store/slices/themeSlice'
 
-/**
- * Hook for managing theme state and system preferences
- */
 export function useTheme() {
   const dispatch = useAppDispatch()
   const effectiveTheme = useAppSelector(selectEffectiveTheme)
+  const transitionTimeoutRef = useRef<NodeJS.Timeout | null>(null)
+  const isTransitioningRef = useRef(false)
+  const [isInitialized, setIsInitialized] = useState(false)
+  const [isDisabled, setIsDisabled] = useState(true)
 
-  // Effect to watch for system preference changes
+  const applyThemeToDocument = useCallback((theme: 'light' | 'dark') => {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return
+
+    console.log('[useTheme] Applying theme:', theme)
+
+    const root = document.documentElement
+    const isDark = theme === 'dark'
+
+    if (transitionTimeoutRef.current) {
+      clearTimeout(transitionTimeoutRef.current)
+    }
+
+    isTransitioningRef.current = true
+
+    root.classList.add('theme-transitioning')
+
+    if (isDark) {
+      root.classList.remove('light')
+      root.classList.add('dark')
+    } else {
+      root.classList.remove('dark')
+      root.classList.add('light')
+    }
+
+    root.style.colorScheme = theme
+
+    transitionTimeoutRef.current = setTimeout(() => {
+      root.classList.remove('theme-transitioning')
+      isTransitioningRef.current = false
+    }, 150)
+  }, [])
+
   useEffect(() => {
     if (typeof window !== 'undefined') {
-      // Get stored theme from localStorage or use system default
-      const storedTheme = localStorage.getItem('theme') || 'system'
-      dispatch(setTheme(storedTheme as 'light' | 'dark' | 'system'))
+      console.log('[useTheme] Initializing theme system')
 
-      // Set up listener for system preference changes
-      const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+      setIsDisabled(true)
+      setIsInitialized(false)
 
-      // Initialize system preference
-      dispatch(updateSystemPreference(mediaQuery.matches ? 'dark' : 'light'))
+      const initializeTheme = async () => {
+        try {
+          const storedTheme = localStorage.getItem('theme') || 'system'
+          console.log('[useTheme] Stored theme:', storedTheme)
 
-      // Update when system preference changes
-      const handleChange = (e: MediaQueryListEvent) => {
-        dispatch(updateSystemPreference(e.matches ? 'dark' : 'light'))
+          const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
+          const initialSystemPreference = mediaQuery.matches ? 'dark' : 'light'
+          console.log('[useTheme] System preference:', initialSystemPreference)
+
+          dispatch(setTheme(storedTheme as 'light' | 'dark' | 'system'))
+          dispatch(updateSystemPreference(initialSystemPreference))
+
+          const effectiveInitialTheme = storedTheme === 'system' ? initialSystemPreference : storedTheme
+          applyThemeToDocument(effectiveInitialTheme as 'light' | 'dark')
+
+          const handleChange = (e: MediaQueryListEvent) => {
+            const newSystemPreference = e.matches ? 'dark' : 'light'
+            console.log('[useTheme] System preference changed:', newSystemPreference)
+            dispatch(updateSystemPreference(newSystemPreference))
+          }
+
+          mediaQuery.addEventListener('change', handleChange)
+
+          setTimeout(() => {
+            setIsInitialized(true)
+            setIsDisabled(false)
+            console.log('[useTheme] Theme system initialized successfully')
+          }, 100)
+
+          return () => {
+            mediaQuery.removeEventListener('change', handleChange)
+            if (transitionTimeoutRef.current) {
+              clearTimeout(transitionTimeoutRef.current)
+            }
+          }
+        } catch (error) {
+          console.error('[useTheme] Initialization failed:', error)
+          setIsInitialized(true)
+          setIsDisabled(false)
+        }
       }
 
-      mediaQuery.addEventListener('change', handleChange)
-
+      const cleanup = initializeTheme()
       return () => {
-        mediaQuery.removeEventListener('change', handleChange)
+        if (cleanup instanceof Function) {
+          cleanup()
+        }
       }
     }
-  }, [dispatch])
+  }, [dispatch, applyThemeToDocument])
 
-  // Effect to apply theme to document
   useEffect(() => {
-    if (typeof window !== 'undefined' && typeof document !== 'undefined') {
-      const root = document.documentElement
-
-      if (effectiveTheme === 'dark') {
-        root.classList.add('dark')
-      } else {
-        root.classList.remove('dark')
-      }
+    if (isInitialized) {
+      console.log('[useTheme] Effective theme changed:', effectiveTheme)
+      applyThemeToDocument(effectiveTheme)
     }
-  }, [effectiveTheme])
+  }, [effectiveTheme, applyThemeToDocument, isInitialized])
+
+  const setThemeWithTransition = useCallback(
+    (theme: 'light' | 'dark' | 'system') => {
+      if (isDisabled || !isInitialized) {
+        console.warn('[useTheme] Cannot change theme - disabled or not initialized')
+        return
+      }
+
+      console.log('[useTheme] Changing theme to:', theme)
+
+      setIsDisabled(true)
+
+      dispatch(setTheme(theme))
+
+      if (typeof window !== 'undefined') {
+        localStorage.setItem('theme', theme)
+      }
+
+      setTimeout(() => {
+        setIsDisabled(false)
+      }, 200)
+    },
+    [dispatch, isDisabled, isInitialized],
+  )
 
   return {
     theme: effectiveTheme,
-    setTheme: (theme: 'light' | 'dark' | 'system') => dispatch(setTheme(theme)),
+    setTheme: setThemeWithTransition,
+    isTransitioning: isTransitioningRef.current,
+    isDisabled: isDisabled || !isInitialized,
+    isInitialized,
   }
 }

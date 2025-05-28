@@ -5,7 +5,7 @@ import { useRouter, usePathname } from 'next/navigation'
 import React, { useState, useCallback } from 'react'
 
 import { useTranslation } from 'react-i18next'
-import { Menu, X, Bell, Search, Settings, LogOut, User, ChevronDown, Home, Users, BarChart3 } from 'lucide-react'
+import { Menu, X, Bell, Search, Settings, LogOut, User, ChevronDown, BarChart3 } from 'lucide-react'
 
 import {
   DropdownMenu,
@@ -25,11 +25,7 @@ import { useAuth } from '@/hooks/useAuth'
 
 import { cn } from '@/lib/utils'
 
-const navigationItems = [
-  { href: '/dashboard', labelKey: 'navigation.dashboard', icon: Home },
-  { href: '/users', labelKey: 'navigation.users', icon: Users },
-  { href: '/components', labelKey: 'navigation.components', icon: BarChart3 },
-] as const
+const navigationItems = [{ href: '/components', labelKey: 'navigation.components', icon: BarChart3 }] as const
 
 export function AuthNavbar() {
   const router = useRouter()

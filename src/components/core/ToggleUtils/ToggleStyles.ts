@@ -27,25 +27,38 @@ export const toggleButtonStyles = cva(
 
 export const dropdownStyles = cva(
   [
-    'absolute top-full mt-1 w-full rounded-md shadow-lg',
+    'absolute mt-1 rounded-md shadow-lg',
     'bg-white dark:bg-neutral-800 border border-neutral-200 dark:border-neutral-700',
-    'py-1 z-50',
+    'py-1 z-50 min-w-full',
+    // Hizalama için kritik stiller
+    'origin-top-left transform-gpu',
   ],
   {
     variants: {
       align: {
-        left: 'left-0',
-        right: 'right-0',
+        left: 'left-0 right-auto',
+        right: 'right-0 left-auto',
+        center: 'left-1/2 -translate-x-1/2',
+      },
+      width: {
+        auto: 'w-auto',
+        full: 'w-full',
+        trigger: 'w-[var(--trigger-width)]',
       },
     },
     defaultVariants: {
       align: 'left',
+      width: 'trigger',
     },
   },
 )
 
 export const menuItemStyles = cva(
-  ['w-full flex items-center px-3 py-2 text-sm transition-colors', 'hover:bg-neutral-50 dark:hover:bg-neutral-700'],
+  [
+    'w-full flex items-center px-3 py-2 text-sm transition-colors',
+    'hover:bg-neutral-50 dark:hover:bg-neutral-700',
+    'focus:bg-neutral-50 dark:focus:bg-neutral-700 focus:outline-none',
+  ],
   {
     variants: {
       isActive: {
@@ -60,3 +73,16 @@ export const menuItemStyles = cva(
 )
 
 export const iconContainerStyles = 'flex-shrink-0 flex items-center justify-center w-6 h-6 mr-2'
+
+// Yeni positioning utilities
+export const dropdownContainerStyles = cva(['relative inline-block'], {
+  variants: {
+    fullWidth: {
+      true: 'w-full',
+      false: 'w-auto',
+    },
+  },
+  defaultVariants: {
+    fullWidth: false,
+  },
+})
