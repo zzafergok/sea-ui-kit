@@ -10,9 +10,9 @@ import { store, persistor } from '@/store'
 
 import { TokenManagerProvider } from '@/providers/TokenManagerProvider'
 
-import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
-import { ToastContainer } from '@/components/ToastContainer/ToastContainer'
-import { GlobalErrorBoundary } from '@/components/ErrorBoundary/GlobalErrorBoundary'
+import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
+import { ToastContainer } from '@/components/ui/ToastContainer/ToastContainer'
+import { GlobalErrorBoundary } from '@/components/ui/ErrorBoundary/GlobalErrorBoundary'
 
 import i18n from '@/locales'
 

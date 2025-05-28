@@ -14,12 +14,12 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/Dropdown/Dropdown'
-import { Input } from '@/components/Input/Input'
-import { Button } from '@/components/Button/Button'
-import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
-import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/Avatar/Avatar'
+} from '@/components/core/Dropdown/Dropdown'
+import { Input } from '@/components/core/Input/Input'
+import { Button } from '@/components/core/Button/Button'
+import { ThemeToggle } from '@/components/ui/ThemeToggle/ThemeToggle'
+import { LanguageToggle } from '@/components/ui/LanguageToggle/LanguageToggle'
+import { Avatar, AvatarFallback, AvatarImage } from '@/components/core/Avatar/Avatar'
 
 import { useAuth } from '@/hooks/useAuth'
 

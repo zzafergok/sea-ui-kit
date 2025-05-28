@@ -32,10 +32,10 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuCheckboxItem,
-} from '@/components/Dropdown/Dropdown'
-import { Input } from '@/components/Input/Input'
-import { Button } from '@/components/Button/Button'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/Select/Select'
+} from '@/components/core/Dropdown/Dropdown'
+import { Input } from '@/components/core/Input/Input'
+import { Button } from '@/components/core/Button/Button'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/core/Select/Select'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]

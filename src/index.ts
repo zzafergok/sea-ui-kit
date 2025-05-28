@@ -1,5 +1,5 @@
 // UI Components
-export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/Tabs/Tabs'
+export { Tabs, TabsList, TabsTrigger, TabsContent } from './components/core/Tabs/Tabs'
 export {
   Form,
   FormItem,
@@ -8,7 +8,7 @@ export {
   FormMessage,
   useFormField,
   FormDescription,
-} from './components/Form/Form'
+} from './components/form/Form'
 export {
   Dialog,
   DialogTitle,
@@ -17,7 +17,7 @@ export {
   DialogTrigger,
   DialogContent,
   DialogDescription,
-} from './components/Dialog/Dialog'
+} from './components/core/Dialog/Dialog'
 export {
   Select,
   SelectItem,
@@ -27,17 +27,17 @@ export {
   SelectTrigger,
   SelectContent,
   SelectSeparator,
-} from './components/Select/Select'
-export { Input } from './components/Input/Input'
-export { Switch } from './components/Switch/Switch'
-export { Textarea } from './components/Textarea/Textarea'
-export { Checkbox } from './components/Checkbox/Checkbox'
-export { Button, buttonVariants } from './components/Button/Button'
+} from './components/core/Select/Select'
+export { Input } from './components/core/Input/Input'
+export { Switch } from './components/core/Switch/Switch'
+export { Textarea } from './components/core/Textarea/Textarea'
+export { Checkbox } from './components/core/Checkbox/Checkbox'
+export { Button, buttonVariants } from './components/core/Button/Button'
 
 // Custom Components
-export { LoginForm } from './components/auth/LoginForm'
-export { ThemeToggle } from './components/ThemeToggle/ThemeToggle'
-export { LanguageToggle } from './components/LanguageToggle/LanguageToggle'
+export { LoginForm } from './components/forms/auth/LoginForm'
+export { ThemeToggle } from './components/ui/ThemeToggle/ThemeToggle'
+export { LanguageToggle } from './components/ui/LanguageToggle/LanguageToggle'
 
 // Hooks
 export { useForm } from './hooks/useForm'

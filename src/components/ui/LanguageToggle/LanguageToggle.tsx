@@ -5,13 +5,13 @@ import React, { useState, useEffect } from 'react'
 import { Check, Globe } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@/components/Button/Button'
+import { Button } from '@/components/core/Button/Button'
 import {
   DropdownMenu,
   DropdownMenuItem,
   DropdownMenuTrigger,
   DropdownMenuContent,
-} from '@/components/Dropdown/Dropdown'
+} from '@/components/core/Dropdown/Dropdown'
 
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectCurrentLanguage, setLanguage } from '@/store/slices/langSlice'

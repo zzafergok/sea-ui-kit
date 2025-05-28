@@ -2,8 +2,8 @@ import React from 'react'
 
 import { AuthProvider } from '@/providers/AuthProvider'
 
-import { AuthNavbar } from '@/components/Navigation/AuthNavbar'
-import { AuthFooter } from '@/components/Navigation/AuthFooter'
+import { AuthNavbar } from '@/components/layout/AuthNavbar'
+import { AuthFooter } from '@/components/layout/AuthFooter'
 
 interface AuthLayoutProps {
   children: React.ReactNode

@@ -4,8 +4,8 @@ import React, { Component, ErrorInfo, ReactNode } from 'react'
 
 import { AlertTriangle, RefreshCw, Home, Bug } from 'lucide-react'
 
-import { Button } from '@/components/Button/Button'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/Card/Card'
+import { Button } from '@/components/core/Button/Button'
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/core/Card/Card'
 
 interface Props {
   children: ReactNode

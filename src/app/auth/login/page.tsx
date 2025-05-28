@@ -2,11 +2,11 @@
 
 import React, { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
-import { LoginForm } from '@/components/auth/LoginForm'
+import { LoginForm } from '@/components/forms/auth/LoginForm'
 import { useAuth } from '@/hooks/useAuth'
 import { LoginFormValues } from '@/lib/validations/auth'
-import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
-import { Button } from '@/components/Button/Button'
+import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
+import { Button } from '@/components/core/Button/Button'
 import { ArrowLeft } from 'lucide-react'
 
 function LoginPageContent() {

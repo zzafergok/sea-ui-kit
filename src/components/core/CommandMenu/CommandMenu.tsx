@@ -5,7 +5,7 @@ import * as React from 'react'
 import { Search } from 'lucide-react'
 import { Command as CommandPrimitive } from 'cmdk'
 
-import { Dialog, DialogContent } from '@/components/Dialog/Dialog'
+import { Dialog, DialogContent } from '@/components/core/Dialog/Dialog'
 
 import { cn } from '@/lib/utils'
 

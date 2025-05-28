@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react'
 
-import { Button } from '@/components/Button/Button'
-import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/Tabs/Tabs'
-import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/Dialog/Dialog'
-import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/Card/Card'
+import { Button } from '@/components/core/Button/Button'
+import { Tabs, TabsList, TabsTrigger, TabsContent } from '@/components/core/Tabs/Tabs'
+import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from '@/components/core/Dialog/Dialog'
+import { Card, CardHeader, CardTitle, CardDescription, CardContent, CardFooter } from '@/components/core/Card/Card'
 
 import { Copy, Code2, Play, ExternalLink, CheckCircle2 } from 'lucide-react'
 

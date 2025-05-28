@@ -6,8 +6,8 @@ import React from 'react'
 
 import { useAuth } from '@/hooks/useAuth'
 
-import { Button } from '@/components/Button/Button'
-import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
+import { Button } from '@/components/core/Button/Button'
+import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
 
 export default function DashboardPage() {
   const router = useRouter()

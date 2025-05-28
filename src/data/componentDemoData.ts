@@ -9,17 +9,17 @@ import {
   DropdownMenuContent,
   DropdownMenuTrigger,
   DropdownMenuSeparator,
-} from '@/components/Dropdown/Dropdown'
-import { Label } from '@/components/Label/Label'
-import { Input } from '@/components/Input/Input'
-import { Switch } from '@/components/Switch/Switch'
-import { Checkbox } from '@/components/Checkbox/Checkbox'
-import { Textarea } from '@/components/Textarea/Textarea'
-import { FileUploadExample } from '@/components/FileUpload/FileUpload'
-import { PageHeaderExample } from '@/components/PageHeader/PageHeader'
-import { Skeleton, SkeletonText, SkeletonAvatar } from '@/components/Skeleton/Skeleton'
-import { LoadingSpinner, LoadingDots, LoadingPulse } from '@/components/Loading/LoadingSpinner'
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/Select/Select'
+} from '@/components/core/Dropdown/Dropdown'
+import { Label } from '@/components/core/Label/Label'
+import { Input } from '@/components/core/Input/Input'
+import { Switch } from '@/components/core/Switch/Switch'
+import { Checkbox } from '@/components/core/Checkbox/Checkbox'
+import { Textarea } from '@/components/core/Textarea/Textarea'
+import { FileUploadExample } from '@/components/ui/FileUpload/FileUpload'
+import { PageHeaderExample } from '@/components/ui/PageHeader/PageHeader'
+import { Skeleton, SkeletonText, SkeletonAvatar } from '@/components/core/Skeleton/Skeleton'
+import { LoadingSpinner, LoadingDots, LoadingPulse } from '@/components/core/Loading/LoadingSpinner'
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/core/Select/Select'
 
 // componentDemoData array'ine eklenecek yeni bileşenler:
 export const componentDemoData = [

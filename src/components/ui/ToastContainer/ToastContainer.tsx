@@ -6,7 +6,7 @@ import { createPortal } from 'react-dom'
 import { AnimatePresence, motion } from 'framer-motion'
 import { X, CheckCircle, AlertCircle, AlertTriangle, Info, ExternalLink } from 'lucide-react'
 
-import { Button } from '@/components/Button/Button'
+import { Button } from '@/components/core/Button/Button'
 
 import { useAppSelector, useAppDispatch } from '@/store'
 import { selectToasts, removeToast, cleanupExpiredHashes, showToast } from '@/store/slices/toastSlice'

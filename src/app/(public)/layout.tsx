@@ -1,7 +1,7 @@
 import React from 'react'
 
-import { PublicNavbar } from '@/components/Navigation/PublicNavbar'
-import { PublicFooter } from '@/components/Navigation/PublicFooter'
+import { PublicNavbar } from '@/components/layout/PublicNavbar'
+import { PublicFooter } from '@/components/layout/PublicFooter'
 
 interface PublicLayoutProps {
   children: React.ReactNode

@@ -6,7 +6,7 @@ import React from 'react'
 
 import { useTranslation } from 'react-i18next'
 
-import { Button } from '@/components/Button/Button'
+import { Button } from '@/components/core/Button/Button'
 
 export default function NotFound() {
   const router = useRouter()

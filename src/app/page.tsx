@@ -8,8 +8,8 @@ import { useTranslation } from 'react-i18next'
 
 import { useAuth } from '@/hooks/useAuth'
 
-import { Button } from '@/components/Button/Button'
-import { LoadingSpinner } from '@/components/Loading/LoadingSpinner'
+import { Button } from '@/components/core/Button/Button'
+import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
 
 export default function HomePage() {
   const router = useRouter()

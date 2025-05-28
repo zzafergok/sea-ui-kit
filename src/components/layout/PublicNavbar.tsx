@@ -7,9 +7,9 @@ import React, { useState, useEffect, useCallback } from 'react'
 import { useTranslation } from 'react-i18next'
 import { Menu, X, Github } from 'lucide-react'
 
-import { Button } from '@/components/Button/Button'
-import { ThemeToggle } from '@/components/ThemeToggle/ThemeToggle'
-import { LanguageToggle } from '@/components/LanguageToggle/LanguageToggle'
+import { Button } from '@/components/core/Button/Button'
+import { ThemeToggle } from '@/components/ui/ThemeToggle/ThemeToggle'
+import { LanguageToggle } from '@/components/ui/LanguageToggle/LanguageToggle'
 
 import { useAuth } from '@/hooks/useAuth'
 

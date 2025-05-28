@@ -10,8 +10,8 @@ import {
   DropdownMenuItem,
   DropdownMenuContent,
   DropdownMenuTrigger,
-} from '@/components/Dropdown/Dropdown'
-import { Button } from '@/components/Button/Button'
+} from '@/components/core/Dropdown/Dropdown'
+import { Button } from '@/components/core/Button/Button'
 
 import { useTheme } from '@/hooks/useTheme'
 

@@ -2,10 +2,10 @@
 
 import React, { useState } from 'react'
 
-import { Input } from '@/components/Input/Input'
-import { Button } from '@/components/Button/Button'
-import { Card, CardContent } from '@/components/Card/Card'
-import { ComponentDemo } from '@/components/ComponentDemo/ComponentDemo'
+import { Input } from '@/components/core/Input/Input'
+import { Button } from '@/components/core/Button/Button'
+import { Card, CardContent } from '@/components/core/Card/Card'
+import { ComponentDemo } from '@/components/ui/ComponentDemo/ComponentDemo'
 
 import { Search, Grid, List } from 'lucide-react'
 
