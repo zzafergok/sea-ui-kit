@@ -141,15 +141,15 @@ function Example() {
     category: 'Form & Input',
     status: 'stable',
     demoComponent: React.createElement('div', { className: 'space-y-4' }, [
-      React.createElement('div', { key: 'item1', className: 'flex items-center justify-between' }, [
+      React.createElement('div', { key: 'item1', className: 'flex items-center justify-between gap-4' }, [
         React.createElement('span', { key: 'label', className: 'text-sm font-medium' }, 'Bildirimler'),
         React.createElement(Switch, { key: 'switch', defaultChecked: true }),
       ]),
-      React.createElement('div', { key: 'item2', className: 'flex items-center justify-between' }, [
+      React.createElement('div', { key: 'item2', className: 'flex items-center justify-between gap-4' }, [
         React.createElement('span', { key: 'label', className: 'text-sm font-medium' }, 'Email Güncellemeleri'),
         React.createElement(Switch, { key: 'switch' }),
       ]),
-      React.createElement('div', { key: 'item3', className: 'flex items-center justify-between' }, [
+      React.createElement('div', { key: 'item3', className: 'flex items-center justify-between gap-4' }, [
         React.createElement('span', { key: 'label', className: 'text-sm font-medium text-neutral-400' }, 'Devre Dışı'),
         React.createElement(Switch, { key: 'switch', disabled: true }),
       ]),
@@ -159,15 +159,15 @@ function Example() {
 function Example() {
   return (
     <div className="space-y-4">
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <span>Bildirimler</span>
         <Switch defaultChecked />
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <span>Email Güncellemeleri</span>
         <Switch />
       </div>
-      <div className="flex items-center justify-between">
+      <div className="flex items-center justify-between gap-4">
         <span>Devre Dışı</span>
         <Switch disabled />
       </div>

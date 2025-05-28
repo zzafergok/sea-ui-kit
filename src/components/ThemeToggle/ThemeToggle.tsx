@@ -68,7 +68,7 @@ export function ThemeToggle() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align='end' className='w-48'>
+      <DropdownMenuContent align='end' className='w-auto'>
         {themes.map((themeOption) => {
           const Icon = themeOption.icon
           const isActive = theme === themeOption.key

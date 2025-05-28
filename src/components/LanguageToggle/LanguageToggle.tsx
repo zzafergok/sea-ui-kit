@@ -86,7 +86,7 @@ export function LanguageToggle() {
         </Button>
       </DropdownMenuTrigger>
 
-      <DropdownMenuContent align='end' className='w-48'>
+      <DropdownMenuContent align='end' className='w-auto'>
         {languages.map((language) => {
           const isActive = currentLanguage === language.code
 

@@ -9,7 +9,7 @@ import { logoutUser } from '@/store/slices/userSlice'
 import { showToast } from '@/store/slices/toastSlice'
 
 import { ApiError } from '@/services/api/types'
-import { HTTP_STATUS, ERROR_CODES } from '@/services/api/constants'
+import { HTTP_STATUS, ERROR_CODES } from '@/services/constants'
 
 import { useTokenManagerContext } from '@/providers/TokenManagerProvider'
 

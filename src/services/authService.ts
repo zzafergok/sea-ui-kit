@@ -1,6 +1,6 @@
 import { AxiosInstance } from 'axios'
-import { API_ENDPOINTS } from './constants'
-import { RefreshTokenResponse } from './api/types'
+
+import { API_ENDPOINTS, RefreshTokenResponse } from './utils'
 
 import apiConfig from '@/config/api'
 
@@ -32,7 +32,7 @@ export interface TokenManagerService {
   getTokenInfo(): TokenInfo
 }
 
-// Browser environment kontrolü için utility function
+// Browser environment kontrolü
 const isBrowser = (): boolean => typeof window !== 'undefined'
 
 // Storage utilities
@@ -69,7 +69,7 @@ const storage = {
 // Token refresh promise cache
 let refreshPromiseCache: Promise<RefreshTokenResponse> | null = null
 
-// Token service functions
+// Core token management functions
 export const getAccessToken = (): string | null => {
   return storage.getItem('accessToken')
 }
@@ -180,7 +180,7 @@ export const getTokenInfo = (): TokenInfo => {
   }
 }
 
-// Default export olarak service object
+// Service object for unified access
 export const tokenManagerService: TokenManagerService = {
   getAccessToken,
   getRefreshToken,

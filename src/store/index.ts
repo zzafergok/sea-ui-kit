@@ -10,7 +10,7 @@ import themeReducer from './slices/themeSlice'
 import toastReducer from './slices/toastSlice'
 import loadingReducer from './slices/loadingSlice'
 
-import { apiSlice } from '../services/api/apiSlice'
+import { apiSlice } from '../services/apiSlice'
 
 // SSR için koşullu import
 const createNoopStorage = () => {
