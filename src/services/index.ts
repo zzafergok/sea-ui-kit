@@ -9,7 +9,7 @@ export * from './utils'
 
 // Backward compatibility exports
 export { tokenManagerService as TokenManager } from './authService'
-export { tokenManagerService } from './authService'
+import { tokenManagerService } from './authService'
 export { apiService } from './apiService'
 export { apiInstance } from './apiService'
 
