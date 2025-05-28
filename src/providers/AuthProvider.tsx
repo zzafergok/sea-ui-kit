@@ -15,9 +15,10 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children, requireAuth = false, redirectTo = '/auth/login' }: AuthProviderProps) {
-  const { isAuthenticated, isLoading, checkAuth } = useAuth()
   const router = useRouter()
   const pathname = usePathname()
+  const { isAuthenticated, isLoading, checkAuth } = useAuth()
+
   const [isInitialized, setIsInitialized] = useState(false)
 
   useEffect(() => {
