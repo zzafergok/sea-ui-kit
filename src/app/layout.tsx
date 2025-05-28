@@ -1,15 +1,66 @@
 import type { Metadata, Viewport } from 'next'
-
+import { Inter } from 'next/font/google'
 import React from 'react'
 
 import { ClientProviders } from '@/providers/ClientProviders'
 
 import './globals.css'
 
+// Next.js 14 font optimization
+const inter = Inter({
+  subsets: ['latin'],
+  display: 'swap',
+  variable: '--font-inter',
+})
+
 export const metadata: Metadata = {
-  title: 'Sea UI Kit - Modern React Component Library',
+  title: {
+    default: 'Sea UI Kit - Modern React Component Library',
+    template: '%s | Sea UI Kit',
+  },
   description:
     'Enterprise seviyede React component kütüphanesi. Radix UI tabanlı, erişilebilir ve özelleştirilebilir komponentler.',
+  keywords: ['React', 'Next.js', 'UI Kit', 'Components', 'TypeScript', 'Tailwind CSS'],
+  authors: [{ name: 'Zafer Gök', url: 'https://github.com/zzafergok' }],
+  creator: 'Zafer Gök',
+  publisher: 'Sea UI Kit',
+  formatDetection: {
+    email: false,
+    address: false,
+    telephone: false,
+  },
+  metadataBase: new URL(process.env.NEXT_PUBLIC_BASE_URL || 'http://localhost:3000'),
+  alternates: {
+    canonical: '/',
+    languages: {
+      'tr-TR': '/tr',
+      'en-US': '/en',
+    },
+  },
+  openGraph: {
+    type: 'website',
+    locale: 'tr_TR',
+    url: '/',
+    title: 'Sea UI Kit - Modern React Component Library',
+    description: 'Enterprise seviyede React component kütüphanesi.',
+    siteName: 'Sea UI Kit',
+  },
+  twitter: {
+    card: 'summary_large_image',
+    title: 'Sea UI Kit - Modern React Component Library',
+    description: 'Enterprise seviyede React component kütüphanesi.',
+  },
+  robots: {
+    index: true,
+    follow: true,
+    googleBot: {
+      index: true,
+      follow: true,
+      'max-video-preview': -1,
+      'max-image-preview': 'large',
+      'max-snippet': -1,
+    },
+  },
   icons: {
     icon: [
       { url: '/favicon.ico' },
@@ -19,7 +70,6 @@ export const metadata: Metadata = {
     apple: [{ url: '/apple-touch-icon.png', sizes: '180x180', type: 'image/png' }],
   },
   manifest: '/site.webmanifest',
-  metadataBase: new URL('http://localhost:3000'),
 }
 
 export const viewport: Viewport = {
@@ -28,32 +78,39 @@ export const viewport: Viewport = {
     { media: '(prefers-color-scheme: dark)', color: '#0f172a' },
   ],
   width: 'device-width',
-  initialScale: 1.0,
-  maximumScale: 5.0,
-  minimumScale: 1.0,
+  initialScale: 1,
+  maximumScale: 5,
+  userScalable: true,
   colorScheme: 'light dark',
 }
 
-export default function RootLayout({ children }: { children: React.ReactNode }) {
+interface RootLayoutProps {
+  children: React.ReactNode
+}
+
+export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang='tr' suppressHydrationWarning>
+    <html lang='tr' suppressHydrationWarning className={inter.variable}>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
-              try {
-                var theme = localStorage.getItem('theme') || 'system';
-                var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
-                var effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
-                document.documentElement.classList.add(effectiveTheme);
-              } catch (e) {
-                console.warn('Theme initialization failed:', e);
-              }
+              (function() {
+                try {
+                  var theme = localStorage.getItem('theme') || 'system';
+                  var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
+                  var effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
+                  document.documentElement.classList.add(effectiveTheme);
+                  document.documentElement.style.colorScheme = effectiveTheme;
+                } catch (e) {
+                  console.warn('Theme initialization failed:', e);
+                }
+              })();
             `,
           }}
         />
       </head>
-      <body suppressHydrationWarning className='bg-background text-foreground'>
+      <body suppressHydrationWarning className={`${inter.className} bg-background text-foreground antialiased`}>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
