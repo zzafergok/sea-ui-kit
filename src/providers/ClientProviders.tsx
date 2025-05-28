@@ -12,7 +12,7 @@ import { TokenManagerProvider } from '@/providers/TokenManagerProvider'
 
 import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
 import { ToastContainer } from '@/components/ui/ToastContainer/ToastContainer'
-import { GlobalErrorBoundary } from '@/components/ui/ErrorBoundary/GlobalErrorBoundary'
+import { EnhancedErrorBoundary } from '@/components/ui/ErrorBoundary/EnhancedErrorBoundary'
 
 import i18n from '@/locales'
 
@@ -63,9 +63,7 @@ function ThemeInitializer({ children }: { children: React.ReactNode }) {
 
 export function ClientProviders({ children }: ClientProvidersProps) {
   return (
-    <GlobalErrorBoundary
-      enableAutoRecovery={true}
-      recoveryTimeout={10000}
+    <EnhancedErrorBoundary
       onError={(error, errorInfo) => {
         if (process.env.NODE_ENV === 'production') {
           console.error('Global Error:', error, errorInfo)
@@ -84,6 +82,6 @@ export function ClientProviders({ children }: ClientProvidersProps) {
           </PersistGate>
         </Provider>
       </ThemeInitializer>
-    </GlobalErrorBoundary>
+    </EnhancedErrorBoundary>
   )
 }
