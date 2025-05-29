@@ -9,7 +9,7 @@
   --primary-200: hsl(200, 95%, 80%);
   --primary-300: hsl(200, 90%, 70%);
   --primary-400: hsl(200, 85%, 60%);
-  --primary-500: hsl(200, 80%, 50%); /* Main sea blue */
+  --primary-500: hsl(200, 80%, 50%);
   --primary-600: hsl(200, 85%, 40%);
   --primary-700: hsl(200, 90%, 30%);
   --primary-800: hsl(200, 95%, 20%);
@@ -21,42 +21,48 @@
   --accent-200: hsl(180, 95%, 80%);
   --accent-300: hsl(180, 90%, 70%);
   --accent-400: hsl(180, 85%, 60%);
-  --accent-500: hsl(180, 80%, 50%); /* Teal accent */
+  --accent-500: hsl(180, 80%, 50%);
   --accent-600: hsl(180, 85%, 40%);
   --accent-700: hsl(180, 90%, 30%);
   --accent-800: hsl(180, 95%, 20%);
   --accent-900: hsl(180, 100%, 10%);
 
   /* Light mode neutrals */
-  --neutral-50: hsl(200, 10%, 98%);
-  --neutral-100: hsl(200, 10%, 95%);
-  --neutral-200: hsl(200, 10%, 90%);
-  --neutral-300: hsl(200, 10%, 80%);
-  --neutral-400: hsl(200, 10%, 70%);
-  --neutral-500: hsl(200, 10%, 50%);
-  --neutral-600: hsl(200, 10%, 40%);
-  --neutral-700: hsl(200, 10%, 30%);
-  --neutral-800: hsl(200, 10%, 20%);
-  --neutral-900: hsl(200, 10%, 10%);
+  --neutral-50: hsl(210, 15%, 98%);
+  --neutral-100: hsl(210, 15%, 95%);
+  --neutral-200: hsl(210, 12%, 90%);
+  --neutral-300: hsl(210, 10%, 80%);
+  --neutral-400: hsl(210, 8%, 60%);
+  --neutral-500: hsl(210, 6%, 45%);
+  --neutral-600: hsl(210, 8%, 35%);
+  --neutral-700: hsl(210, 10%, 25%);
+  --neutral-800: hsl(210, 12%, 15%);
+  --neutral-900: hsl(210, 15%, 8%);
 
   /* Semantic colors - Light mode */
-  --success: hsl(160, 80%, 45%);
-  --warning: hsl(40, 90%, 50%);
-  --error: hsl(350, 80%, 55%);
-  --info: hsl(220, 80%, 55%);
+  --success: hsl(142, 76%, 36%);
+  --warning: hsl(38, 92%, 50%);
+  --error: hsl(350, 89%, 60%);
+  --info: hsl(217, 91%, 60%);
 
   /* Light mode specific */
   --background: hsl(0, 0%, 100%);
-  --foreground: hsl(200, 20%, 10%);
-  --muted: hsl(200, 10%, 95%);
-  --muted-foreground: hsl(200, 10%, 45%);
+  --foreground: hsl(210, 20%, 10%);
+  --muted: hsl(210, 15%, 96%);
+  --muted-foreground: hsl(210, 10%, 40%);
   --card: hsl(0, 0%, 100%);
-  --card-foreground: hsl(200, 20%, 10%);
+  --card-foreground: hsl(210, 20%, 10%);
   --popover: hsl(0, 0%, 100%);
-  --popover-foreground: hsl(200, 20%, 10%);
-  --border: hsl(200, 20%, 90%);
-  --input: hsl(200, 20%, 90%);
+  --popover-foreground: hsl(210, 20%, 10%);
+  --border: hsl(210, 20%, 88%);
+  --input: hsl(210, 20%, 88%);
   --ring: hsl(200, 80%, 50%);
+
+  /* Shadows - Light mode */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
 
   /* Radii */
   --radius-sm: 0.125rem;
@@ -65,80 +71,85 @@
   --radius-xl: 1rem;
   --radius-full: 9999px;
 
-  /* Shadows - Light mode */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.05);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04);
-
   /* Transitions */
   --transition-fast: 0.15s ease-in-out;
   --transition-default: 0.25s ease-in-out;
   --transition-slow: 0.4s ease-in-out;
 }
 
-/* Dark theme */
+/* Dark theme - Revize edilmiş renk paleti */
 .dark {
-  /* Dark mode background and foreground */
-  --background: hsl(200, 25%, 8%);
-  --foreground: hsl(200, 10%, 95%);
-  --muted: hsl(200, 15%, 12%);
-  --muted-foreground: hsl(200, 10%, 60%);
-  --card: hsl(200, 20%, 10%);
-  --card-foreground: hsl(200, 10%, 95%);
-  --popover: hsl(200, 20%, 10%);
-  --popover-foreground: hsl(200, 10%, 95%);
-  --border: hsl(200, 20%, 20%);
-  --input: hsl(200, 20%, 20%);
-  --ring: hsl(200, 70%, 45%);
+  /* Dark mode background hierarchy - daha iyi contrast */
+  --background: hsl(210, 25%, 6%);
+  --foreground: hsl(210, 10%, 92%);
+  --muted: hsl(210, 20%, 10%);
+  --muted-foreground: hsl(210, 8%, 65%);
+  --card: hsl(210, 22%, 8%);
+  --card-foreground: hsl(210, 10%, 90%);
+  --popover: hsl(210, 22%, 8%);
+  --popover-foreground: hsl(210, 10%, 90%);
+  --border: hsl(210, 18%, 16%);
+  --input: hsl(210, 18%, 16%);
+  --ring: hsl(200, 70%, 55%);
 
-  /* Dark mode primary colors */
-  --primary-50: hsl(200, 30%, 15%);
-  --primary-100: hsl(200, 30%, 20%);
-  --primary-200: hsl(200, 30%, 25%);
-  --primary-300: hsl(200, 40%, 30%);
-  --primary-400: hsl(200, 50%, 35%);
-  --primary-500: hsl(200, 70%, 45%);
-  --primary-600: hsl(200, 75%, 55%);
-  --primary-700: hsl(200, 80%, 65%);
-  --primary-800: hsl(200, 85%, 75%);
-  --primary-900: hsl(200, 90%, 85%);
+  /* Dark mode primary colors - daha dengeli */
+  --primary-50: hsl(200, 20%, 12%);
+  --primary-100: hsl(200, 25%, 16%);
+  --primary-200: hsl(200, 30%, 20%);
+  --primary-300: hsl(200, 35%, 28%);
+  --primary-400: hsl(200, 45%, 40%);
+  --primary-500: hsl(200, 65%, 52%);
+  --primary-600: hsl(200, 70%, 62%);
+  --primary-700: hsl(200, 75%, 72%);
+  --primary-800: hsl(200, 80%, 82%);
+  --primary-900: hsl(200, 85%, 90%);
 
-  /* Dark mode accent colors */
-  --accent-50: hsl(180, 30%, 15%);
-  --accent-100: hsl(180, 30%, 20%);
-  --accent-200: hsl(180, 30%, 25%);
-  --accent-300: hsl(180, 40%, 30%);
-  --accent-400: hsl(180, 50%, 35%);
-  --accent-500: hsl(180, 70%, 45%);
-  --accent-600: hsl(180, 75%, 55%);
-  --accent-700: hsl(180, 80%, 65%);
-  --accent-800: hsl(180, 85%, 75%);
-  --accent-900: hsl(180, 90%, 85%);
+  /* Dark mode accent colors - uyumlu teal */
+  --accent-50: hsl(180, 20%, 12%);
+  --accent-100: hsl(180, 25%, 16%);
+  --accent-200: hsl(180, 30%, 20%);
+  --accent-300: hsl(180, 35%, 28%);
+  --accent-400: hsl(180, 45%, 40%);
+  --accent-500: hsl(180, 65%, 52%);
+  --accent-600: hsl(180, 70%, 62%);
+  --accent-700: hsl(180, 75%, 72%);
+  --accent-800: hsl(180, 80%, 82%);
+  --accent-900: hsl(180, 85%, 90%);
 
-  /* Dark mode neutrals */
-  --neutral-50: hsl(200, 15%, 15%);
-  --neutral-100: hsl(200, 15%, 20%);
-  --neutral-200: hsl(200, 15%, 25%);
-  --neutral-300: hsl(200, 15%, 35%);
-  --neutral-400: hsl(200, 10%, 50%);
-  --neutral-500: hsl(200, 10%, 60%);
-  --neutral-600: hsl(200, 10%, 70%);
-  --neutral-700: hsl(200, 10%, 80%);
-  --neutral-800: hsl(200, 10%, 90%);
-  --neutral-900: hsl(200, 10%, 95%);
+  /* Dark mode neutrals - geliştirilmiş hiyerarşi */
+  --neutral-50: hsl(210, 18%, 12%);
+  --neutral-100: hsl(210, 16%, 16%);
+  --neutral-200: hsl(210, 14%, 22%);
+  --neutral-300: hsl(210, 12%, 32%);
+  --neutral-400: hsl(210, 8%, 48%);
+  --neutral-500: hsl(210, 6%, 58%);
+  --neutral-600: hsl(210, 8%, 68%);
+  --neutral-700: hsl(210, 10%, 78%);
+  --neutral-800: hsl(210, 12%, 86%);
+  --neutral-900: hsl(210, 15%, 92%);
 
-  /* Dark mode semantic colors */
-  --success: hsl(160, 70%, 40%);
-  --warning: hsl(40, 80%, 45%);
-  --error: hsl(350, 70%, 50%);
-  --info: hsl(220, 70%, 50%);
+  /* Dark mode semantic colors - daha iyi görünürlük */
+  --success: hsl(142, 70%, 45%);
+  --warning: hsl(38, 85%, 55%);
+  --error: hsl(350, 80%, 65%);
+  --info: hsl(217, 85%, 70%);
 
-  /* Dark mode shadows */
-  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.4);
-  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.5), 0 2px 4px -1px rgba(0, 0, 0, 0.3);
-  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.5), 0 4px 6px -2px rgba(0, 0, 0, 0.3);
-  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.5), 0 10px 10px -5px rgba(0, 0, 0, 0.3);
+  /* Dark mode shadows - daha belirgin */
+  --shadow-sm: 0 1px 2px 0 rgba(0, 0, 0, 0.3);
+  --shadow-md: 0 4px 6px -1px rgba(0, 0, 0, 0.4), 0 2px 4px -1px rgba(0, 0, 0, 0.2);
+  --shadow-lg: 0 10px 15px -3px rgba(0, 0, 0, 0.4), 0 4px 6px -2px rgba(0, 0, 0, 0.2);
+  --shadow-xl: 0 20px 25px -5px rgba(0, 0, 0, 0.4), 0 10px 10px -5px rgba(0, 0, 0, 0.2);
+}
+
+/* Ana sayfa için özel dark tema geliştirmeleri */
+.dark .gradient-bg-dark {
+  background: linear-gradient(135deg, hsl(210, 25%, 6%) 0%, hsl(210, 22%, 8%) 50%, hsl(200, 20%, 10%) 100%);
+}
+
+.dark .hero-pattern-dark {
+  background-image:
+    radial-gradient(circle at 25% 25%, hsla(200, 60%, 40%, 0.15) 0%, transparent 50%),
+    radial-gradient(circle at 75% 75%, hsla(180, 60%, 40%, 0.15) 0%, transparent 50%);
 }
 
 /* Tema geçiş stilleri */
@@ -261,7 +272,7 @@ footer {
 
 /* Dark mode specific focus */
 .dark *:focus-visible {
-  outline-color: var(--primary-400);
+  outline-color: hsl(200, 70%, 55%);
 }
 
 .focus-ring {
@@ -288,15 +299,15 @@ footer {
 }
 
 .dark ::-webkit-scrollbar-track {
-  background: var(--neutral-100);
+  background: hsl(210, 20%, 10%);
 }
 
 .dark ::-webkit-scrollbar-thumb {
-  background: var(--neutral-300);
+  background: hsl(210, 12%, 25%);
 }
 
 .dark ::-webkit-scrollbar-thumb:hover {
-  background: var(--neutral-400);
+  background: hsl(210, 12%, 35%);
 }
 
 /* Modern Scrollbar Styles */
@@ -656,8 +667,21 @@ nav {
 }
 
 .dark ::selection {
-  background-color: var(--primary-800);
-  color: var(--primary-100);
+  background-color: hsl(200, 60%, 25%);
+  color: hsl(200, 85%, 90%);
+}
+
+/* Dark mode için özel utility sınıfları */
+.dark .text-primary-contrast {
+  color: hsl(200, 70%, 60%);
+}
+
+.dark .bg-primary-subtle {
+  background-color: hsl(200, 25%, 12%);
+}
+
+.dark .border-primary-subtle {
+  border-color: hsl(200, 20%, 20%);
 }
 
 /* Gradient Text */

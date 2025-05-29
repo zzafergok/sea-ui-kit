@@ -30,6 +30,7 @@ const config = {
           700: 'var(--primary-700)',
           800: 'var(--primary-800)',
           900: 'var(--primary-900)',
+          950: 'hsl(200, 30%, 4%)', // Ekstra dark için
           DEFAULT: 'var(--primary-500)',
         },
         accent: {
@@ -43,6 +44,7 @@ const config = {
           700: 'var(--accent-700)',
           800: 'var(--accent-800)',
           900: 'var(--accent-900)',
+          950: 'hsl(180, 30%, 4%)', // Ekstra dark için
           DEFAULT: 'var(--accent-500)',
         },
         neutral: {
@@ -56,6 +58,7 @@ const config = {
           700: 'var(--neutral-700)',
           800: 'var(--neutral-800)',
           900: 'var(--neutral-900)',
+          950: 'hsl(210, 20%, 4%)', // En koyu dark için
           DEFAULT: 'var(--neutral-500)',
         },
         success: 'var(--success)',
@@ -80,19 +83,6 @@ const config = {
         fast: 'var(--transition-fast)',
         default: 'var(--transition-default)',
         slow: 'var(--transition-slow)',
-      },
-      fontFamily: {
-        sans: [
-          'system-ui',
-          '-apple-system',
-          'BlinkMacSystemFont',
-          '"Segoe UI"',
-          'Roboto',
-          '"Helvetica Neue"',
-          'Arial',
-          'sans-serif',
-        ],
-        mono: ['ui-monospace', 'SFMono-Regular', '"SF Mono"', 'Consolas', '"Liberation Mono"', 'Menlo', 'monospace'],
       },
       screens: {
         xs: '475px',

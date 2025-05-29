@@ -8,7 +8,6 @@ import { useTranslation } from 'react-i18next'
 import { User, Settings, Users, BarChart3, Activity, TrendingUp, Eye, Download } from 'lucide-react'
 
 import { useAuth } from '@/hooks/useAuth'
-
 import { Button } from '@/components/core/Button/Button'
 import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/core/Card/Card'
@@ -58,7 +57,8 @@ export default function DashboardPage() {
       change: '+12%',
       icon: Eye,
       color: 'text-blue-600 dark:text-blue-400',
-      bgColor: 'bg-blue-100 dark:bg-blue-900/20',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
+      borderColor: 'border-blue-200 dark:border-blue-800/50',
     },
     {
       title: 'Aktif Kullanıcılar',
@@ -66,7 +66,8 @@ export default function DashboardPage() {
       change: '+8%',
       icon: Users,
       color: 'text-green-600 dark:text-green-400',
-      bgColor: 'bg-green-100 dark:bg-green-900/20',
+      bgColor: 'bg-green-100 dark:bg-green-900/30',
+      borderColor: 'border-green-200 dark:border-green-800/50',
     },
     {
       title: 'İndirmeler',
@@ -74,7 +75,8 @@ export default function DashboardPage() {
       change: '+23%',
       icon: Download,
       color: 'text-purple-600 dark:text-purple-400',
-      bgColor: 'bg-purple-100 dark:bg-purple-900/20',
+      bgColor: 'bg-purple-100 dark:bg-purple-900/30',
+      borderColor: 'border-purple-200 dark:border-purple-800/50',
     },
     {
       title: 'Performans',
@@ -82,7 +84,8 @@ export default function DashboardPage() {
       change: '+2%',
       icon: Activity,
       color: 'text-orange-600 dark:text-orange-400',
-      bgColor: 'bg-orange-100 dark:bg-orange-900/20',
+      bgColor: 'bg-orange-100 dark:bg-orange-900/30',
+      borderColor: 'border-orange-200 dark:border-orange-800/50',
     },
   ]
 
@@ -93,6 +96,7 @@ export default function DashboardPage() {
       icon: User,
       href: '/profile',
       color: 'text-primary-600 dark:text-primary-400',
+      bgColor: 'bg-primary-100 dark:bg-primary-900/30',
     },
     {
       title: 'Ayarlar',
@@ -100,6 +104,7 @@ export default function DashboardPage() {
       icon: Settings,
       href: '/settings',
       color: 'text-neutral-600 dark:text-neutral-400',
+      bgColor: 'bg-neutral-100 dark:bg-neutral-800/50',
     },
     {
       title: 'Kullanıcılar',
@@ -107,6 +112,7 @@ export default function DashboardPage() {
       icon: Users,
       href: '/users',
       color: 'text-green-600 dark:text-green-400',
+      bgColor: 'bg-green-100 dark:bg-green-900/30',
     },
     {
       title: 'Bileşenler',
@@ -114,37 +120,49 @@ export default function DashboardPage() {
       icon: BarChart3,
       href: '/components',
       color: 'text-blue-600 dark:text-blue-400',
+      bgColor: 'bg-blue-100 dark:bg-blue-900/30',
     },
   ]
 
   return (
     <div className='space-y-8'>
-      {/* Welcome Section */}
-      <div className='bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-lg p-6 border border-primary-100 dark:border-primary-800'>
+      {/* Welcome Section - Dark tema iyileştirmeleri */}
+      <div className='bg-gradient-to-r from-primary-50 to-accent-50 dark:from-primary-900/20 dark:to-accent-900/20 rounded-lg p-6 border border-primary-100 dark:border-primary-800/50 backdrop-blur-sm'>
         <div className='flex flex-col sm:flex-row sm:items-center sm:justify-between'>
           <div>
             <h1 className='text-2xl font-bold text-neutral-900 dark:text-neutral-100 mb-2'>
               {t('pages.dashboard.welcome', { name: user.username || user.username || user.email?.split('@')[0] })}
             </h1>
-            <p className='text-neutral-600 dark:text-neutral-400'>{t('pages.dashboard.description')}</p>
+            <p className='text-neutral-600 dark:text-neutral-300'>{t('pages.dashboard.description')}</p>
           </div>
           <div className='mt-4 sm:mt-0 flex space-x-3'>
-            <Button onClick={() => router.push('/profile')} variant='outline'>
+            <Button
+              onClick={() => router.push('/profile')}
+              variant='outline'
+              className='border-primary-300 dark:border-primary-700 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/30'
+            >
               {t('pages.dashboard.viewProfile')}
             </Button>
-            <Button onClick={handleLogout} variant='outline'>
+            <Button
+              onClick={handleLogout}
+              variant='outline'
+              className='border-neutral-300 dark:border-neutral-600 text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800/50'
+            >
               {t('pages.dashboard.logout')}
             </Button>
           </div>
         </div>
       </div>
 
-      {/* Stats Grid */}
+      {/* Stats Grid - Dark tema iyileştirmeleri */}
       <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
         {stats.map((stat, index) => {
           const Icon = stat.icon
           return (
-            <Card key={index} className='hover:shadow-md transition-shadow'>
+            <Card
+              key={index}
+              className='hover:shadow-lg dark:hover:shadow-xl transition-all duration-300 border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800/50'
+            >
               <CardContent className='p-6'>
                 <div className='flex items-center justify-between'>
                   <div>
@@ -153,10 +171,10 @@ export default function DashboardPage() {
                     <div className='flex items-center text-sm'>
                       <TrendingUp className='h-3 w-3 text-green-600 dark:text-green-400 mr-1' />
                       <span className='text-green-600 dark:text-green-400 font-medium'>{stat.change}</span>
-                      <span className='text-neutral-500 dark:text-neutral-500 ml-1'>son ay</span>
+                      <span className='text-neutral-500 dark:text-neutral-400 ml-1'>son ay</span>
                     </div>
                   </div>
-                  <div className={`p-3 rounded-full ${stat.bgColor}`}>
+                  <div className={`p-3 rounded-full ${stat.bgColor} border ${stat.borderColor}`}>
                     <Icon className={`h-6 w-6 ${stat.color}`} />
                   </div>
                 </div>
@@ -166,7 +184,7 @@ export default function DashboardPage() {
         })}
       </div>
 
-      {/* Quick Actions */}
+      {/* Quick Actions - Dark tema iyileştirmeleri */}
       <div>
         <h2 className='text-lg font-semibold text-neutral-900 dark:text-neutral-100 mb-4'>Hızlı İşlemler</h2>
         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
@@ -175,13 +193,13 @@ export default function DashboardPage() {
             return (
               <Card
                 key={index}
-                className='hover:shadow-md transition-all hover:-translate-y-1 cursor-pointer group'
+                className='hover:shadow-lg dark:hover:shadow-xl transition-all duration-300 hover:-translate-y-1 cursor-pointer group border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800/50'
                 onClick={() => router.push(action.href)}
               >
                 <CardContent className='p-6'>
                   <div className='flex items-start space-x-4'>
                     <div
-                      className={`p-2 rounded-lg bg-neutral-100 dark:bg-neutral-800 group-hover:scale-110 transition-transform`}
+                      className={`p-2 rounded-lg ${action.bgColor} group-hover:scale-110 transition-transform duration-300`}
                     >
                       <Icon className={`h-5 w-5 ${action.color}`} />
                     </div>
@@ -201,8 +219,8 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Recent Activity */}
-      <Card>
+      {/* Recent Activity - Dark tema iyileştirmeleri */}
+      <Card className='border-neutral-200 dark:border-neutral-700 dark:bg-neutral-800/50'>
         <CardHeader>
           <CardTitle className='text-neutral-900 dark:text-neutral-100'>Son Aktiviteler</CardTitle>
           <CardDescription className='text-neutral-600 dark:text-neutral-400'>
@@ -231,12 +249,12 @@ export default function DashboardPage() {
               const Icon = activity.icon
               return (
                 <div key={index} className='flex items-center space-x-3 py-2'>
-                  <div className='p-1.5 rounded-full bg-neutral-100 dark:bg-neutral-800'>
-                    <Icon className='h-4 w-4 text-neutral-600 dark:text-neutral-400' />
+                  <div className='p-1.5 rounded-full bg-neutral-100 dark:bg-neutral-700/50'>
+                    <Icon className='h-4 w-4 text-neutral-600 dark:text-neutral-300' />
                   </div>
                   <div className='flex-1'>
                     <p className='text-sm text-neutral-900 dark:text-neutral-100'>{activity.action}</p>
-                    <p className='text-xs text-neutral-500 dark:text-neutral-500'>{activity.time}</p>
+                    <p className='text-xs text-neutral-500 dark:text-neutral-400'>{activity.time}</p>
                   </div>
                 </div>
               )

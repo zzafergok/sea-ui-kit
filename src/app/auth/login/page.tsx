@@ -1,15 +1,19 @@
 'use client'
 
-import React, { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+
+import React, { useEffect, Suspense } from 'react'
+
+import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
 
-import { LoginForm } from '@/components/forms/auth/LoginForm'
 import { useAuth } from '@/hooks/useAuth'
-import { LoginFormValues } from '@/lib/validations/auth'
-import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
+
 import { Button } from '@/components/core/Button/Button'
-import { ArrowLeft } from 'lucide-react'
+import { LoginForm } from '@/components/forms/auth/LoginForm'
+import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
+
+import { LoginFormValues } from '@/lib/validations/auth'
 
 function LoginPageContent() {
   const router = useRouter()
@@ -20,26 +24,22 @@ function LoginPageContent() {
   const redirectTo = searchParams.get('redirect') || '/dashboard'
   const error = searchParams.get('error')
 
-  // Login işlemi
   const handleLogin = async (data: LoginFormValues) => {
     try {
       console.log(t('auth.loginFormSubmitted'))
       await login(data)
-      // LoginForm kendi yönlendirmesini yapacak
     } catch (error) {
       console.error('Login failed:', error)
     }
   }
 
-  // Zaten giriş yapılmışsa yönlendir - SADECE ilk yüklemede
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
       console.log(t('auth.alreadyAuthenticated'), redirectTo)
-      router.replace(redirectTo) // replace kullan push yerine
+      router.replace(redirectTo)
     }
-  }, []) // Boş dependency array - sadece mount'ta çalışır
+  }, [])
 
-  // Loading durumunda spinner göster
   if (isLoading) {
     return (
       <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>
@@ -66,23 +66,23 @@ function LoginPageContent() {
 
   return (
     <div className='min-h-screen bg-neutral-50 dark:bg-neutral-900'>
-      {/* Header with back button */}
+      {/* Header with back button - Dark tema iyileştirmeleri */}
       <div className='absolute top-4 left-4 z-10'>
         <Button
           variant='ghost'
           size='sm'
           onClick={() => router.push('/')}
-          className='flex items-center space-x-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
+          className='flex items-center space-x-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800/50'
         >
           <ArrowLeft className='h-4 w-4' />
           <span>{t('common.backToHome')}</span>
         </Button>
       </div>
 
-      {/* Error message from URL */}
+      {/* Error message from URL - Dark tema iyileştirmeleri */}
       {error && (
         <div className='absolute top-16 left-1/2 transform -translate-x-1/2 z-10'>
-          <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm'>
+          <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800/50 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm backdrop-blur-sm'>
             {getErrorMessage(error)}
           </div>
         </div>
