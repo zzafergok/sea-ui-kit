@@ -25,7 +25,9 @@ function LoadingFallback() {
     <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>
       <div className='text-center space-y-4'>
         <LoadingSpinner size='lg' />
-        <p className='text-sm text-neutral-600 dark:text-neutral-400'>Uygulama yükleniyor...</p>
+        <p className='text-sm text-neutral-600 dark:text-neutral-400'>
+          {i18n.t ? i18n.t('common.appLoading') : 'Uygulama yükleniyor...'}
+        </p>
       </div>
     </div>
   )

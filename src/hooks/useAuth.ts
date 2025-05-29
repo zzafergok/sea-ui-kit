@@ -1,6 +1,7 @@
 'use client'
 
 import { useCallback, useEffect, useRef } from 'react'
+import { useTranslation } from 'react-i18next'
 
 import {
   User,
@@ -73,6 +74,7 @@ interface AuthActions {
 }
 
 export function useAuth(): AuthState & AuthActions {
+  const { t } = useTranslation()
   const dispatch = useAppDispatch()
   const tokenManager = useTokenManagerContext()
 
@@ -193,14 +195,14 @@ export function useAuth(): AuthState & AuthActions {
       }
     } catch (error) {
       console.error('[useAuth] Auth check failed:', error)
-      dispatch(setError('Authentication check failed'))
+      dispatch(setError(t('auth.sessionExpired')))
       await logout()
     } finally {
       dispatch(setLoading(false))
       initializationRef.current.hasInitialized = true
       initializationRef.current.isInitializing = false
     }
-  }, [dispatch, tokenManager, setTokensInCookies, refreshUser]) // Stable dependencies
+  }, [dispatch, tokenManager, setTokensInCookies, refreshUser, t]) // Stable dependencies
 
   // Giriş işlemi - Geliştirilmiş
   const login = useCallback(
@@ -219,7 +221,7 @@ export function useAuth(): AuthState & AuthActions {
         )
 
         if (!foundUser) {
-          throw new Error('E-posta veya şifre hatalı')
+          throw new Error(t('auth.invalidCredentials'))
         }
 
         // Mock token generation
@@ -249,8 +251,8 @@ export function useAuth(): AuthState & AuthActions {
         dispatch(
           showToast({
             type: 'success',
-            title: 'Başarılı',
-            message: `Hoş geldiniz, ${loginUser.username}!`,
+            title: t('common.success'),
+            message: t('auth.welcomeBack') + ` ${loginUser.username}!`,
             duration: 3000,
           }),
         )
@@ -262,14 +264,14 @@ export function useAuth(): AuthState & AuthActions {
         console.log('[useAuth] Login process completed')
         return loginUser
       } catch (error: unknown) {
-        const errorMessage = error instanceof Error ? error.message : 'Giriş başarısız'
+        const errorMessage = error instanceof Error ? error.message : t('auth.loginFailed')
         console.error('[useAuth] Login failed:', errorMessage)
 
         dispatch(setError(errorMessage))
         dispatch(
           showToast({
             type: 'error',
-            title: 'Giriş Hatası',
+            title: t('auth.loginFailed'),
             message: errorMessage,
             duration: 5000,
           }),
@@ -280,7 +282,7 @@ export function useAuth(): AuthState & AuthActions {
         dispatch(setLoading(false))
       }
     },
-    [dispatch, tokenManager, setTokensInCookies],
+    [dispatch, tokenManager, setTokensInCookies, t],
   )
 
   // Çıkış işlemi - Güvenli
@@ -304,8 +306,8 @@ export function useAuth(): AuthState & AuthActions {
         dispatch(
           showToast({
             type: 'success',
-            title: 'Çıkış Yapıldı',
-            message: 'Güvenli bir şekilde çıkış yaptınız',
+            title: t('auth.logoutSuccess'),
+            message: t('auth.safelyLoggedOut'),
             duration: 3000,
           }),
         )
@@ -322,7 +324,7 @@ export function useAuth(): AuthState & AuthActions {
       initializationRef.current.hasInitialized = false
       initializationRef.current.isInitializing = false
     }
-  }, [dispatch, tokenManager, clearTokensFromCookies, user])
+  }, [dispatch, tokenManager, clearTokensFromCookies, user, t])
 
   // Hata temizleme
   const clearError = useCallback(() => {

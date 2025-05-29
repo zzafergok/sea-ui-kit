@@ -1,13 +1,10 @@
 'use client'
 
 import { useRouter } from 'next/navigation'
-
 import React, { useEffect, useState } from 'react'
-
 import { useTranslation } from 'react-i18next'
 
 import { useAuth } from '@/hooks/useAuth'
-
 import { Button } from '@/components/core/Button/Button'
 import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
 
@@ -15,7 +12,6 @@ export default function HomePage() {
   const router = useRouter()
   const { t } = useTranslation()
   const { isAuthenticated, isLoading } = useAuth()
-
   const [mounted, setMounted] = useState(false)
 
   // Hydration mismatch'i önlemek için mount kontrolü
@@ -41,7 +37,7 @@ export default function HomePage() {
       <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>
         <div className='text-center space-y-4'>
           <LoadingSpinner size='lg' />
-          <p className='text-sm text-neutral-600 dark:text-neutral-400'>Sayfa yükleniyor...</p>
+          <p className='text-sm text-neutral-600 dark:text-neutral-400'>{t('common.pageLoading')}</p>
         </div>
       </div>
     )

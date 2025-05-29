@@ -2,6 +2,8 @@
 
 import React, { useEffect, Suspense } from 'react'
 import { useRouter, useSearchParams } from 'next/navigation'
+import { useTranslation } from 'react-i18next'
+
 import { LoginForm } from '@/components/forms/auth/LoginForm'
 import { useAuth } from '@/hooks/useAuth'
 import { LoginFormValues } from '@/lib/validations/auth'
@@ -11,6 +13,7 @@ import { ArrowLeft } from 'lucide-react'
 
 function LoginPageContent() {
   const router = useRouter()
+  const { t } = useTranslation()
   const searchParams = useSearchParams()
   const { isAuthenticated, login, isLoading } = useAuth()
 
@@ -20,7 +23,7 @@ function LoginPageContent() {
   // Login işlemi
   const handleLogin = async (data: LoginFormValues) => {
     try {
-      console.log('Login form submitted from page')
+      console.log(t('auth.loginFormSubmitted'))
       await login(data)
       // LoginForm kendi yönlendirmesini yapacak
     } catch (error) {
@@ -31,7 +34,7 @@ function LoginPageContent() {
   // Zaten giriş yapılmışsa yönlendir - SADECE ilk yüklemede
   useEffect(() => {
     if (isAuthenticated && !isLoading) {
-      console.log('Already authenticated on page load, redirecting to:', redirectTo)
+      console.log(t('auth.alreadyAuthenticated'), redirectTo)
       router.replace(redirectTo) // replace kullan push yerine
     }
   }, []) // Boş dependency array - sadece mount'ta çalışır
@@ -42,10 +45,23 @@ function LoginPageContent() {
       <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>
         <div className='text-center space-y-4'>
           <LoadingSpinner size='lg' />
-          <p className='text-sm text-neutral-600 dark:text-neutral-400'>Kimlik doğrulanıyor...</p>
+          <p className='text-sm text-neutral-600 dark:text-neutral-400'>{t('common.authenticating')}</p>
         </div>
       </div>
     )
+  }
+
+  const getErrorMessage = (errorCode: string | null) => {
+    switch (errorCode) {
+      case 'unauthorized':
+        return t('errors.unauthorized')
+      case 'session_expired':
+        return t('errors.sessionExpired')
+      case 'invalid_token':
+        return t('errors.invalidToken')
+      default:
+        return null
+    }
   }
 
   return (
@@ -59,7 +75,7 @@ function LoginPageContent() {
           className='flex items-center space-x-2 text-neutral-600 dark:text-neutral-400 hover:text-neutral-900 dark:hover:text-neutral-100'
         >
           <ArrowLeft className='h-4 w-4' />
-          <span>Ana Sayfaya Dön</span>
+          <span>{t('common.backToHome')}</span>
         </Button>
       </div>
 
@@ -67,9 +83,7 @@ function LoginPageContent() {
       {error && (
         <div className='absolute top-16 left-1/2 transform -translate-x-1/2 z-10'>
           <div className='bg-red-50 dark:bg-red-900/20 border border-red-200 dark:border-red-800 text-red-700 dark:text-red-300 px-4 py-2 rounded-lg text-sm'>
-            {error === 'unauthorized' && 'Bu sayfaya erişim için giriş yapmalısınız'}
-            {error === 'session_expired' && 'Oturumunuz sona erdi, lütfen tekrar giriş yapın'}
-            {error === 'invalid_token' && 'Geçersiz token, lütfen tekrar giriş yapın'}
+            {getErrorMessage(error)}
           </div>
         </div>
       )}
@@ -88,13 +102,15 @@ function LoginPageContent() {
 }
 
 export default function LoginPage() {
+  const { t } = useTranslation()
+
   return (
     <Suspense
       fallback={
         <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-neutral-900'>
           <div className='text-center space-y-4'>
             <LoadingSpinner size='lg' />
-            <p className='text-sm text-neutral-600 dark:text-neutral-400'>Sayfa yükleniyor...</p>
+            <p className='text-sm text-neutral-600 dark:text-neutral-400'>{t('common.pageLoading')}</p>
           </div>
         </div>
       }
