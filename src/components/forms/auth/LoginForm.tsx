@@ -123,9 +123,9 @@ export function LoginForm({
 
   return (
     <div className={cn('min-h-screen flex items-center justify-center p-4', className)}>
-      <div className='w-full space-x-6 flex items-center justify-center'>
+      <div className='w-full space-x-6 flex items-center justify-center max-md:flex-col max-md:gap-4 max-md:items-end max-md:mt-12'>
         {/* Demo Hesaplar */}
-        <Card className='bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 w-full'>
+        <Card className='bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 w-full md:p-8'>
           <CardHeader className='pb-3'>
             <CardTitle className='text-lg text-blue-800 dark:text-blue-200'>Demo Hesapları (Development)</CardTitle>
             <CardDescription className='text-blue-600 dark:text-blue-300'>
@@ -293,19 +293,6 @@ export function LoginForm({
               </form>
             </CardContent>
           </Card>
-
-          {/* Footer Note */}
-          <div className='text-center'>
-            <p className='text-xs text-neutral-500 dark:text-neutral-400'>
-              Hesabınız yok mu?{' '}
-              <button
-                onClick={() => router.push('/auth/register')}
-                className='text-primary-600 hover:text-primary-500 dark:text-primary-400'
-              >
-                Kayıt olun
-              </button>
-            </p>
-          </div>
         </div>
       </div>
     </div>
