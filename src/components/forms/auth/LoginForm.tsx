@@ -1,29 +1,27 @@
 'use client'
 
+import Link from 'next/link'
 import { useRouter } from 'next/navigation'
 
-import React, { useState, useCallback } from 'react'
+import React, { useCallback } from 'react'
 
 import { useTranslation } from 'react-i18next'
-import { Eye, EyeOff, Mail, Lock, ArrowRight, UserCheck } from 'lucide-react'
+import { Mail, Lock, Eye, EyeOff } from 'lucide-react'
 
-import { Input } from '@/components/core/Input/Input'
+import { useForm } from '@/hooks/useForm'
+
 import { Button } from '@/components/core/Button/Button'
+import { Input } from '@/components/core/Input/Input'
 import { Checkbox } from '@/components/core/Checkbox/Checkbox'
-import { ThemeToggle } from '@/components/ui/ThemeToggle/ThemeToggle'
-import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
-import { LanguageToggle } from '@/components/ui/LanguageToggle/LanguageToggle'
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/core/Card/Card'
 
-import { useFormValidation } from '@/hooks/useFormValidation'
-
+import { loginSchema, LoginFormValues } from '@/lib/validations/auth'
 import { cn } from '@/lib/utils'
-import { loginSchema, type LoginFormValues } from '@/lib/validations/auth'
 
 interface LoginFormProps {
   onSubmit: (data: LoginFormValues) => Promise<void>
   redirectOnSuccess?: string
-  variant?: 'default' | 'modal'
+  variant?: 'default' | 'card' | 'minimal'
   showRememberMe?: boolean
   showForgotPassword?: boolean
   showRegisterLink?: boolean
@@ -54,6 +52,7 @@ const DEMO_ACCOUNTS = [
 export function LoginForm({
   onSubmit,
   redirectOnSuccess = '/dashboard',
+  variant = 'default',
   showRememberMe = true,
   showForgotPassword = true,
   showRegisterLink = true,
@@ -61,12 +60,17 @@ export function LoginForm({
 }: LoginFormProps) {
   const router = useRouter()
   const { t } = useTranslation()
-  const [showPassword, setShowPassword] = useState(false)
-  const [isSubmitting, setIsSubmitting] = useState(false)
 
-  const { register, handleSubmit, formState, setValue, getFieldError, hasFieldError } = useFormValidation(loginSchema, {
-    mode: 'onBlur',
-    reValidateMode: 'onChange',
+  const [showPassword, setShowPassword] = React.useState(false)
+  const [isSubmitting, setIsSubmitting] = React.useState(false)
+
+  const {
+    register,
+    handleSubmit,
+    formState: { errors, isValid },
+    setError,
+    setValue,
+  } = useForm(loginSchema, {
     defaultValues: {
       email: '',
       password: '',
@@ -74,30 +78,30 @@ export function LoginForm({
     },
   })
 
-  const handleFormSubmit = useCallback(
-    async (data: LoginFormValues) => {
-      if (isSubmitting) return
+  const handleFormSubmit = async (data: LoginFormValues) => {
+    if (isSubmitting) return
 
+    try {
       setIsSubmitting(true)
-      try {
-        console.log('Form submission started with data:', {
-          email: data.email,
-          rememberMe: data.rememberMe,
-          hasPassword: !!data.password,
-        })
+      await onSubmit(data)
 
-        await onSubmit(data)
-
-        console.log('Form submission successful, redirecting to:', redirectOnSuccess)
+      // Başarılı giriş durumunda yönlendirme
+      if (redirectOnSuccess) {
         router.push(redirectOnSuccess)
-      } catch (error) {
-        console.error('Form submission failed:', error)
-      } finally {
-        setIsSubmitting(false)
       }
-    },
-    [onSubmit, redirectOnSuccess, router, isSubmitting],
-  )
+    } catch (error: any) {
+      console.error('Login error:', error)
+
+      // Form hatası gösterimi
+      if (error?.message) {
+        setError('root', { message: error.message })
+      } else {
+        setError('root', { message: t('auth.loginFailed') })
+      }
+    } finally {
+      setIsSubmitting(false)
+    }
+  }
 
   const fillDemoAccount = useCallback(
     (account: (typeof DEMO_ACCOUNTS)[0]) => {
@@ -118,13 +122,154 @@ export function LoginForm({
     [setValue],
   )
 
-  const emailError = getFieldError('email')
-  const passwordError = getFieldError('password')
+  const FormContent = () => (
+    <form onSubmit={handleSubmit(handleFormSubmit)} className='space-y-6'>
+      {/* Email Field */}
+      <div className='space-y-2'>
+        <label
+          htmlFor='email'
+          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-900 dark:text-neutral-100'
+        >
+          {t('auth.email')}
+          <span className='text-red-500 dark:text-red-400 ml-1'>*</span>
+        </label>
+        <Input
+          {...register('email')}
+          id='email'
+          type='email'
+          placeholder='ornek@email.com'
+          startIcon={<Mail className='h-4 w-4' />}
+          error={errors.email?.message}
+          className='transition-colors'
+        />
+      </div>
 
+      {/* Password Field */}
+      <div className='space-y-2'>
+        <label
+          htmlFor='password'
+          className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-900 dark:text-neutral-100'
+        >
+          {t('auth.password')}
+          <span className='text-red-500 dark:text-red-400 ml-1'>*</span>
+        </label>
+        <Input
+          {...register('password')}
+          id='password'
+          type={showPassword ? 'text' : 'password'}
+          placeholder='••••••••'
+          startIcon={<Lock className='h-4 w-4' />}
+          endIcon={
+            <button
+              type='button'
+              onClick={() => setShowPassword(!showPassword)}
+              className='text-neutral-500 hover:text-neutral-700 dark:text-neutral-400 dark:hover:text-neutral-200 focus:outline-none'
+            >
+              {showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
+            </button>
+          }
+          error={errors.password?.message}
+        />
+      </div>
+
+      {/* Remember Me & Forgot Password */}
+      <div className='flex items-center justify-between'>
+        {showRememberMe && (
+          <div className='flex items-center space-x-2'>
+            <Checkbox {...register('rememberMe')} id='rememberMe' />
+            <label
+              htmlFor='rememberMe'
+              className='text-sm font-medium leading-none peer-disabled:cursor-not-allowed peer-disabled:opacity-70 text-neutral-700 dark:text-neutral-300'
+            >
+              {t('auth.rememberMe')}
+            </label>
+          </div>
+        )}
+
+        {showForgotPassword && (
+          <Link
+            href='/auth/forgot-password'
+            className='text-sm text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 transition-colors'
+          >
+            {t('auth.forgotPassword')}
+          </Link>
+        )}
+      </div>
+
+      {/* Form Error */}
+      {errors.root && (
+        <div className='bg-red-50 border border-red-200 text-red-700 px-4 py-3 rounded-md text-sm dark:bg-red-900/20 dark:border-red-800 dark:text-red-300'>
+          {errors.root.message}
+        </div>
+      )}
+
+      {/* Submit Button */}
+      <Button
+        type='submit'
+        disabled={!isValid || isSubmitting}
+        loading={isSubmitting}
+        className='w-full transition-all'
+      >
+        {isSubmitting ? t('common.pleaseWait') : t('auth.login')}
+      </Button>
+
+      {/* Register Link */}
+      {showRegisterLink && (
+        <div className='text-center'>
+          <p className='text-sm text-neutral-600 dark:text-neutral-400'>
+            {t('auth.dontHaveAccount')}{' '}
+            <Link
+              href='/auth/register'
+              className='text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300 font-medium transition-colors'
+            >
+              {t('auth.signUpHere')}
+            </Link>
+          </p>
+        </div>
+      )}
+    </form>
+  )
+
+  if (variant === 'card') {
+    return (
+      <div
+        className={`flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-neutral-50 dark:bg-neutral-900 ${className}`}
+      >
+        <Card className='w-full max-w-md'>
+          <CardHeader className='space-y-1 text-center'>
+            <CardTitle className='text-2xl font-bold text-neutral-900 dark:text-neutral-100'>
+              {t('auth.welcomeBack')}
+            </CardTitle>
+            <CardDescription className='text-neutral-600 dark:text-neutral-400'>
+              {t('auth.pleaseLogin')}
+            </CardDescription>
+          </CardHeader>
+          <CardContent>
+            <FormContent />
+          </CardContent>
+        </Card>
+      </div>
+    )
+  }
+
+  if (variant === 'minimal') {
+    return (
+      <div className={`w-full max-w-sm mx-auto ${className}`}>
+        <FormContent />
+      </div>
+    )
+  }
+
+  // Default variant
   return (
-    <div className={cn('min-h-screen flex items-center justify-center p-4', className)}>
-      <div className='w-full space-x-6 flex items-center justify-center max-md:flex-col max-md:gap-4 max-md:items-end max-md:mt-12'>
-        {/* Demo Hesaplar */}
+    <div
+      className={`flex min-h-screen items-center justify-center py-12 px-4 sm:px-6 lg:px-8 bg-neutral-50 dark:bg-neutral-900 ${className}`}
+    >
+      <div className='w-full max-w-md space-y-8'>
+        <div className='text-center'>
+          <h2 className='mt-6 text-3xl font-bold text-neutral-900 dark:text-neutral-100'>{t('auth.welcomeBack')}</h2>
+          <p className='mt-2 text-sm text-neutral-600 dark:text-neutral-400'>{t('auth.pleaseLogin')}</p>
+        </div>
         <Card className='bg-blue-50 dark:bg-blue-950/20 border-blue-200 dark:border-blue-800 w-full md:p-8'>
           <CardHeader className='pb-3'>
             <CardTitle className='text-lg text-blue-800 dark:text-blue-200'>Demo Hesapları (Development)</CardTitle>
@@ -155,144 +300,8 @@ export function LoginForm({
             ))}
           </CardContent>
         </Card>
-
-        <div className='flex flex-col space-y-6 w-full'>
-          {/* Ana Giriş Formu */}
-          <Card className='shadow-lg'>
-            <CardHeader className='space-y-1 text-center'>
-              <div className='flex justify-between items-center'>
-                <div className='flex-1'>
-                  <CardTitle className='text-2xl font-bold text-neutral-900 dark:text-neutral-100'>
-                    {t('auth.login')}
-                  </CardTitle>
-                  <CardDescription className='text-neutral-600 dark:text-neutral-400'>
-                    {t('auth.welcomeBack')}
-                  </CardDescription>
-                </div>
-                <div className='flex items-center gap-2'>
-                  <ThemeToggle />
-                  <LanguageToggle />
-                </div>
-              </div>
-            </CardHeader>
-
-            <CardContent>
-              <form onSubmit={handleSubmit(handleFormSubmit)} className='space-y-4'>
-                {/* Email Field */}
-                <div className='space-y-2'>
-                  <label htmlFor='email' className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
-                    {t('auth.email')} <span className='text-red-500'>*</span>
-                  </label>
-                  <div className='relative'>
-                    <Mail className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
-                    <Input
-                      {...register('email')}
-                      id='email'
-                      type='email'
-                      placeholder='user@example.com'
-                      className={cn(
-                        'pl-10',
-                        hasFieldError('email') && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-                      )}
-                      disabled={isSubmitting}
-                      autoComplete='email'
-                    />
-                  </div>
-                  {emailError && <p className='text-sm text-red-600 dark:text-red-400'>{emailError.message}</p>}
-                </div>
-
-                {/* Password Field */}
-                <div className='space-y-2'>
-                  <label htmlFor='password' className='text-sm font-medium text-neutral-700 dark:text-neutral-300'>
-                    {t('auth.password')} <span className='text-red-500'>*</span>
-                  </label>
-                  <div className='relative'>
-                    <Lock className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
-                    <Input
-                      {...register('password')}
-                      id='password'
-                      type={showPassword ? 'text' : 'password'}
-                      placeholder='••••••••'
-                      className={cn(
-                        'pl-10 pr-10',
-                        hasFieldError('password') && 'border-red-500 focus:border-red-500 focus:ring-red-500',
-                      )}
-                      disabled={isSubmitting}
-                      autoComplete='current-password'
-                    />
-                    <button
-                      type='button'
-                      onClick={() => setShowPassword(!showPassword)}
-                      className='absolute right-3 top-1/2 transform -translate-y-1/2 text-neutral-400 hover:text-neutral-600 dark:hover:text-neutral-300'
-                      disabled={isSubmitting}
-                    >
-                      {showPassword ? <EyeOff className='h-4 w-4' /> : <Eye className='h-4 w-4' />}
-                    </button>
-                  </div>
-                  {passwordError && <p className='text-sm text-red-600 dark:text-red-400'>{passwordError.message}</p>}
-                </div>
-
-                {/* Remember Me & Forgot Password */}
-                <div className='flex items-center justify-between'>
-                  {showRememberMe && (
-                    <div className='flex items-center space-x-2'>
-                      <Checkbox {...register('rememberMe')} id='rememberMe' disabled={isSubmitting} />
-                      <label
-                        htmlFor='rememberMe'
-                        className='text-sm text-neutral-600 dark:text-neutral-400 cursor-pointer'
-                      >
-                        {t('auth.rememberMe')}
-                      </label>
-                    </div>
-                  )}
-
-                  {showForgotPassword && (
-                    <button
-                      type='button'
-                      onClick={() => router.push('/auth/forgot-password')}
-                      className='text-sm text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300'
-                      disabled={isSubmitting}
-                    >
-                      {t('auth.forgotPassword')}
-                    </button>
-                  )}
-                </div>
-
-                {/* Submit Button */}
-                <Button type='submit' className='w-full' disabled={isSubmitting || !formState.isValid} size='lg'>
-                  {isSubmitting ? (
-                    <div className='flex items-center gap-2'>
-                      <LoadingSpinner size='sm' />
-                      <span>Giriş yapılıyor...</span>
-                    </div>
-                  ) : (
-                    <div className='flex items-center gap-2'>
-                      <UserCheck className='h-4 w-4' />
-                      <span>{t('auth.login')}</span>
-                      <ArrowRight className='h-4 w-4' />
-                    </div>
-                  )}
-                </Button>
-
-                {/* Register Link */}
-                {showRegisterLink && (
-                  <div className='text-center pt-4 border-t border-neutral-200 dark:border-neutral-700'>
-                    <p className='text-sm text-neutral-600 dark:text-neutral-400'>
-                      {t('auth.dontHaveAccount')}{' '}
-                      <button
-                        type='button'
-                        onClick={() => router.push('/auth/register')}
-                        className='text-primary-600 hover:text-primary-500 dark:text-primary-400 dark:hover:text-primary-300 font-medium'
-                        disabled={isSubmitting}
-                      >
-                        {t('auth.signUpHere')}
-                      </button>
-                    </p>
-                  </div>
-                )}
-              </form>
-            </CardContent>
-          </Card>
+        <div className='bg-white dark:bg-neutral-800 py-8 px-6 shadow-lg rounded-lg border border-neutral-200 dark:border-neutral-700'>
+          <FormContent />
         </div>
       </div>
     </div>

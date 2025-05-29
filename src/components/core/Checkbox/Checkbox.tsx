@@ -1,29 +1,41 @@
-import React from 'react'
+import * as React from 'react'
 
 import { Check } from 'lucide-react'
-
-import * as RadixCheckbox from '@radix-ui/react-checkbox'
+import * as CheckboxPrimitive from '@radix-ui/react-checkbox'
 
 import { cn } from '@/lib/utils'
 
 const Checkbox = React.forwardRef<
-  React.ElementRef<typeof RadixCheckbox.Root>,
-  React.ComponentPropsWithoutRef<typeof RadixCheckbox.Root>
+  React.ElementRef<typeof CheckboxPrimitive.Root>,
+  React.ComponentPropsWithoutRef<typeof CheckboxPrimitive.Root>
 >(({ className, ...props }, ref) => (
-  <RadixCheckbox.Root
+  <CheckboxPrimitive.Root
     ref={ref}
     className={cn(
-      'peer h-4 w-4 shrink-0 rounded-sm border border-neutral-200 focus:ring-primary-400 focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 dark:border-neutral-700 dark:focus:ring-primary-600 data-[state=checked]:bg-primary-500 data-[state=checked]:text-white dark:data-[state=checked]:bg-primary-600',
+      'peer h-4 w-4 shrink-0 rounded-sm border shadow transition-all',
+      'focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-offset-2',
+      'disabled:cursor-not-allowed disabled:opacity-50',
+      // Light mode styles
+      'border-neutral-300 bg-white text-white',
+      'hover:border-neutral-400 hover:bg-neutral-50',
+      'focus-visible:ring-primary-500 focus-visible:ring-offset-white',
+      'data-[state=checked]:bg-primary-500 data-[state=checked]:border-primary-500',
+      'data-[state=checked]:text-white',
+      // Dark mode styles
+      'dark:border-neutral-600 dark:bg-neutral-900 dark:text-white',
+      'dark:hover:border-neutral-500 dark:hover:bg-neutral-800',
+      'dark:focus-visible:ring-primary-400 dark:focus-visible:ring-offset-neutral-900',
+      'dark:data-[state=checked]:bg-primary-600 dark:data-[state=checked]:border-primary-600',
+      'dark:data-[state=checked]:text-white',
       className,
     )}
     {...props}
   >
-    <RadixCheckbox.Indicator className='flex items-center justify-center text-current'>
-      <Check className='h-3 w-3' />
-    </RadixCheckbox.Indicator>
-  </RadixCheckbox.Root>
+    <CheckboxPrimitive.Indicator className={cn('flex items-center justify-center text-current')}>
+      <Check className='h-3.5 w-3.5' />
+    </CheckboxPrimitive.Indicator>
+  </CheckboxPrimitive.Root>
 ))
-
-Checkbox.displayName = RadixCheckbox.Root.displayName
+Checkbox.displayName = CheckboxPrimitive.Root.displayName
 
 export { Checkbox }
