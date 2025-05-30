@@ -1,54 +1,47 @@
+'use client'
+
 import * as React from 'react'
+
 import { Slot } from '@radix-ui/react-slot'
 import { cva, type VariantProps } from 'class-variance-authority'
+
 import { cn } from '@/lib/utils'
 
 const buttonVariants = cva(
-  'inline-flex items-center justify-center whitespace-nowrap rounded-md text-sm font-medium transition-colors focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50',
+  'inline-flex items-center justify-center rounded-md text-sm font-medium transition-all duration-200 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:pointer-events-none disabled:opacity-50 relative overflow-hidden',
   {
     variants: {
       variant: {
-        default: [
-          'bg-primary-500 text-white shadow hover:bg-primary-600 active:bg-primary-700',
-          'dark:bg-primary-600 dark:text-white dark:hover:bg-primary-500 dark:active:bg-primary-400',
-          'focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400',
-        ].join(' '),
-        destructive: [
-          'bg-red-500 text-white shadow-sm hover:bg-red-600 active:bg-red-700',
-          'dark:bg-red-600 dark:text-white dark:hover:bg-red-500 dark:active:bg-red-400',
-          'focus-visible:ring-red-500 dark:focus-visible:ring-red-400',
-        ].join(' '),
-        outline: [
-          'border border-neutral-200 bg-white text-neutral-900 shadow-sm hover:bg-neutral-50 hover:text-neutral-900',
-          'dark:border-neutral-700 dark:bg-neutral-900 dark:text-neutral-100 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
-          'focus-visible:ring-neutral-500 dark:focus-visible:ring-neutral-400',
-        ].join(' '),
-        secondary: [
-          'bg-neutral-100 text-neutral-900 shadow-sm hover:bg-neutral-200',
-          'dark:bg-neutral-800 dark:text-neutral-100 dark:hover:bg-neutral-700',
-          'focus-visible:ring-neutral-500 dark:focus-visible:ring-neutral-400',
-        ].join(' '),
-        ghost: [
-          'text-neutral-900 hover:bg-neutral-100 hover:text-neutral-900',
-          'dark:text-neutral-100 dark:hover:bg-neutral-800 dark:hover:text-neutral-100',
-          'focus-visible:ring-neutral-500 dark:focus-visible:ring-neutral-400',
-        ].join(' '),
-        link: [
-          'text-primary-500 underline-offset-4 hover:underline',
-          'dark:text-primary-400 dark:hover:text-primary-300',
-          'focus-visible:ring-primary-500 dark:focus-visible:ring-primary-400',
-        ].join(' '),
+        default:
+          'bg-gradient-to-r from-primary-500 to-primary-600 text-white hover:from-primary-400 hover:to-primary-500 shadow-md hover:shadow-lg dark:from-primary-500 dark:to-primary-600 dark:hover:from-primary-400 dark:hover:to-primary-500 border border-primary-600 dark:border-primary-500',
+        destructive:
+          'bg-gradient-to-r from-red-500 to-red-600 text-white hover:from-red-400 hover:to-red-500 shadow-md hover:shadow-lg border border-red-600',
+        outline:
+          'border border-primary-300 dark:border-primary-600 bg-transparent text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20 hover:border-primary-400 dark:hover:border-primary-500',
+        secondary:
+          'bg-gradient-to-r from-accent-500 to-accent-600 text-white hover:from-accent-400 hover:to-accent-500 shadow-md hover:shadow-lg dark:from-accent-500 dark:to-accent-600 dark:hover:from-accent-400 dark:hover:to-accent-500 border border-accent-600 dark:border-accent-500',
+        ghost:
+          'hover:bg-primary-50 dark:hover:bg-primary-900/20 text-primary-700 dark:text-primary-300 hover:text-primary-800 dark:hover:text-primary-200',
+        link: 'text-primary-600 dark:text-primary-400 underline-offset-4 hover:underline hover:text-primary-700 dark:hover:text-primary-300',
+        blue: 'bg-gradient-to-r from-blue-500 to-blue-600 text-white hover:from-blue-400 hover:to-blue-500 shadow-md hover:shadow-lg border border-blue-600',
+        teal: 'bg-gradient-to-r from-teal-500 to-teal-600 text-white hover:from-teal-400 hover:to-teal-500 shadow-md hover:shadow-lg border border-teal-600',
       },
       size: {
         default: 'h-10 px-4 py-2',
-        sm: 'h-8 rounded-md px-3 text-xs',
-        lg: 'h-12 rounded-md px-8',
+        sm: 'h-9 rounded-md px-3',
+        lg: 'h-11 rounded-md px-8',
+        xl: 'h-12 rounded-lg px-10 text-base',
         icon: 'h-10 w-10',
+      },
+      fullWidth: {
+        true: 'w-full',
+        false: 'w-auto',
       },
     },
     defaultVariants: {
       variant: 'default',
       size: 'default',
+      fullWidth: false,
     },
   },
 )
@@ -61,12 +54,16 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, loading = false, disabled, children, ...props }, ref) => {
+  ({ className, variant, size, fullWidth, asChild = false, loading = false, children, disabled, ...props }, ref) => {
     const Comp = asChild ? Slot : 'button'
 
     return (
       <Comp
-        className={cn(buttonVariants({ variant, size, className }))}
+        className={cn(
+          buttonVariants({ variant, size, fullWidth, className }),
+          loading && 'pointer-events-none',
+          'transform hover:scale-105 active:scale-95 hover:-translate-y-0.5 transition-all duration-200',
+        )}
         ref={ref}
         disabled={disabled || loading}
         {...props}
@@ -74,7 +71,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
         {loading ? (
           <>
             <svg
-              className='mr-2 h-4 w-4 animate-spin'
+              className='animate-spin -ml-1 mr-2 h-4 w-4 text-current'
               xmlns='http://www.w3.org/2000/svg'
               fill='none'
               viewBox='0 0 24 24'
@@ -83,7 +80,7 @@ const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
               <path
                 className='opacity-75'
                 fill='currentColor'
-                d='m4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
+                d='M4 12a8 8 0 018-8V0C5.373 0 0 5.373 0 12h4zm2 5.291A7.962 7.962 0 014 12H0c0 3.042 1.135 5.824 3 7.938l3-2.647z'
               />
             </svg>
             Yükleniyor...
