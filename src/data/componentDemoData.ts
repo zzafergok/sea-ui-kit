@@ -20,6 +20,7 @@ import { PageHeaderExample } from '@/components/ui/PageHeader/PageHeader'
 import { Skeleton, SkeletonText, SkeletonAvatar } from '@/components/core/Skeleton/Skeleton'
 import { LoadingSpinner, LoadingDots, LoadingPulse } from '@/components/core/Loading/LoadingSpinner'
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/core/Select/Select'
+import { Badge } from '@/components/core/Badge/Badge'
 
 // componentDemoData array'ine eklenecek yeni bileşenler:
 export const componentDemoData = [
@@ -2381,6 +2382,136 @@ function Example() {
         type: 'boolean',
         description: 'Geri buton göster',
         default: 'false',
+      },
+    ],
+  },
+  // Badge bileşeni
+  {
+    id: 'badge',
+    title: 'Badge',
+    description: 'Durum ve bilgi göstergesi için kullanılan esnek badge bileşeni',
+    category: 'Veri Gösterimi',
+    status: 'stable',
+    demoComponent: React.createElement('div', { className: 'flex flex-wrap gap-3 items-center' }, [
+      React.createElement(Badge, { key: 'default', variant: 'default', children: 'Varsayılan' }),
+      React.createElement(Badge, { key: 'secondary', variant: 'secondary', children: 'İkincil' }),
+      React.createElement(Badge, { key: 'success', variant: 'success', children: 'Başarılı' }),
+      React.createElement(Badge, { key: 'warning', variant: 'warning', children: 'Uyarı' }),
+      React.createElement(Badge, { key: 'error', variant: 'error', children: 'Hata' }),
+      React.createElement(Badge, { key: 'info', variant: 'info', children: 'Bilgi' }),
+      React.createElement(Badge, { key: 'outline', variant: 'outline', children: 'Çerçeveli' }),
+      React.createElement(Badge, { key: 'muted', variant: 'muted', children: 'Sessiz' }),
+    ]),
+    code: `import { Badge } from '@/components/Badge/Badge'
+
+function Example() {
+  return (
+    <div className="flex flex-wrap gap-3">
+      <Badge variant="default">Varsayılan</Badge>
+      <Badge variant="secondary">İkincil</Badge>
+      <Badge variant="success">Başarılı</Badge>
+      <Badge variant="warning">Uyarı</Badge>
+      <Badge variant="error">Hata</Badge>
+      <Badge variant="info">Bilgi</Badge>
+      <Badge variant="outline">Çerçeveli</Badge>
+      <Badge variant="muted">Sessiz</Badge>
+    </div>
+  )
+}`,
+    usageExamples: [
+      {
+        title: 'Farklı Boyutlar',
+        description: 'Badge bileşeninin farklı boyut seçenekleri',
+        code: `<div className="flex items-center gap-3">
+  <Badge size="sm" variant="success">Küçük</Badge>
+  <Badge size="md" variant="info">Orta</Badge>
+  <Badge size="lg" variant="warning">Büyük</Badge>
+</div>`,
+        component: React.createElement('div', { className: 'flex items-center gap-3' }, [
+          React.createElement(Badge, { key: 'sm', size: 'sm', variant: 'success', children: 'Küçük' }),
+          React.createElement(Badge, { key: 'md', size: 'md', variant: 'info', children: 'Orta' }),
+          React.createElement(Badge, { key: 'lg', size: 'lg', variant: 'warning', children: 'Büyük' }),
+        ]),
+      },
+      {
+        title: 'Sayı ile Kullanım',
+        description: 'Bildirim sayıları ve istatistikler için kullanım',
+        code: `<div className="flex items-center gap-4">
+  <div className="flex items-center gap-2">
+    <span>Mesajlar</span>
+    <Badge variant="error" size="sm">12</Badge>
+  </div>
+  <div className="flex items-center gap-2">
+    <span>Bildirimler</span>
+    <Badge variant="info" size="sm">3</Badge>
+  </div>
+  <div className="flex items-center gap-2">
+    <span>Tamamlanan</span>
+    <Badge variant="success" size="sm">25</Badge>
+  </div>
+</div>`,
+        component: React.createElement('div', { className: 'flex items-center gap-4' }, [
+          React.createElement('div', { key: 'messages', className: 'flex items-center gap-2' }, [
+            React.createElement('span', { key: 'label', className: 'text-sm' }, 'Mesajlar'),
+            React.createElement(Badge, { key: 'badge', variant: 'error', size: 'sm', children: '12' }),
+          ]),
+          React.createElement('div', { key: 'notifications', className: 'flex items-center gap-2' }, [
+            React.createElement('span', { key: 'label', className: 'text-sm' }, 'Bildirimler'),
+            React.createElement(Badge, { key: 'badge', variant: 'info', size: 'sm', children: '3' }),
+          ]),
+          React.createElement('div', { key: 'completed', className: 'flex items-center gap-2' }, [
+            React.createElement('span', { key: 'label', className: 'text-sm' }, 'Tamamlanan'),
+            React.createElement(Badge, { key: 'badge', variant: 'success', size: 'sm', children: '25' }),
+          ]),
+        ]),
+      },
+      {
+        title: 'Farklı Şekiller',
+        description: 'Çeşitli border radius seçenekleri',
+        code: `<div className="flex items-center gap-3">
+  <Badge rounded="sm" variant="primary">Keskin</Badge>
+  <Badge rounded="md" variant="secondary">Orta</Badge>
+  <Badge rounded="lg" variant="success">Yumuşak</Badge>
+  <Badge rounded="full" variant="info">Yuvarlak</Badge>
+</div>`,
+        component: React.createElement('div', { className: 'flex items-center gap-3' }, [
+          React.createElement(Badge, { key: 'sm', rounded: 'sm', variant: 'default', children: 'Keskin' }),
+          React.createElement(Badge, { key: 'md', rounded: 'md', variant: 'secondary', children: 'Orta' }),
+          React.createElement(Badge, { key: 'lg', rounded: 'lg', variant: 'success', children: 'Yumuşak' }),
+          React.createElement(Badge, { key: 'full', rounded: 'full', variant: 'info', children: 'Yuvarlak' }),
+        ]),
+      },
+    ],
+    props: [
+      {
+        name: 'variant',
+        type: "'default' | 'secondary' | 'success' | 'warning' | 'error' | 'info' | 'outline' | 'muted'",
+        description: 'Badge görünüm varyantı',
+        default: 'default',
+      },
+      {
+        name: 'size',
+        type: "'sm' | 'md' | 'lg'",
+        description: 'Badge boyutu',
+        default: 'md',
+      },
+      {
+        name: 'rounded',
+        type: "'sm' | 'md' | 'lg' | 'full'",
+        description: 'Border radius seviyesi',
+        default: 'full',
+      },
+      {
+        name: 'asChild',
+        type: 'boolean',
+        description: 'Radix Slot API kullanarak child elementi render eder',
+        default: 'false',
+      },
+      {
+        name: 'children',
+        type: 'ReactNode',
+        description: 'Badge içeriği',
+        required: true,
       },
     ],
   },

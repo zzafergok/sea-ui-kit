@@ -73,6 +73,9 @@ export {
 // Loading Components
 export { LoadingSpinner, LoadingDots, LoadingPulse } from './components/core/Loading/LoadingSpinner'
 
+export type { BadgeProps } from './components/core/Badge/Badge'
+export { Badge, badgeVariants } from './components/core/Badge/Badge'
+
 // Skeleton Components
 export { Skeleton, SkeletonAvatar, SkeletonText } from './components/core/Skeleton/Skeleton'
 

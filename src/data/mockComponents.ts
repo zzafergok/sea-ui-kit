@@ -142,6 +142,16 @@ export const mockComponents: ComponentItem[] = [
     popularity: 73,
   },
   {
+    id: 'badge',
+    name: 'Badge',
+    description: 'Durum ve bilgi göstergesi için esnek badge bileşeni',
+    category: 'Veri Gösterimi',
+    tags: ['badge', 'status', 'indicator', 'label'],
+    status: 'stable',
+    lastUpdated: '2024-01-20',
+    popularity: 87,
+  },
+  {
     id: 'avatar',
     name: 'Avatar',
     description: 'Kullanıcı profil resmi bileşeni',

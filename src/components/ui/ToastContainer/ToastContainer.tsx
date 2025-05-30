@@ -2,63 +2,44 @@
 
 import React, { useEffect } from 'react'
 
-import { Toast } from '@/store/slices/toastSlice'
-import { useAppSelector, useAppDispatch } from '@/store'
-import { selectToasts, removeToast, cleanupExpiredHashes } from '@/store/slices/toastSlice'
+import { createPortal } from 'react-dom'
+import { AnimatePresence, motion } from 'framer-motion'
+import { X, CheckCircle, AlertCircle, Info, AlertTriangle } from 'lucide-react'
 
-import { X, CheckCircle, AlertCircle, AlertTriangle, Info } from 'lucide-react'
+import { useAppSelector, useAppDispatch } from '@/store'
+import { removeToast, selectToasts } from '@/store/slices/toastSlice'
+
+import { cn } from '@/lib/utils'
 
 interface ToastContainerProps {
   position?: 'top-right' | 'top-left' | 'bottom-right' | 'bottom-left' | 'top-center' | 'bottom-center'
 }
 
-interface ToastItemProps {
-  toast: Toast
-  onRemove: (id: string) => void
-}
+export function ToastContainer({ position = 'top-right' }: ToastContainerProps) {
+  const dispatch = useAppDispatch()
+  const toasts = useAppSelector(selectToasts)
 
-const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
-  const [isVisible, setIsVisible] = React.useState(false)
-  const [isRemoving, setIsRemoving] = React.useState(false)
+  const [mounted, setMounted] = React.useState(false)
 
-  const progressRef = React.useRef<HTMLDivElement>(null)
-  const timeoutRef = React.useRef<NodeJS.Timeout | null>(null)
-
-  // Toast görünür hale getir
   useEffect(() => {
-    const timer = setTimeout(() => setIsVisible(true), 50)
-    return () => clearTimeout(timer)
+    setMounted(true)
   }, [])
 
-  // Auto-dismiss logic
-  useEffect(() => {
-    if (!toast.persistent && toast.duration && toast.duration > 0) {
-      timeoutRef.current = setTimeout(() => {
-        handleRemove()
-      }, toast.duration)
-
-      // Progress bar animation
-      if (progressRef.current) {
-        progressRef.current.style.animation = `shrink ${toast.duration}ms linear`
-      }
-    }
-
-    return () => {
-      if (timeoutRef.current) {
-        clearTimeout(timeoutRef.current)
-      }
-    }
-  }, [toast.duration, toast.persistent])
-
-  const handleRemove = () => {
-    setIsRemoving(true)
-    setTimeout(() => {
-      onRemove(toast.id)
-    }, 150)
+  if (!mounted) {
+    return null
   }
 
-  const getIcon = () => {
-    switch (toast.type) {
+  const positionClasses = {
+    'top-right': 'top-4 right-4',
+    'top-left': 'top-4 left-4',
+    'bottom-right': 'bottom-4 right-4',
+    'bottom-left': 'bottom-4 left-4',
+    'top-center': 'top-4 left-1/2 transform -translate-x-1/2',
+    'bottom-center': 'bottom-4 left-1/2 transform -translate-x-1/2',
+  }
+
+  const getIcon = (type: string) => {
+    switch (type) {
       case 'success':
         return <CheckCircle className='h-5 w-5 text-green-500 dark:text-green-400' />
       case 'error':
@@ -72,139 +53,82 @@ const ToastItem: React.FC<ToastItemProps> = ({ toast, onRemove }) => {
     }
   }
 
-  const getBackgroundColor = () => {
-    switch (toast.type) {
+  const getToastStyles = (type: string) => {
+    const baseStyles = 'bg-white dark:bg-card border shadow-lg dark:shadow-xl'
+
+    switch (type) {
       case 'success':
-        return 'bg-green-50 border-green-200 dark:bg-green-900/20 dark:border-green-800'
+        return `${baseStyles} border-green-200 dark:border-green-800/50`
       case 'error':
-        return 'bg-red-50 border-red-200 dark:bg-red-900/20 dark:border-red-800'
+        return `${baseStyles} border-red-200 dark:border-red-800/50`
       case 'warning':
-        return 'bg-yellow-50 border-yellow-200 dark:bg-yellow-900/20 dark:border-yellow-800'
+        return `${baseStyles} border-yellow-200 dark:border-yellow-800/50`
       case 'info':
-        return 'bg-blue-50 border-blue-200 dark:bg-blue-900/20 dark:border-blue-800'
+        return `${baseStyles} border-blue-200 dark:border-blue-800/50`
       default:
-        return 'bg-white border-neutral-200 dark:bg-neutral-800 dark:border-neutral-700'
+        return `${baseStyles} border-neutral-200 dark:border-border`
     }
   }
 
-  const getProgressColor = () => {
-    switch (toast.type) {
-      case 'success':
-        return 'bg-green-500 dark:bg-green-400'
-      case 'error':
-        return 'bg-red-500 dark:bg-red-400'
-      case 'warning':
-        return 'bg-yellow-500 dark:bg-yellow-400'
-      case 'info':
-        return 'bg-blue-500 dark:bg-blue-400'
-      default:
-        return 'bg-neutral-500 dark:bg-neutral-400'
-    }
-  }
-
-  return (
-    <div
-      className={`
-        relative max-w-sm w-full bg-white dark:bg-neutral-800 shadow-lg rounded-lg border pointer-events-auto transition-all duration-150 ease-in-out transform
-        ${isVisible && !isRemoving ? 'translate-x-0 opacity-100' : 'translate-x-full opacity-0'}
-        ${getBackgroundColor()}
-      `}
-    >
-      <div className='p-4'>
-        <div className='flex items-start'>
-          <div className='flex-shrink-0'>{getIcon()}</div>
-          <div className='ml-3 w-0 flex-1'>
-            {toast.title && <p className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>{toast.title}</p>}
-            <p className={`text-sm text-neutral-700 dark:text-neutral-300 ${toast.title ? 'mt-1' : ''}`}>
-              {toast.message}
-            </p>
-            {toast.action && (
-              <div className='mt-3'>
+  const toastContent = (
+    <div className={cn('fixed z-50 pointer-events-none', positionClasses[position])}>
+      <AnimatePresence>
+        {toasts.map((toast) => (
+          <motion.div
+            key={toast.id}
+            initial={{ opacity: 0, y: -20, scale: 0.95 }}
+            animate={{ opacity: 1, y: 0, scale: 1 }}
+            exit={{ opacity: 0, y: -20, scale: 0.95 }}
+            transition={{ duration: 0.2 }}
+            className='pointer-events-auto mb-4'
+          >
+            <div className={cn('min-w-[300px] max-w-md rounded-lg p-4 backdrop-blur-sm', getToastStyles(toast.type))}>
+              <div className='flex items-start gap-3'>
+                {getIcon(toast.type)}
+                <div className='flex-1'>
+                  {toast.title && (
+                    <h4 className='text-sm font-semibold text-neutral-900 dark:text-foreground mb-1'>{toast.title}</h4>
+                  )}
+                  <p className='text-sm text-neutral-600 dark:text-muted-foreground'>{toast.message}</p>
+                  {toast.action && (
+                    <button
+                      onClick={toast.action.onClick}
+                      className='mt-2 text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300'
+                    >
+                      {toast.action.label}
+                    </button>
+                  )}
+                </div>
                 <button
-                  onClick={toast.action.onClick}
-                  className='text-sm font-medium text-primary-600 hover:text-primary-700 dark:text-primary-400 dark:hover:text-primary-300'
+                  onClick={() => dispatch(removeToast(toast.id))}
+                  className='text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300 transition-colors'
                 >
-                  {toast.action.label}
+                  <X className='h-4 w-4' />
                 </button>
               </div>
-            )}
-          </div>
-          {toast.dismissible !== false && (
-            <div className='ml-4 flex-shrink-0 flex'>
-              <button
-                onClick={handleRemove}
-                className='inline-flex text-neutral-400 hover:text-neutral-600 dark:text-neutral-500 dark:hover:text-neutral-300 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-primary-500 dark:focus:ring-primary-400 rounded-md'
-              >
-                <span className='sr-only'>Kapat</span>
-                <X className='h-5 w-5' />
-              </button>
+              {!toast.persistent && toast.duration && (
+                <div className='absolute bottom-0 left-0 right-0 h-1 bg-neutral-100 dark:bg-neutral-800 rounded-b-lg overflow-hidden'>
+                  <motion.div
+                    initial={{ width: '100%' }}
+                    animate={{ width: '0%' }}
+                    transition={{ duration: toast.duration / 1000, ease: 'linear' }}
+                    className={cn(
+                      'h-full',
+                      toast.type === 'success' && 'bg-green-500 dark:bg-green-400',
+                      toast.type === 'error' && 'bg-red-500 dark:bg-red-400',
+                      toast.type === 'warning' && 'bg-yellow-500 dark:bg-yellow-400',
+                      toast.type === 'info' && 'bg-blue-500 dark:bg-blue-400',
+                    )}
+                    onAnimationComplete={() => dispatch(removeToast(toast.id))}
+                  />
+                </div>
+              )}
             </div>
-          )}
-        </div>
-      </div>
-
-      {/* Progress Bar */}
-      {!toast.persistent && toast.duration && toast.duration > 0 && (
-        <div className='absolute bottom-0 left-0 right-0 h-1 bg-neutral-200 dark:bg-neutral-700 rounded-b-lg overflow-hidden'>
-          <div ref={progressRef} className={`h-full ${getProgressColor()}`} style={{ width: '100%' }} />
-        </div>
-      )}
-    </div>
-  )
-}
-
-export const ToastContainer: React.FC<ToastContainerProps> = ({ position = 'top-right' }) => {
-  const dispatch = useAppDispatch()
-  const toasts = useAppSelector(selectToasts)
-
-  // Cleanup expired hashes periodically
-  useEffect(() => {
-    const interval = setInterval(() => {
-      dispatch(cleanupExpiredHashes())
-    }, 30000) // 30 saniyede bir temizle
-
-    return () => clearInterval(interval)
-  }, [dispatch])
-
-  const handleRemoveToast = (id: string) => {
-    dispatch(removeToast(id))
-  }
-
-  const getPositionClasses = () => {
-    switch (position) {
-      case 'top-right':
-        return 'top-0 right-0 items-end'
-      case 'top-left':
-        return 'top-0 left-0 items-start'
-      case 'bottom-right':
-        return 'bottom-0 right-0 items-end'
-      case 'bottom-left':
-        return 'bottom-0 left-0 items-start'
-      case 'top-center':
-        return 'top-0 left-1/2 transform -translate-x-1/2 items-center'
-      case 'bottom-center':
-        return 'bottom-0 left-1/2 transform -translate-x-1/2 items-center'
-      default:
-        return 'top-0 right-0 items-end'
-    }
-  }
-
-  if (toasts.length === 0) {
-    return null
-  }
-
-  return (
-    <div
-      className={`
-        toast-container fixed z-50 pointer-events-none p-6 w-full max-w-sm
-        ${getPositionClasses()}
-      `}
-    >
-      <div className='flex flex-col space-y-4'>
-        {toasts.map((toast) => (
-          <ToastItem key={toast.id} toast={toast} onRemove={handleRemoveToast} />
+          </motion.div>
         ))}
-      </div>
+      </AnimatePresence>
     </div>
   )
+
+  return createPortal(toastContent, document.body)
 }

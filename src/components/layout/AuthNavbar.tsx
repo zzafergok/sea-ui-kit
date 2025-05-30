@@ -1,11 +1,14 @@
 'use client'
 
-import { useRouter, usePathname } from 'next/navigation'
+import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 
-import React, { useState, useCallback } from 'react'
-
+import React, { useState } from 'react'
 import { useTranslation } from 'react-i18next'
-import { Menu, X, Bell, Search, Settings, LogOut, User, ChevronDown, BarChart3 } from 'lucide-react'
+
+import { Home, Users, Settings, LogOut, Menu, X, User, BarChart3, ChevronDown } from 'lucide-react'
+
+import { useAuth } from '@/hooks/useAuth'
 
 import {
   DropdownMenu,
@@ -15,166 +18,133 @@ import {
   DropdownMenuTrigger,
   DropdownMenuSeparator,
 } from '@/components/core/Dropdown/Dropdown'
-import { Input } from '@/components/core/Input/Input'
 import { Button } from '@/components/core/Button/Button'
 import { ThemeToggle } from '@/components/ui/ThemeToggle/ThemeToggle'
 import { LanguageToggle } from '@/components/ui/LanguageToggle/LanguageToggle'
-import { Avatar, AvatarFallback, AvatarImage } from '@/components/core/Avatar/Avatar'
-
-import { useAuth } from '@/hooks/useAuth'
 
 import { cn } from '@/lib/utils'
 
-const navigationItems = [{ href: '/components', labelKey: 'navigation.components', icon: BarChart3 }] as const
-
 export function AuthNavbar() {
   const router = useRouter()
-  const pathname = usePathname()
   const { t } = useTranslation()
   const { user, logout } = useAuth()
-  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false)
-  const [searchQuery, setSearchQuery] = useState('')
 
-  const handleNavigation = useCallback(
-    (href: string) => {
-      router.push(href)
-      setIsMobileMenuOpen(false)
-    },
-    [router],
-  )
+  const [mobileMenuOpen, setMobileMenuOpen] = useState(false)
 
-  const handleLogout = useCallback(async () => {
+  const handleLogout = async () => {
     try {
       await logout()
       router.push('/')
     } catch (error) {
       console.error('Logout failed:', error)
     }
-  }, [logout, router])
+  }
 
-  const handleProfileClick = useCallback(() => {
-    router.push('/profile')
-  }, [router])
-
-  const handleSettingsClick = useCallback(() => {
-    router.push('/settings')
-  }, [router])
-
-  const getUserInitials = useCallback(() => {
-    if (user?.username) {
-      return user.username.substring(0, 2).toUpperCase()
-    }
-    return user?.email?.substring(0, 2).toUpperCase() || 'U'
-  }, [user])
+  const navigationItems = [
+    {
+      name: t('navigation.dashboard'),
+      href: '/dashboard',
+      icon: Home,
+    },
+    {
+      name: t('navigation.components'),
+      href: '/components',
+      icon: BarChart3,
+    },
+    {
+      name: t('navigation.users'),
+      href: '/users',
+      icon: Users,
+    },
+    {
+      name: t('navigation.settings'),
+      href: '/settings',
+      icon: Settings,
+    },
+  ]
 
   return (
-    <header className='sticky top-0 z-navbar bg-white dark:bg-neutral-900 border-b border-neutral-200 dark:border-neutral-800 shadow-sm'>
-      <nav className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
-        <div className='flex items-center justify-between h-16'>
-          {/* Left Side - Logo & Navigation */}
-          <div className='flex items-center space-x-8'>
-            {/* Logo */}
-            <button
-              onClick={() => handleNavigation('/dashboard')}
-              className='text-xl font-bold bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent hover:opacity-80 transition-opacity'
-            >
-              Sea UI Kit
-            </button>
-
-            {/* Desktop Navigation */}
-            <div className='hidden lg:flex items-center space-x-6'>
-              {navigationItems.map((item) => {
-                const Icon = item.icon
-                return (
-                  <button
-                    key={item.href}
-                    onClick={() => handleNavigation(item.href)}
-                    className={cn(
-                      'flex items-center gap-2 px-3 py-2 text-sm font-medium rounded-md transition-all duration-200',
-                      pathname === item.href
-                        ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                        : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800 hover:text-primary-600 dark:hover:text-primary-400',
-                    )}
-                  >
-                    <Icon className='h-4 w-4' />
-                    {t(item.labelKey)}
-                  </button>
-                )
-              })}
-            </div>
+    <nav className='sticky top-0 z-50 w-full bg-white/80 dark:bg-background/80 backdrop-blur-xl border-b border-neutral-200 dark:border-border navbar-glass'>
+      <div className='max-w-7xl mx-auto px-4 sm:px-6 lg:px-8'>
+        <div className='flex justify-between h-16'>
+          {/* Logo and Brand */}
+          <div className='flex items-center'>
+            <Link href='/dashboard' className='flex items-center space-x-2 text-xl font-bold'>
+              <span className='text-2xl'>🌊</span>
+              <span className='bg-gradient-to-r from-primary-600 to-accent-600 dark:from-primary-400 dark:to-accent-400 bg-clip-text text-transparent'>
+                Sea UI Kit
+              </span>
+            </Link>
           </div>
 
-          {/* Center - Search */}
-          <div className='hidden md:flex flex-1 max-w-md mx-8'>
-            <div className='relative w-full'>
-              <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
-              <Input
-                placeholder={t('components.navbar.searchPlaceholder')}
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                className='pl-10 pr-4'
-              />
-            </div>
+          {/* Desktop Navigation */}
+          <div className='hidden md:flex items-center space-x-1'>
+            {navigationItems.map((item) => {
+              const Icon = item.icon
+              return (
+                <Link
+                  key={item.name}
+                  href={item.href}
+                  className='flex items-center space-x-2 px-4 py-2 rounded-lg text-sm font-medium text-neutral-700 dark:text-neutral-200 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 transition-all duration-200'
+                >
+                  <Icon className='h-4 w-4' />
+                  <span>{item.name}</span>
+                </Link>
+              )
+            })}
           </div>
 
-          {/* Right Side - Actions & User Menu */}
-          <div className='flex items-center space-x-4'>
-            {/* Theme & Language Toggles */}
-            <div className='hidden sm:flex items-center space-x-2'>
+          {/* Right Side Actions */}
+          <div className='flex items-center space-x-3'>
+            {/* Theme and Language Toggles */}
+            <div className='hidden md:flex items-center space-x-2'>
               <ThemeToggle />
               <LanguageToggle />
             </div>
-
-            {/* Notifications */}
-            <Button variant='ghost' size='sm' className='relative p-2'>
-              <Bell className='h-5 w-5' />
-              <span className='absolute -top-1 -right-1 h-2 w-2 bg-red-500 rounded-full'></span>
-            </Button>
 
             {/* User Menu */}
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button
                   variant='ghost'
-                  className='flex items-center space-x-2 hover:bg-neutral-50 dark:hover:bg-neutral-800'
+                  className='flex items-center space-x-2 px-3 py-2 hover:bg-neutral-100 dark:hover:bg-neutral-800/50'
                 >
-                  <Avatar className='h-8 w-8'>
-                    <AvatarImage src={user?.avatar} />
-                    <AvatarFallback className='text-xs font-medium'>{getUserInitials()}</AvatarFallback>
-                  </Avatar>
-                  <div className='hidden sm:block text-left'>
-                    <p className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>
-                      {user?.username || user?.email}
-                    </p>
-                    <p className='text-xs text-neutral-500 dark:text-neutral-400'>{user?.role}</p>
+                  <div className='w-8 h-8 rounded-full bg-gradient-to-br from-primary-400 to-accent-400 dark:from-primary-500 dark:to-accent-500 flex items-center justify-center text-white text-sm font-medium'>
+                    {user?.username?.charAt(0).toUpperCase() || 'U'}
                   </div>
-                  <ChevronDown className='h-4 w-4 text-neutral-400' />
+                  <span className='hidden md:block text-sm font-medium text-neutral-700 dark:text-neutral-200'>
+                    {user?.username || user?.email}
+                  </span>
+                  <ChevronDown className='h-4 w-4 text-neutral-500 dark:text-neutral-400' />
                 </Button>
               </DropdownMenuTrigger>
-
-              <DropdownMenuContent align='end' className='w-56'>
-                <DropdownMenuLabel className='font-normal'>
-                  <div className='flex flex-col space-y-1'>
-                    <p className='text-sm font-medium'>{user?.username || user?.email}</p>
-                    <p className='text-xs text-neutral-500 dark:text-neutral-400'>{user?.email}</p>
-                  </div>
+              <DropdownMenuContent
+                align='end'
+                className='w-56 bg-white dark:bg-popover border-neutral-200 dark:border-border shadow-lg dark:shadow-xl'
+              >
+                <DropdownMenuLabel className='text-neutral-900 dark:text-foreground'>
+                  {t('navigation.profile')}
                 </DropdownMenuLabel>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem onClick={handleProfileClick}>
+                <DropdownMenuSeparator className='bg-neutral-200 dark:bg-border' />
+                <DropdownMenuItem
+                  onClick={() => router.push('/profile')}
+                  className='text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 cursor-pointer'
+                >
                   <User className='mr-2 h-4 w-4' />
                   {t('navigation.profile')}
                 </DropdownMenuItem>
-
-                <DropdownMenuItem onClick={handleSettingsClick}>
+                <DropdownMenuItem
+                  onClick={() => router.push('/settings')}
+                  className='text-neutral-700 dark:text-neutral-200 hover:bg-neutral-100 dark:hover:bg-neutral-800/50 cursor-pointer'
+                >
                   <Settings className='mr-2 h-4 w-4' />
                   {t('navigation.settings')}
                 </DropdownMenuItem>
-
-                <DropdownMenuSeparator />
-
-                <DropdownMenuItem onClick={handleLogout} className='text-red-600 dark:text-red-400'>
+                <DropdownMenuSeparator className='bg-neutral-200 dark:bg-border' />
+                <DropdownMenuItem
+                  onClick={handleLogout}
+                  className='text-red-600 dark:text-red-400 hover:bg-red-50 dark:hover:bg-red-900/20 cursor-pointer'
+                >
                   <LogOut className='mr-2 h-4 w-4' />
                   {t('auth.logout')}
                 </DropdownMenuItem>
@@ -182,70 +152,42 @@ export function AuthNavbar() {
             </DropdownMenu>
 
             {/* Mobile Menu Button */}
-            <div className='lg:hidden'>
-              <Button variant='ghost' size='sm' onClick={() => setIsMobileMenuOpen(!isMobileMenuOpen)} className='p-2'>
-                {isMobileMenuOpen ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
-              </Button>
-            </div>
+            <Button variant='ghost' size='sm' className='md:hidden' onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              {mobileMenuOpen ? <X className='h-5 w-5' /> : <Menu className='h-5 w-5' />}
+            </Button>
           </div>
         </div>
+      </div>
 
-        {/* Mobile Menu */}
-        {isMobileMenuOpen && (
-          <div className='lg:hidden border-t border-neutral-200 dark:border-neutral-800'>
-            <div className='px-4 py-6 space-y-6'>
-              {/* Mobile Search */}
-              <div className='md:hidden'>
-                <div className='relative'>
-                  <Search className='absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-neutral-400' />
-                  <Input
-                    placeholder={t('components.navbar.searchPlaceholder')}
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className='pl-10 pr-4 w-full'
-                  />
-                </div>
-              </div>
-
-              {/* Mobile Navigation */}
-              <div className='space-y-2'>
-                {navigationItems.map((item) => {
-                  const Icon = item.icon
-                  return (
-                    <button
-                      key={item.href}
-                      onClick={() => handleNavigation(item.href)}
-                      className={cn(
-                        'flex items-center gap-3 w-full px-3 py-3 text-base font-medium rounded-md transition-all duration-200',
-                        pathname === item.href
-                          ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-600 dark:text-primary-400'
-                          : 'text-neutral-700 dark:text-neutral-300 hover:bg-neutral-50 dark:hover:bg-neutral-800',
-                      )}
-                    >
-                      <Icon className='h-5 w-5' />
-                      {t(item.labelKey)}
-                    </button>
-                  )
-                })}
-              </div>
-
-              {/* Mobile Theme & Language */}
-              <div className='sm:hidden space-y-4 pt-4 border-t border-neutral-200 dark:border-neutral-800'>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm font-medium'>
-                    {t('theme.light')}/{t('theme.dark')}
-                  </span>
-                  <ThemeToggle />
-                </div>
-                <div className='flex items-center justify-between'>
-                  <span className='text-sm font-medium'>Dil / Language</span>
-                  <LanguageToggle />
-                </div>
-              </div>
-            </div>
-          </div>
+      {/* Mobile Menu */}
+      <div
+        className={cn(
+          'md:hidden overflow-hidden transition-all duration-300 ease-in-out',
+          mobileMenuOpen ? 'max-h-96' : 'max-h-0',
         )}
-      </nav>
-    </header>
+      >
+        <div className='px-4 pt-2 pb-4 space-y-1 bg-white dark:bg-card border-t border-neutral-200 dark:border-border'>
+          {navigationItems.map((item) => {
+            const Icon = item.icon
+            return (
+              <Link
+                key={item.name}
+                href={item.href}
+                className='flex items-center space-x-3 px-3 py-2 rounded-lg text-base font-medium text-neutral-700 dark:text-neutral-200 hover:text-primary-600 dark:hover:text-primary-400 hover:bg-neutral-100 dark:hover:bg-neutral-800/50'
+                onClick={() => setMobileMenuOpen(false)}
+              >
+                <Icon className='h-5 w-5' />
+                <span>{item.name}</span>
+              </Link>
+            )
+          })}
+
+          <div className='pt-4 flex items-center space-x-2'>
+            <ThemeToggle />
+            <LanguageToggle />
+          </div>
+        </div>
+      </div>
+    </nav>
   )
 }
