@@ -42,10 +42,10 @@ function LoginPageContent() {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-background'>
+      <div className='min-h-screen flex items-center justify-center bg-background'>
         <div className='text-center space-y-4'>
           <LoadingSpinner size='lg' />
-          <p className='text-sm text-neutral-600 dark:text-muted-foreground'>{t('common.authenticating')}</p>
+          <p className='text-sm text-muted-foreground'>{t('common.authenticating')}</p>
         </div>
       </div>
     )
@@ -65,7 +65,7 @@ function LoginPageContent() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-neutral-50 to-primary-50/20 dark:gradient-bg-dark relative overflow-hidden'>
+    <div className='min-h-screen bg-gradient-to-br from-background via-primary-50/20 to-blue-50/30 dark:from-background dark:via-primary-950/20 dark:to-blue-950/20 relative overflow-hidden'>
       {/* Background decorations */}
       <div className='absolute inset-0 dark:hero-pattern-dark' />
       <div className='absolute top-0 right-0 w-96 h-96 bg-primary-200/20 dark:bg-primary-500/5 rounded-full blur-3xl' />
@@ -77,7 +77,7 @@ function LoginPageContent() {
           variant='ghost'
           size='sm'
           onClick={() => router.push('/')}
-          className='flex items-center space-x-2 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100/80 dark:hover:bg-neutral-800/50 backdrop-blur-sm'
+          className='flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-sm'
         >
           <ArrowLeft className='h-4 w-4' />
           <span>{t('common.backToHome')}</span>
@@ -93,7 +93,7 @@ function LoginPageContent() {
         </div>
       )}
 
-      {/* Login Form with improved styling */}
+      {/* Login Form */}
       <div className='relative z-10'>
         <LoginForm
           onSubmit={handleLogin}
@@ -114,10 +114,10 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className='min-h-screen flex items-center justify-center bg-neutral-50 dark:bg-background'>
+        <div className='min-h-screen flex items-center justify-center bg-background'>
           <div className='text-center space-y-4'>
             <LoadingSpinner size='lg' />
-            <p className='text-sm text-neutral-600 dark:text-muted-foreground'>{t('common.pageLoading')}</p>
+            <p className='text-sm text-muted-foreground'>{t('common.pageLoading')}</p>
           </div>
         </div>
       }

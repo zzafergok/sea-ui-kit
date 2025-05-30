@@ -31,7 +31,7 @@ export default function DashboardPage() {
       <div className='flex items-center justify-center min-h-96'>
         <div className='text-center space-y-4'>
           <LoadingSpinner size='lg' />
-          <p className='text-sm text-neutral-600 dark:text-neutral-400'>{t('common.loading')}</p>
+          <p className='text-sm text-muted-foreground'>{t('common.loading')}</p>
         </div>
       </div>
     )
@@ -41,7 +41,7 @@ export default function DashboardPage() {
     return (
       <div className='flex items-center justify-center min-h-96'>
         <div className='text-center'>
-          <p className='text-neutral-600 dark:text-neutral-400'>{t('pages.dashboard.userInfoNotLoaded')}</p>
+          <p className='text-muted-foreground'>{t('pages.dashboard.userInfoNotLoaded')}</p>
           <Button onClick={() => router.push('/auth/login')} className='mt-4'>
             {t('auth.login')}
           </Button>
@@ -91,8 +91,8 @@ export default function DashboardPage() {
 
   return (
     <div className='space-y-8'>
-      {/* Enhanced Welcome Section */}
-      <Card className='card-modern bg-gradient-to-r from-primary-50 to-blue-50/50 dark:from-primary-900/10 dark:to-blue-900/5 border-primary-200/50 dark:border-primary-700/30'>
+      {/* Welcome Section */}
+      <Card className='card-modern bg-gradient-to-r from-primary-50/80 to-blue-50/50 dark:from-primary-950/20 dark:to-blue-950/10 border-primary-200/50 dark:border-primary-700/30'>
         <CardContent className='p-8'>
           <div className='flex flex-col lg:flex-row lg:items-center lg:justify-between gap-6'>
             <div className='space-y-2'>
@@ -101,12 +101,12 @@ export default function DashboardPage() {
                   <Sparkles className='h-6 w-6 text-white' />
                 </div>
                 <div>
-                  <h1 className='text-2xl lg:text-3xl font-bold text-neutral-900 dark:text-neutral-100'>
+                  <h1 className='text-2xl lg:text-3xl font-bold text-foreground'>
                     {t('pages.dashboard.welcome', {
                       name: user.username || user.username || user.email?.split('@')[0],
                     })}
                   </h1>
-                  <p className='text-neutral-600 dark:text-neutral-300 text-sm'>
+                  <p className='text-muted-foreground text-sm'>
                     {new Date().toLocaleDateString('tr-TR', {
                       weekday: 'long',
                       year: 'numeric',
@@ -116,14 +116,14 @@ export default function DashboardPage() {
                   </p>
                 </div>
               </div>
-              <p className='text-neutral-600 dark:text-neutral-300 max-w-2xl'>{t('pages.dashboard.description')}</p>
+              <p className='text-muted-foreground max-w-2xl'>{t('pages.dashboard.description')}</p>
             </div>
 
             <div className='flex flex-col sm:flex-row gap-3'>
               <Button
                 onClick={() => router.push('/profile')}
                 variant='outline'
-                className='border-primary-300 dark:border-primary-600 text-primary-700 dark:text-primary-300 hover:bg-primary-50 dark:hover:bg-primary-900/20'
+                className='border-border text-foreground hover:bg-muted'
               >
                 <User className='h-4 w-4 mr-2' />
                 {t('pages.dashboard.viewProfile')}
@@ -131,7 +131,7 @@ export default function DashboardPage() {
               <Button
                 onClick={handleLogout}
                 variant='ghost'
-                className='text-neutral-600 dark:text-neutral-400 hover:text-neutral-800 dark:hover:text-neutral-200'
+                className='text-muted-foreground hover:text-foreground hover:bg-muted'
               >
                 {t('pages.dashboard.logout')}
               </Button>
@@ -140,13 +140,13 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Enhanced Quick Actions */}
+      {/* Quick Actions */}
       <div>
         <div className='flex items-center gap-3 mb-6'>
           <div className='w-8 h-8 bg-gradient-to-r from-accent-500 to-accent-600 rounded-lg flex items-center justify-center'>
             <Zap className='h-4 w-4 text-white' />
           </div>
-          <h2 className='text-xl font-semibold text-neutral-900 dark:text-neutral-100'>Hızlı İşlemler</h2>
+          <h2 className='text-xl font-semibold text-foreground'>Hızlı İşlemler</h2>
         </div>
 
         <div className='grid grid-cols-1 gap-4 sm:grid-cols-2 lg:grid-cols-4'>
@@ -155,7 +155,7 @@ export default function DashboardPage() {
             return (
               <Card
                 key={index}
-                className='card-modern group cursor-pointer hover:-translate-y-1 transition-all duration-300'
+                className='card-modern group cursor-pointer hover:-translate-y-1 transition-all duration-300 border-border hover:border-primary-300 dark:hover:border-primary-600'
                 onClick={() => router.push(action.href)}
               >
                 <CardContent className='p-6'>
@@ -166,12 +166,8 @@ export default function DashboardPage() {
                       <Icon className={`h-5 w-5 bg-gradient-to-r ${action.gradient} text-transparent bg-clip-text`} />
                     </div>
                     <div className='flex-1 min-w-0'>
-                      <h3 className='text-sm font-medium text-neutral-900 dark:text-neutral-100 mb-1'>
-                        {action.title}
-                      </h3>
-                      <p className='text-xs text-neutral-600 dark:text-neutral-400 line-clamp-2'>
-                        {action.description}
-                      </p>
+                      <h3 className='text-sm font-medium text-foreground mb-1'>{action.title}</h3>
+                      <p className='text-xs text-muted-foreground line-clamp-2'>{action.description}</p>
                     </div>
                   </div>
                 </CardContent>
@@ -181,18 +177,16 @@ export default function DashboardPage() {
         </div>
       </div>
 
-      {/* Enhanced Recent Activity */}
-      <Card className='card-modern'>
+      {/* Recent Activity */}
+      <Card className='card-modern border-border'>
         <CardHeader className='pb-4'>
           <div className='flex items-center gap-3'>
             <div className='w-8 h-8 bg-gradient-to-r from-teal-500 to-teal-600 rounded-lg flex items-center justify-center'>
               <Clock className='h-4 w-4 text-white' />
             </div>
             <div>
-              <CardTitle className='text-neutral-900 dark:text-neutral-100'>Son Aktiviteler</CardTitle>
-              <CardDescription className='text-neutral-600 dark:text-neutral-400'>
-                Hesabınızdaki son aktivitelerin özeti
-              </CardDescription>
+              <CardTitle className='text-foreground'>Son Aktiviteler</CardTitle>
+              <CardDescription className='text-muted-foreground'>Hesabınızdaki son aktivitelerin özeti</CardDescription>
             </div>
           </div>
         </CardHeader>
@@ -236,7 +230,7 @@ export default function DashboardPage() {
               return (
                 <div
                   key={index}
-                  className='flex items-center space-x-4 p-3 rounded-xl hover:bg-neutral-50 dark:hover:bg-neutral-800/30 transition-colors duration-200 group'
+                  className='flex items-center space-x-4 p-3 rounded-xl hover:bg-muted transition-colors duration-200 group'
                 >
                   <div
                     className={`p-2 rounded-lg bg-gradient-to-br ${activity.bgGradient} dark:${activity.darkBgGradient} group-hover:scale-110 transition-transform duration-200`}
@@ -244,8 +238,8 @@ export default function DashboardPage() {
                     <Icon className={`h-4 w-4 bg-gradient-to-r ${activity.gradient} text-transparent bg-clip-text`} />
                   </div>
                   <div className='flex-1'>
-                    <p className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>{activity.action}</p>
-                    <p className='text-xs text-neutral-500 dark:text-neutral-400'>{activity.time}</p>
+                    <p className='text-sm font-medium text-foreground'>{activity.action}</p>
+                    <p className='text-xs text-muted-foreground'>{activity.time}</p>
                   </div>
                 </div>
               )
@@ -254,41 +248,41 @@ export default function DashboardPage() {
         </CardContent>
       </Card>
 
-      {/* Enhanced Performance Overview */}
+      {/* Performance Overview */}
       <div className='grid grid-cols-1 lg:grid-cols-2 gap-6'>
-        <Card className='card-modern'>
+        <Card className='card-modern border-border'>
           <CardHeader>
             <div className='flex items-center gap-3'>
               <div className='w-8 h-8 bg-gradient-to-r from-primary-500 to-primary-600 rounded-lg flex items-center justify-center'>
                 <BarChart3 className='h-4 w-4 text-white' />
               </div>
-              <CardTitle className='text-neutral-900 dark:text-neutral-100'>Performans Özeti</CardTitle>
+              <CardTitle className='text-foreground'>Performans Özeti</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
               <div className='flex items-center justify-between'>
-                <span className='text-sm text-neutral-600 dark:text-neutral-400'>Sayfa Yükleme Hızı</span>
+                <span className='text-sm text-muted-foreground'>Sayfa Yükleme Hızı</span>
                 <div className='flex items-center gap-2'>
-                  <div className='w-24 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden'>
+                  <div className='w-24 h-2 bg-muted rounded-full overflow-hidden'>
                     <div className='w-4/5 h-full bg-gradient-to-r from-green-500 to-green-600'></div>
                   </div>
                   <span className='text-sm font-medium text-green-600 dark:text-green-400'>95%</span>
                 </div>
               </div>
               <div className='flex items-center justify-between'>
-                <span className='text-sm text-neutral-600 dark:text-neutral-400'>API Yanıt Süresi</span>
+                <span className='text-sm text-muted-foreground'>API Yanıt Süresi</span>
                 <div className='flex items-center gap-2'>
-                  <div className='w-24 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden'>
+                  <div className='w-24 h-2 bg-muted rounded-full overflow-hidden'>
                     <div className='w-3/4 h-full bg-gradient-to-r from-blue-500 to-blue-600'></div>
                   </div>
                   <span className='text-sm font-medium text-blue-600 dark:text-blue-400'>87%</span>
                 </div>
               </div>
               <div className='flex items-center justify-between'>
-                <span className='text-sm text-neutral-600 dark:text-neutral-400'>Kullanıcı Memnuniyeti</span>
+                <span className='text-sm text-muted-foreground'>Kullanıcı Memnuniyeti</span>
                 <div className='flex items-center gap-2'>
-                  <div className='w-24 h-2 bg-neutral-200 dark:bg-neutral-700 rounded-full overflow-hidden'>
+                  <div className='w-24 h-2 bg-muted rounded-full overflow-hidden'>
                     <div className='w-full h-full bg-gradient-to-r from-primary-500 to-primary-600'></div>
                   </div>
                   <span className='text-sm font-medium text-primary-600 dark:text-primary-400'>98%</span>
@@ -297,22 +291,21 @@ export default function DashboardPage() {
             </div>
           </CardContent>
         </Card>
-
-        <Card className='card-modern'>
+        <Card className='card-modern border-border'>
           <CardHeader>
             <div className='flex items-center gap-3'>
               <div className='w-8 h-8 bg-gradient-to-r from-accent-500 to-accent-600 rounded-lg flex items-center justify-center'>
                 <TrendingUp className='h-4 w-4 text-white' />
               </div>
-              <CardTitle className='text-neutral-900 dark:text-neutral-100'>Bu Hafta</CardTitle>
+              <CardTitle className='text-foreground'>Bu Hafta</CardTitle>
             </div>
           </CardHeader>
           <CardContent>
             <div className='space-y-4'>
-              <div className='flex items-center justify-between p-3 bg-gradient-to-r from-primary-50 to-blue-50/50 dark:from-primary-900/10 dark:to-blue-900/5 rounded-lg'>
+              <div className='flex items-center justify-between p-3 bg-gradient-to-r from-primary-50/80 to-blue-50/50 dark:from-primary-950/20 dark:to-blue-950/10 rounded-lg border border-primary-200/30 dark:border-primary-800/30'>
                 <div>
-                  <p className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>Toplam Ziyaretçi</p>
-                  <p className='text-xs text-neutral-600 dark:text-neutral-400'>Son 7 gün</p>
+                  <p className='text-sm font-medium text-foreground'>Toplam Ziyaretçi</p>
+                  <p className='text-xs text-muted-foreground'>Son 7 gün</p>
                 </div>
                 <div className='text-right'>
                   <p className='text-lg font-bold text-primary-600 dark:text-primary-400'>1,847</p>
@@ -320,10 +313,10 @@ export default function DashboardPage() {
                 </div>
               </div>
 
-              <div className='flex items-center justify-between p-3 bg-gradient-to-r from-accent-50 to-teal-50/50 dark:from-accent-900/10 dark:to-teal-900/5 rounded-lg'>
+              <div className='flex items-center justify-between p-3 bg-gradient-to-r from-accent-50/80 to-teal-50/50 dark:from-accent-950/20 dark:to-teal-950/10 rounded-lg border border-accent-200/30 dark:border-accent-800/30'>
                 <div>
-                  <p className='text-sm font-medium text-neutral-900 dark:text-neutral-100'>Yeni Kullanıcılar</p>
-                  <p className='text-xs text-neutral-600 dark:text-neutral-400'>Son 7 gün</p>
+                  <p className='text-sm font-medium text-foreground'>Yeni Kullanıcılar</p>
+                  <p className='text-xs text-muted-foreground'>Son 7 gün</p>
                 </div>
                 <div className='text-right'>
                   <p className='text-lg font-bold text-accent-600 dark:text-accent-400'>234</p>
