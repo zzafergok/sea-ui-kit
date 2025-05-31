@@ -1,30 +1,34 @@
 'use client'
 
-import * as React from 'react'
-
-import { Moon, Sun } from 'lucide-react'
-
+import React from 'react'
+import { Monitor, Moon, Sun } from 'lucide-react'
 import { useTheme } from '@/hooks/useTheme'
-
+import { Button } from '@/components/core/Button/Button'
 import {
   DropdownMenu,
-  DropdownMenuItem,
   DropdownMenuContent,
+  DropdownMenuItem,
   DropdownMenuTrigger,
 } from '@/components/core/Dropdown/Dropdown'
-import { Button } from '@/components/core/Button/Button'
 
 export function ThemeToggle() {
   const { theme, setTheme, isDisabled } = useTheme()
 
-  const getThemeIcon = () => {
-    switch (theme) {
-      case 'dark':
-        return <Moon className='h-4 w-4' />
-      case 'light':
-        return <Sun className='h-4 w-4' />
-    }
-  }
+  const themeOptions = [
+    {
+      value: 'light' as const,
+      label: 'Açık',
+      icon: Sun,
+    },
+    {
+      value: 'dark' as const,
+      label: 'Koyu',
+      icon: Moon,
+    },
+  ]
+
+  const currentTheme = themeOptions.find((option) => option.value === theme)
+  const CurrentIcon = currentTheme?.icon || Monitor
 
   return (
     <DropdownMenu>
@@ -32,42 +36,32 @@ export function ThemeToggle() {
         <Button
           variant='ghost'
           size='sm'
-          className='h-9 w-9 p-0 hover:bg-primary-50 dark:hover:bg-primary-900/20 border border-primary-200/50 dark:border-primary-700/30'
           disabled={isDisabled}
+          className='w-9 h-9 p-0 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 transition-colors'
+          aria-label='Tema değiştir'
         >
-          <div className='flex items-center justify-center'>{getThemeIcon()}</div>
-          <span className='sr-only'>Tema değiştir</span>
+          <CurrentIcon className='h-4 w-4' />
         </Button>
       </DropdownMenuTrigger>
-      <DropdownMenuContent
-        align='end'
-        className='min-w-[140px] bg-white dark:bg-card border border-neutral-200 dark:border-border shadow-lg'
-      >
-        <DropdownMenuItem
-          onClick={() => setTheme('light')}
-          className={`flex items-center gap-2 cursor-pointer ${
-            theme === 'light'
-              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-              : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
-          }`}
-        >
-          <Sun className='h-4 w-4' />
-          <span>Açık Tema</span>
-          {theme === 'light' && <div className='ml-auto w-2 h-2 bg-primary-500 rounded-full' />}
-        </DropdownMenuItem>
-
-        <DropdownMenuItem
-          onClick={() => setTheme('dark')}
-          className={`flex items-center gap-2 cursor-pointer ${
-            theme === 'dark'
-              ? 'bg-primary-50 dark:bg-primary-900/20 text-primary-700 dark:text-primary-300'
-              : 'hover:bg-neutral-50 dark:hover:bg-neutral-800'
-          }`}
-        >
-          <Moon className='h-4 w-4' />
-          <span>Koyu Tema</span>
-          {theme === 'dark' && <div className='ml-auto w-2 h-2 bg-primary-500 rounded-full' />}
-        </DropdownMenuItem>
+      <DropdownMenuContent align='end' className='w-40 z-[9999]' sideOffset={5} collisionPadding={8}>
+        {themeOptions.map((option) => {
+          const Icon = option.icon
+          return (
+            <DropdownMenuItem
+              key={option.value}
+              onClick={() => setTheme(option.value)}
+              className={`flex items-center cursor-pointer ${
+                theme === option.value
+                  ? 'bg-primary-50 dark:bg-primary-900/30 text-primary-600 dark:text-primary-400'
+                  : ''
+              }`}
+            >
+              <Icon className='mr-2 h-4 w-4' />
+              {option.label}
+              {theme === option.value && <div className='ml-auto w-2 h-2 bg-primary-500 rounded-full' />}
+            </DropdownMenuItem>
+          )
+        })}
       </DropdownMenuContent>
     </DropdownMenu>
   )

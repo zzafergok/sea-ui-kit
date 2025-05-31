@@ -1123,3 +1123,64 @@ nav {
   -moz-user-select: none;
   -ms-user-select: none;
 }
+
+/* Enhanced Z-Index Management for Navbar Components */
+.navbar-theme-toggle {
+  z-index: 9999 !important;
+}
+
+.navbar-language-toggle {
+  z-index: 9998 !important;
+}
+
+.navbar-user-menu {
+  z-index: 9997 !important;
+}
+
+/* Radix UI Portal Z-Index Overrides for Navbar */
+[data-radix-portal] {
+  z-index: 9999 !important;
+}
+
+[data-radix-dropdown-menu-content] {
+  z-index: 9999 !important;
+}
+
+[data-radix-select-content] {
+  z-index: 9999 !important;
+}
+
+[data-radix-popover-content] {
+  z-index: 9999 !important;
+}
+
+/* Navbar Specific Dropdown Positioning */
+.navbar-dropdown {
+  position: fixed !important;
+  z-index: 9999 !important;
+  will-change: transform, opacity;
+  transform: translateZ(0);
+}
+
+/* Prevent scrollbar shift on dropdown open */
+.dropdown-open {
+  overflow: hidden;
+  padding-right: var(--scrollbar-width, 0px);
+}
+
+/* Smooth navbar transitions */
+.navbar-transition {
+  transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+/* Mobile menu overlay */
+.mobile-menu-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  bottom: 0;
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+  z-index: 9998;
+}
