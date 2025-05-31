@@ -1,19 +1,15 @@
 'use client'
 
 import React, { useEffect, useState } from 'react'
-
 import { Provider } from 'react-redux'
 import { I18nextProvider } from 'react-i18next'
 import { PersistGate } from 'redux-persist/integration/react'
 
 import { store, persistor } from '@/store'
-
 import { TokenManagerProvider } from '@/providers/TokenManagerProvider'
-
 import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
 import { ToastContainer } from '@/components/ui/ToastContainer/ToastContainer'
 import { EnhancedErrorBoundary } from '@/components/ui/ErrorBoundary/EnhancedErrorBoundary'
-
 import i18n from '@/locales'
 
 interface ClientProvidersProps {
@@ -39,26 +35,21 @@ function ThemeInitializer({ children }: { children: React.ReactNode }) {
   useEffect(() => {
     const initializeTheme = () => {
       try {
-        // İlk yükleme kontrolü
         const html = document.documentElement
 
-        // Eğer tema sınıfları zaten uygulanmışsa direkt mount et
         if (html.classList.contains('light') || html.classList.contains('dark')) {
           setMounted(true)
           return
         }
 
-        // Tema başlatma
         const savedTheme = localStorage.getItem('theme') || 'system'
         const systemPreference = window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'
         const effectiveTheme = savedTheme === 'system' ? systemPreference : savedTheme
 
-        // Tema sınıflarını uygula
         html.classList.remove('light', 'dark', 'theme-loading')
         html.classList.add(effectiveTheme)
         html.style.colorScheme = effectiveTheme
 
-        // Tema değişiklik listener'ını ekle
         const mediaQuery = window.matchMedia('(prefers-color-scheme: dark)')
         const handleSystemThemeChange = (e: MediaQueryListEvent) => {
           if (localStorage.getItem('theme') === 'system') {
@@ -70,28 +61,20 @@ function ThemeInitializer({ children }: { children: React.ReactNode }) {
         }
 
         mediaQuery.addEventListener('change', handleSystemThemeChange)
-
-        // Component'i mount et
         setMounted(true)
 
-        // Cleanup function
         return () => {
           mediaQuery.removeEventListener('change', handleSystemThemeChange)
         }
       } catch (error) {
         console.warn('Theme initialization error:', error)
-        // Hata durumunda varsayılan tema ile devam et
         document.documentElement.classList.add('light')
         setMounted(true)
       }
     }
 
-    // Tema başlatmayı bir sonraki frame'e ertele
     const timeoutId = setTimeout(initializeTheme, 0)
-
-    return () => {
-      clearTimeout(timeoutId)
-    }
+    return () => clearTimeout(timeoutId)
   }, [])
 
   if (!mounted) {

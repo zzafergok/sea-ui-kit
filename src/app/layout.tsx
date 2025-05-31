@@ -1,9 +1,6 @@
 import type { Metadata, Viewport } from 'next'
-
 import React from 'react'
-
 import { ClientProviders } from '@/providers/ClientProviders'
-
 import './globals.css'
 
 export const metadata: Metadata = {
@@ -83,31 +80,34 @@ interface RootLayoutProps {
 
 export default function RootLayout({ children }: RootLayoutProps) {
   return (
-    <html lang='tr' suppressHydrationWarning className={`theme-loading`}>
+    <html lang='tr' suppressHydrationWarning className='theme-loading' style={{ scrollbarGutter: 'stable' }}>
       <head>
         <script
           dangerouslySetInnerHTML={{
             __html: `
               (function() {
                 try {
-                  // Tema yüklenirken görünürlüğü kontrol et
+                  // Scrollbar-gutter desteği kontrol et ve uygula
+                  if (CSS && CSS.supports && CSS.supports('scrollbar-gutter', 'stable')) {
+                    document.documentElement.style.scrollbarGutter = 'stable';
+                    document.body.style.scrollbarGutter = 'stable';
+                  }
+                  
+                  // Tema başlatma
                   var html = document.documentElement;
                   var theme = localStorage.getItem('theme') || 'system';
                   var systemDark = window.matchMedia('(prefers-color-scheme: dark)').matches;
                   var effectiveTheme = theme === 'system' ? (systemDark ? 'dark' : 'light') : theme;
                   
-                  // Tema sınıflarını anında uygula
                   html.classList.remove('light', 'dark', 'theme-loading');
                   html.classList.add(effectiveTheme);
                   html.style.colorScheme = effectiveTheme;
                   
-                  // Kısa bir gecikme sonrası görünürlüğü etkinleştir
                   requestAnimationFrame(function() {
                     html.style.visibility = 'visible';
                   });
                 } catch (e) {
-                  console.warn('Theme initialization failed:', e);
-                  // Hata durumunda varsayılan tema uygula
+                  console.warn('Initialization failed:', e);
                   document.documentElement.classList.add('light');
                   document.documentElement.style.visibility = 'visible';
                 }
@@ -116,7 +116,7 @@ export default function RootLayout({ children }: RootLayoutProps) {
           }}
         />
       </head>
-      <body suppressHydrationWarning className={`bg-background text-foreground antialiased`}>
+      <body suppressHydrationWarning className='bg-background text-foreground antialiased'>
         <ClientProviders>{children}</ClientProviders>
       </body>
     </html>
