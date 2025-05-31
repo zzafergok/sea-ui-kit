@@ -8,7 +8,7 @@ interface AuthPagesLayoutProps {
 export default function AuthPagesLayout({ children }: AuthPagesLayoutProps) {
   return (
     <AuthProvider requireAuth={false}>
-      <div className='min-h-screen bg-neutral-50 dark:bg-neutral-900'>{children}</div>
+      <div className='min-h-screen bg-white dark:bg-neutral-900'>{children}</div>
     </AuthProvider>
   )
 }

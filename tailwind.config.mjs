@@ -16,94 +16,95 @@ const config = {
   theme: {
     extend: {
       colors: {
-        background: 'var(--background)',
-        foreground: 'var(--foreground)',
-
-        // Yeni Primary Color System
-        primary: {
-          50: 'var(--primary-50)',
-          100: 'var(--primary-100)',
-          200: 'var(--primary-200)',
-          300: 'var(--primary-300)',
-          400: 'var(--primary-400)',
-          500: 'var(--primary-500)',
-          600: 'var(--primary-600)',
-          700: 'var(--primary-700)',
-          800: 'var(--primary-800)',
-          900: 'var(--primary-900)',
-          DEFAULT: 'var(--primary-500)',
-        },
-
-        // Accent/Secondary Colors
-        accent: {
-          50: 'var(--accent-50)',
-          100: 'var(--accent-100)',
-          200: 'var(--accent-200)',
-          300: 'var(--accent-300)',
-          400: 'var(--accent-400)',
-          500: 'var(--accent-500)',
-          600: 'var(--accent-600)',
-          700: 'var(--accent-700)',
-          800: 'var(--accent-800)',
-          900: 'var(--accent-900)',
-          DEFAULT: 'var(--accent-500)',
-        },
-
-        // Blue variations from palette
-        blue: {
-          50: 'var(--blue-50)',
-          100: 'var(--blue-100)',
-          200: 'var(--blue-200)',
-          300: 'var(--blue-300)',
-          400: 'var(--blue-400)',
-          500: 'var(--blue-500)',
-          600: 'var(--blue-600)',
-          DEFAULT: 'var(--blue-500)',
-        },
-
-        // Teal variations from palette
-        teal: {
-          50: 'var(--teal-50)',
-          100: 'var(--teal-100)',
-          200: 'var(--teal-200)',
-          300: 'var(--teal-300)',
-          400: 'var(--teal-400)',
-          500: 'var(--teal-500)',
-          600: 'var(--teal-600)',
-          DEFAULT: 'var(--teal-500)',
-        },
-
-        // Enhanced Neutral System
+        // Enhanced neutral system for better dark theme contrast
         neutral: {
-          50: 'var(--neutral-50)',
-          100: 'var(--neutral-100)',
-          200: 'var(--neutral-200)',
-          300: 'var(--neutral-300)',
-          400: 'var(--neutral-400)',
-          500: 'var(--neutral-500)',
-          600: 'var(--neutral-600)',
-          700: 'var(--neutral-700)',
-          800: 'var(--neutral-800)',
-          900: 'var(--neutral-900)',
-          DEFAULT: 'var(--neutral-500)',
+          50: '#fafafa',
+          100: '#f5f5f5',
+          200: '#e5e5e5',
+          300: '#d4d4d4',
+          400: '#a3a3a3',
+          500: '#737373',
+          600: '#525252',
+          700: '#404040',
+          800: '#262626',
+          900: '#171717',
+          950: '#0a0a0a',
         },
 
-        // Semantic Colors
-        success: 'var(--success)',
-        warning: 'var(--warning)',
-        error: 'var(--error)',
-        info: 'var(--info)',
+        // Background and foreground for semantic usage
+        background: 'hsl(var(--background))',
+        foreground: 'hsl(var(--foreground))',
 
-        // UI Element Colors
-        muted: 'var(--muted)',
-        'muted-foreground': 'var(--muted-foreground)',
-        card: 'var(--card)',
-        'card-foreground': 'var(--card-foreground)',
-        popover: 'var(--popover)',
-        'popover-foreground': 'var(--popover-foreground)',
-        border: 'var(--border)',
-        input: 'var(--input)',
-        ring: 'var(--ring)',
+        // Primary color system
+        primary: {
+          50: 'hsl(var(--primary-50))',
+          100: 'hsl(var(--primary-100))',
+          200: 'hsl(var(--primary-200))',
+          300: 'hsl(var(--primary-300))',
+          400: 'hsl(var(--primary-400))',
+          500: 'hsl(var(--primary-500))',
+          600: 'hsl(var(--primary-600))',
+          700: 'hsl(var(--primary-700))',
+          800: 'hsl(var(--primary-800))',
+          900: 'hsl(var(--primary-900))',
+          DEFAULT: 'hsl(var(--primary-500))',
+        },
+
+        // Accent/Secondary colors
+        accent: {
+          50: 'hsl(var(--accent-50))',
+          100: 'hsl(var(--accent-100))',
+          200: 'hsl(var(--accent-200))',
+          300: 'hsl(var(--accent-300))',
+          400: 'hsl(var(--accent-400))',
+          500: 'hsl(var(--accent-500))',
+          600: 'hsl(var(--accent-600))',
+          700: 'hsl(var(--accent-700))',
+          800: 'hsl(var(--accent-800))',
+          900: 'hsl(var(--accent-900))',
+          DEFAULT: 'hsl(var(--accent-500))',
+        },
+
+        // Blue variations
+        blue: {
+          50: 'hsl(var(--blue-50))',
+          100: 'hsl(var(--blue-100))',
+          200: 'hsl(var(--blue-200))',
+          300: 'hsl(var(--blue-300))',
+          400: 'hsl(var(--blue-400))',
+          500: 'hsl(var(--blue-500))',
+          600: 'hsl(var(--blue-600))',
+          DEFAULT: 'hsl(var(--blue-500))',
+        },
+
+        // Teal variations
+        teal: {
+          50: 'hsl(var(--teal-50))',
+          100: 'hsl(var(--teal-100))',
+          200: 'hsl(var(--teal-200))',
+          300: 'hsl(var(--teal-300))',
+          400: 'hsl(var(--teal-400))',
+          500: 'hsl(var(--teal-500))',
+          600: 'hsl(var(--teal-600))',
+          DEFAULT: 'hsl(var(--teal-500))',
+        },
+
+        // Semantic colors
+        success: 'hsl(var(--success))',
+        warning: 'hsl(var(--warning))',
+        error: 'hsl(var(--error))',
+        info: 'hsl(var(--info))',
+
+        // UI component colors
+        muted: 'hsl(var(--muted))',
+        'muted-foreground': 'hsl(var(--muted-foreground))',
+        card: 'hsl(var(--card))',
+        'card-foreground': 'hsl(var(--card-foreground))',
+        popover: 'hsl(var(--popover))',
+        'popover-foreground': 'hsl(var(--popover-foreground))',
+        border: 'hsl(var(--border))',
+        input: 'hsl(var(--input))',
+        ring: 'hsl(var(--ring))',
       },
 
       borderRadius: {
@@ -123,29 +124,10 @@ const config = {
         'accent-glow': '0 0 20px hsla(212, 65%, 52%, 0.3)',
       },
 
-      transitionDuration: {
-        fast: 'var(--transition-fast)',
-        default: 'var(--transition-default)',
-        slow: 'var(--transition-slow)',
-      },
-
-      screens: {
-        xs: '475px',
-      },
-
-      spacing: {
-        18: '4.5rem',
-        88: '22rem',
-        128: '32rem',
-      },
-
       animation: {
         'fade-in': 'fadeIn 0.3s ease-out',
         'slide-in': 'slideInRight 0.3s ease-out',
-        'spin-slow': 'spin 3s linear infinite',
-        'pulse-slow': 'pulse 3s ease-in-out infinite',
         'scale-in': 'scaleIn 0.2s ease-out',
-        'glow-pulse': 'glowPulse 2s ease-in-out infinite',
       },
 
       keyframes: {
@@ -161,18 +143,6 @@ const config = {
           '0%': { opacity: '0', transform: 'scale(0.95)' },
           '100%': { opacity: '1', transform: 'scale(1)' },
         },
-        glowPulse: {
-          '0%, 100%': { boxShadow: '0 0 20px hsla(204, 85%, 58%, 0.2)' },
-          '50%': { boxShadow: '0 0 30px hsla(204, 85%, 58%, 0.4)' },
-        },
-      },
-
-      backgroundImage: {
-        'gradient-primary': 'linear-gradient(135deg, var(--primary-500), var(--primary-600))',
-        'gradient-accent': 'linear-gradient(135deg, var(--accent-500), var(--accent-600))',
-        'gradient-blue': 'linear-gradient(135deg, var(--blue-500), var(--blue-600))',
-        'gradient-teal': 'linear-gradient(135deg, var(--teal-500), var(--teal-600))',
-        'gradient-dark': 'linear-gradient(135deg, hsl(215, 25%, 8%), hsl(215, 25%, 12%))',
       },
     },
   },
@@ -184,25 +154,6 @@ const config = {
           'scrollbar-width': 'none',
           '&::-webkit-scrollbar': {
             display: 'none',
-          },
-        },
-        '.scrollbar-modern': {
-          'scrollbar-width': 'thin',
-          'scrollbar-color': 'var(--neutral-300) var(--neutral-100)',
-          '&::-webkit-scrollbar': {
-            width: '6px',
-            height: '6px',
-          },
-          '&::-webkit-scrollbar-track': {
-            background: 'var(--neutral-100)',
-            borderRadius: '3px',
-          },
-          '&::-webkit-scrollbar-thumb': {
-            background: 'var(--neutral-300)',
-            borderRadius: '3px',
-            '&:hover': {
-              background: 'var(--neutral-400)',
-            },
           },
         },
         '.text-gradient': {
@@ -220,32 +171,15 @@ const config = {
 
       const newComponents = {
         '.btn-primary': {
-          background: 'var(--gradient-primary)',
+          background: 'linear-gradient(135deg, var(--primary-500), var(--primary-600))',
           color: 'white',
           padding: '0.5rem 1rem',
           borderRadius: 'var(--radius-md)',
           fontWeight: '500',
-          transition: 'all var(--transition-fast)',
+          transition: 'all 150ms',
           border: '1px solid var(--primary-600)',
           '&:hover': {
             background: 'linear-gradient(135deg, var(--primary-400), var(--primary-500))',
-            transform: 'translateY(-1px)',
-            boxShadow: 'var(--shadow-md)',
-          },
-          '&:active': {
-            transform: 'translateY(0)',
-          },
-        },
-        '.btn-accent': {
-          background: 'var(--gradient-accent)',
-          color: 'white',
-          padding: '0.5rem 1rem',
-          borderRadius: 'var(--radius-md)',
-          fontWeight: '500',
-          transition: 'all var(--transition-fast)',
-          border: '1px solid var(--accent-600)',
-          '&:hover': {
-            background: 'linear-gradient(135deg, var(--accent-400), var(--accent-500))',
             transform: 'translateY(-1px)',
             boxShadow: 'var(--shadow-md)',
           },
@@ -256,7 +190,7 @@ const config = {
           borderRadius: 'var(--radius-lg)',
           padding: '1.5rem',
           boxShadow: 'var(--shadow-sm)',
-          transition: 'all var(--transition-default)',
+          transition: 'all 300ms',
           '&:hover': {
             boxShadow: 'var(--shadow-lg)',
             transform: 'translateY(-2px)',

@@ -1,18 +1,13 @@
 'use client'
 
 import { useRouter, useSearchParams } from 'next/navigation'
-
 import React, { useEffect, Suspense } from 'react'
-
 import { ArrowLeft } from 'lucide-react'
 import { useTranslation } from 'react-i18next'
-
 import { useAuth } from '@/hooks/useAuth'
-
 import { Button } from '@/components/core/Button/Button'
 import { LoginForm } from '@/components/forms/auth/LoginForm'
 import { LoadingSpinner } from '@/components/core/Loading/LoadingSpinner'
-
 import { LoginFormValues } from '@/lib/validations/auth'
 
 function LoginPageContent() {
@@ -42,10 +37,10 @@ function LoginPageContent() {
 
   if (isLoading) {
     return (
-      <div className='min-h-screen flex items-center justify-center bg-background'>
+      <div className='min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900'>
         <div className='text-center space-y-4'>
           <LoadingSpinner size='lg' />
-          <p className='text-sm text-muted-foreground'>{t('common.authenticating')}</p>
+          <p className='text-sm text-neutral-600 dark:text-neutral-300'>{t('common.authenticating')}</p>
         </div>
       </div>
     )
@@ -65,11 +60,11 @@ function LoginPageContent() {
   }
 
   return (
-    <div className='min-h-screen bg-gradient-to-br from-background via-primary-50/20 to-blue-50/30 dark:from-background dark:via-primary-950/20 dark:to-blue-950/20 relative overflow-hidden'>
+    <div className='min-h-screen bg-gradient-to-br from-white via-primary-50 to-blue-50 dark:from-neutral-900 dark:via-neutral-800 dark:to-neutral-800 relative overflow-hidden'>
       {/* Background decorations */}
       <div className='absolute inset-0 dark:hero-pattern-dark' />
-      <div className='absolute top-0 right-0 w-96 h-96 bg-primary-200/20 dark:bg-primary-500/5 rounded-full blur-3xl' />
-      <div className='absolute bottom-0 left-0 w-96 h-96 bg-accent-200/20 dark:bg-accent-500/5 rounded-full blur-3xl' />
+      <div className='absolute top-0 right-0 w-96 h-96 bg-primary-200/20 dark:bg-primary-700/10 rounded-full blur-3xl' />
+      <div className='absolute bottom-0 left-0 w-96 h-96 bg-accent-200/20 dark:bg-accent-700/10 rounded-full blur-3xl' />
 
       {/* Header with back button */}
       <div className='absolute top-4 left-4 z-20'>
@@ -77,7 +72,7 @@ function LoginPageContent() {
           variant='ghost'
           size='sm'
           onClick={() => router.push('/')}
-          className='flex items-center space-x-2 text-muted-foreground hover:text-foreground hover:bg-muted backdrop-blur-sm'
+          className='flex items-center space-x-2 text-neutral-600 dark:text-neutral-300 hover:text-neutral-900 dark:hover:text-neutral-100 hover:bg-neutral-100 dark:hover:bg-neutral-800 backdrop-blur-sm'
         >
           <ArrowLeft className='h-4 w-4' />
           <span>{t('common.backToHome')}</span>
@@ -114,10 +109,10 @@ export default function LoginPage() {
   return (
     <Suspense
       fallback={
-        <div className='min-h-screen flex items-center justify-center bg-background'>
+        <div className='min-h-screen flex items-center justify-center bg-white dark:bg-neutral-900'>
           <div className='text-center space-y-4'>
             <LoadingSpinner size='lg' />
-            <p className='text-sm text-muted-foreground'>{t('common.pageLoading')}</p>
+            <p className='text-sm text-neutral-600 dark:text-neutral-300'>{t('common.pageLoading')}</p>
           </div>
         </div>
       }
