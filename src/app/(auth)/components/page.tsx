@@ -1,5 +1,7 @@
 'use client'
 
+import dynamic from 'next/dynamic'
+
 import React, { useState } from 'react'
 
 import { useTranslation } from 'react-i18next'
@@ -8,10 +10,32 @@ import { Search, Grid, List } from 'lucide-react'
 import { Input } from '@/components/core/Input/Input'
 import { Button } from '@/components/core/Button/Button'
 import { Card, CardContent } from '@/components/core/Card/Card'
-import { ComponentDemo } from '@/components/ui/ComponentDemo/ComponentDemo'
+
+const ComponentDemo = dynamic(
+  () => import('@/components/ui/ComponentDemo/ComponentDemo').then((mod) => mod.ComponentDemo),
+  {
+    loading: () => <ComponentDemoSkeleton />,
+    ssr: false, // Client-side only components için
+  },
+)
 
 import { cn } from '@/lib/utils'
 import { componentDemoData } from '@/data/componentDemoData'
+
+// Define a skeleton component for loading state
+const ComponentDemoSkeleton = () => (
+  <div className='bg-card/50 backdrop-blur-sm border border-border rounded-lg shadow-lg overflow-hidden animate-pulse'>
+    <div className='p-6'>
+      <div className='h-6 bg-muted rounded w-3/4 mb-4'></div>
+      <div className='h-4 bg-muted rounded w-full mb-2'></div>
+      <div className='h-4 bg-muted rounded w-5/6 mb-4'></div>
+      <div className='h-10 bg-muted rounded w-1/2'></div>
+    </div>
+    <div className='bg-muted/50 p-6 border-t border-border'>
+      <div className='h-40 bg-muted rounded'></div>
+    </div>
+  </div>
+)
 
 export default function ComponentsPage() {
   const { t } = useTranslation()
